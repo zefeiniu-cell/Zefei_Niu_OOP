@@ -1,6 +1,6 @@
 /*
  * =============================================================================
- *  System  : Health Clinic Appointment System
+ *  System  : Arcana Health Centre - Appointment System
  *  Unit    : PROG2004 Object Oriented Programming - Assessment 1
  *  Author  : Zefei Niu (zniu16, 25259175)
  *  File    : Physiotherapist.java
@@ -17,7 +17,7 @@
  * </p>
  *
  * @author Zefei Niu
- * @version 1.0
+ * @version 2.0
  */
 public class Physiotherapist extends HealthProfessional {
 
@@ -33,7 +33,7 @@ public class Physiotherapist extends HealthProfessional {
      * @param treatmentFocus the treatment focus, already validated
      */
     private Physiotherapist(String id, String name, String[] workingDays, String treatmentFocus) {
-        super(id, name, workingDays);                               // [Inheritance] shared details set by the parent
+        super(id, name, workingDays);                               // [Inheritance] the parent owns the shared fields, so it sets them
         this.treatmentFocus = Validator.tidy(treatmentFocus);
     }
 
@@ -63,7 +63,7 @@ public class Physiotherapist extends HealthProfessional {
     public static Physiotherapist create(String id, String name, String[] workingDays,
                                          String treatmentFocus) {
         if (!check(id, name, workingDays, treatmentFocus).isEmpty()) {
-            return null;                                            // [Guard] invalid details: no object is built
+            return null;                                            // [Encapsulation] invalid details never become an object
         }
         return new Physiotherapist(id, name, workingDays, treatmentFocus);
     }
@@ -89,7 +89,7 @@ public class Physiotherapist extends HealthProfessional {
                 Validator.checkPersonName("Patient name", patientName),
                 Validator.checkRequiredText("Condition", condition));
         if (!problems.isEmpty()) {
-            return "[WARNING] Exercise programme not created: " + problems; // [Guard] incomplete request
+            return "[WARNING] Exercise programme not created. " + problems;
         }
         return "Exercise programme: 4-week plan for " + Validator.tidy(patientName) + " ("
                 + Validator.tidy(condition) + "), designed by " + getName() + ".";
@@ -112,7 +112,7 @@ public class Physiotherapist extends HealthProfessional {
      */
     @Override
     public String describeServices() {
-        return "Movement assessment, treatment and exercise programmes";
+        return "Movement assessment, treatment, exercise programmes";
     }
 
     /**
@@ -126,13 +126,12 @@ public class Physiotherapist extends HealthProfessional {
     }
 
     /**
-     * Presents the shared details followed by the treatment focus.
+     * Presents the shared columns followed by the treatment focus.
      *
-     * @return the details, one per line
+     * @return this physiotherapist's table row
      */
     @Override
     public String toString() {
-        return super.toString()                                     // [Reuse] parent's lines first
-                + Display.line("Focus", treatmentFocus);
+        return super.toString() + treatmentFocus;                   // [Inheritance] reuse the parent's columns instead of repeating them
     }
 }

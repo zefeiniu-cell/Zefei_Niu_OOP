@@ -1,6 +1,6 @@
 /*
  * =============================================================================
- *  System  : Health Clinic Appointment System
+ *  System  : Arcana Health Centre - Appointment System
  *  Unit    : PROG2004 Object Oriented Programming - Assessment 1
  *  Author  : Zefei Niu (zniu16, 25259175)
  *  File    : Nurse.java
@@ -22,9 +22,9 @@
  * </p>
  *
  * @author Zefei Niu
- * @version 1.0
+ * @version 2.0
  */
-public abstract class Nurse extends HealthProfessional {
+public abstract class Nurse extends HealthProfessional {           // [Abstraction] every nurse is an RN or an NP, never a plain nurse
 
     /** The area the nurse works in, e.g. "Immunisation" or "Wound care". */
     private final String clinicalArea;
@@ -39,7 +39,7 @@ public abstract class Nurse extends HealthProfessional {
      * @param clinicalArea the nurse's clinical area, already validated
      */
     public Nurse(String id, String name, String[] workingDays, String clinicalArea) {
-        super(id, name, workingDays);                               // [Inheritance] HealthProfessional sets the shared part
+        super(id, name, workingDays);                               // [Inheritance] each level sets only the fields it owns
         this.clinicalArea = Validator.tidy(clinicalArea);
     }
 
@@ -52,7 +52,7 @@ public abstract class Nurse extends HealthProfessional {
      * @param clinicalArea the nurse's clinical area, already validated
      */
     public Nurse(String id, String name, String clinicalArea) {
-        super(id, name);                                            // [Reuse] default full-time week
+        super(id, name);
         this.clinicalArea = Validator.tidy(clinicalArea);
     }
 
@@ -103,7 +103,7 @@ public abstract class Nurse extends HealthProfessional {
     public String takeBloodSample(String patientName) {
         String problem = Validator.checkPersonName("Patient name", patientName);
         if (!problem.isEmpty()) {
-            return "[WARNING] Blood sample not taken: " + problem;  // [Guard] unknown patient
+            return "[WARNING] Blood sample not taken. " + problem;  // an unlabelled sample could be given to the wrong person
         }
         return "Blood sample: taken from " + Validator.tidy(patientName) + " by " + getName()
                 + " (" + getProfessionType() + ") and labelled for pathology.";
@@ -121,13 +121,12 @@ public abstract class Nurse extends HealthProfessional {
     }
 
     /**
-     * Presents the shared details followed by the clinical area.
+     * Presents the shared columns followed by the clinical area.
      *
-     * @return the details, one per line
+     * @return the nursing part of the table row
      */
     @Override
     public String toString() {
-        return super.toString()                                     // [Reuse] HealthProfessional's lines first
-                + Display.line("Clinical area", clinicalArea);
+        return super.toString() + clinicalArea;                     // [Inheritance] subclasses add to this in turn
     }
 }

@@ -1,6 +1,6 @@
 /*
  * =============================================================================
- *  System  : Health Clinic Appointment System
+ *  System  : Arcana Health Centre - Appointment System
  *  Unit    : PROG2004 Object Oriented Programming - Assessment 1
  *  Author  : Zefei Niu (zniu16, 25259175)
  *  File    : Dietitian.java
@@ -17,7 +17,7 @@
  * </p>
  *
  * @author Zefei Niu
- * @version 1.0
+ * @version 2.0
  */
 public class Dietitian extends HealthProfessional {
 
@@ -33,7 +33,7 @@ public class Dietitian extends HealthProfessional {
      * @param focusArea   the focus area, already validated
      */
     private Dietitian(String id, String name, String[] workingDays, String focusArea) {
-        super(id, name, workingDays);                               // [Inheritance] shared details set by the parent
+        super(id, name, workingDays);                               // [Inheritance] the parent owns the shared fields, so it sets them
         this.focusArea = Validator.tidy(focusArea);
     }
 
@@ -62,7 +62,7 @@ public class Dietitian extends HealthProfessional {
      */
     public static Dietitian create(String id, String name, String[] workingDays, String focusArea) {
         if (!check(id, name, workingDays, focusArea).isEmpty()) {
-            return null;                                            // [Guard] invalid details: no object is built
+            return null;                                            // [Encapsulation] invalid details never become an object
         }
         return new Dietitian(id, name, workingDays, focusArea);
     }
@@ -88,7 +88,7 @@ public class Dietitian extends HealthProfessional {
                 Validator.checkPersonName("Patient name", patientName),
                 Validator.checkRequiredText("Goal", goal));
         if (!problems.isEmpty()) {
-            return "[WARNING] Meal plan not created: " + problems;  // [Guard] incomplete request
+            return "[WARNING] Meal plan not created. " + problems;
         }
         return "Meal plan: 7-day plan for " + Validator.tidy(patientName) + " aiming for "
                 + Validator.tidy(goal) + ", prepared by " + getName() + ".";
@@ -111,7 +111,7 @@ public class Dietitian extends HealthProfessional {
      */
     @Override
     public String describeServices() {
-        return "Nutrition assessment and meal planning (" + focusArea + ")";
+        return "Nutrition assessment and meal planning";
     }
 
     /**
@@ -125,13 +125,12 @@ public class Dietitian extends HealthProfessional {
     }
 
     /**
-     * Presents the shared details followed by the focus area.
+     * Presents the shared columns followed by the focus area.
      *
-     * @return the details, one per line
+     * @return this dietitian's table row
      */
     @Override
     public String toString() {
-        return super.toString()                                     // [Reuse] parent's lines first
-                + Display.line("Focus area", focusArea);
+        return super.toString() + focusArea;                        // [Inheritance] reuse the parent's columns instead of repeating them
     }
 }

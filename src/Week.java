@@ -1,6 +1,6 @@
 /*
  * =============================================================================
- *  System  : Health Clinic Appointment System
+ *  System  : Arcana Health Centre - Appointment System
  *  Unit    : PROG2004 Object Oriented Programming - Assessment 1
  *  Author  : Zefei Niu (zniu16, 25259175)
  *  File    : Week.java
@@ -19,7 +19,7 @@
  * </p>
  *
  * @author Zefei Niu
- * @version 1.0
+ * @version 2.0
  */
 public class Week {
 
@@ -27,10 +27,10 @@ public class Week {
     public static final int DAYS_IN_WEEK = 7;
 
     /** Length of a short day name such as "Mon". */
-    private static final int SHORT_NAME_LENGTH = 3;
+    public static final int SHORT_NAME_LENGTH = 3;
 
-    /** The fixed day names, Monday first. Private, so no other class can change them. */
-    private static final String[] DAY_NAMES = {
+    /** The fixed day names, Monday first. */
+    private static final String[] DAY_NAMES = {               // [Encapsulation] private, so no class can rename a day
         "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
     };
 
@@ -50,17 +50,17 @@ public class Week {
      * @return 0 for Monday up to 6 for Sunday, or -1 if it is not a day
      */
     public static int indexOf(String dayName) {
-        if (dayName == null) {                                      // [Guard] nothing to look up
-            return -1;
+        if (dayName == null) {
+            return -1;                                              // callers test for -1 instead of handling an exception
         }
         String text = dayName.trim();
         for (int i = 0; i < DAYS_IN_WEEK; i++) {
             String shortName = DAY_NAMES[i].substring(0, SHORT_NAME_LENGTH);
             if (DAY_NAMES[i].equalsIgnoreCase(text) || shortName.equalsIgnoreCase(text)) {
-                return i;                                           // found its position
+                return i;
             }
         }
-        return -1;                                                  // not a day of the week
+        return -1;
     }
 
     /**
@@ -80,10 +80,24 @@ public class Week {
      * @return the day name, or an empty text if the position is outside the week
      */
     public static String nameAt(int index) {
-        if (index < 0 || index >= DAYS_IN_WEEK) {                   // [Guard] outside Monday..Sunday
-            return "";
+        if (index < 0 || index >= DAYS_IN_WEEK) {
+            return "";                                              // an empty name is safer to print than a crash
         }
         return DAY_NAMES[index];
+    }
+
+    /**
+     * Returns the three-letter name of the day at a position, for tables.
+     *
+     * @param index 0 for Monday up to 6 for Sunday
+     * @return e.g. "Wed", or an empty text if the position is outside the week
+     */
+    public static String shortNameAt(int index) {
+        String name = nameAt(index);
+        if (name.isEmpty()) {
+            return "";
+        }
+        return name.substring(0, SHORT_NAME_LENGTH);
     }
 
     /**
@@ -93,6 +107,6 @@ public class Week {
      * @return the standard name, e.g. "Wednesday", or an empty text if it is not a day
      */
     public static String normalise(String dayName) {
-        return nameAt(indexOf(dayName));                            // -1 becomes "" through nameAt
+        return nameAt(indexOf(dayName));                            // nameAt(-1) already returns "", so no extra check is needed
     }
 }

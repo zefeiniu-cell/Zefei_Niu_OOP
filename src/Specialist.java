@@ -1,6 +1,6 @@
 /*
  * =============================================================================
- *  System  : Health Clinic Appointment System
+ *  System  : Arcana Health Centre - Appointment System
  *  Unit    : PROG2004 Object Oriented Programming - Assessment 1
  *  Author  : Zefei Niu (zniu16, 25259175)
  *  File    : Specialist.java
@@ -19,7 +19,7 @@
  * </p>
  *
  * @author Zefei Niu
- * @version 1.0
+ * @version 2.0
  */
 public class Specialist extends HealthProfessional implements Prescriber {
 
@@ -46,7 +46,7 @@ public class Specialist extends HealthProfessional implements Prescriber {
      */
     private Specialist(String id, String name, String[] workingDays, String specialty,
                        boolean referralRequired) {
-        super(id, name, workingDays);                               // [Inheritance] shared details set by the parent
+        super(id, name, workingDays);                               // [Inheritance] the parent owns the shared fields, so it sets them
         this.specialty = Validator.tidy(specialty);
         this.referralRequired = referralRequired;
     }
@@ -60,7 +60,7 @@ public class Specialist extends HealthProfessional implements Prescriber {
      * @param specialty   the medical field, already validated
      */
     private Specialist(String id, String name, String[] workingDays, String specialty) {
-        this(id, name, workingDays, specialty, DEFAULT_REFERRAL_REQUIRED); // [Reuse] chain to the full constructor
+        this(id, name, workingDays, specialty, DEFAULT_REFERRAL_REQUIRED); // a named constant documents why the default is true
     }
 
     /**
@@ -90,7 +90,7 @@ public class Specialist extends HealthProfessional implements Prescriber {
     public static Specialist create(String id, String name, String[] workingDays, String specialty,
                                     boolean referralRequired) {
         if (!check(id, name, workingDays, specialty).isEmpty()) {
-            return null;                                            // [Guard] invalid details: no object is built
+            return null;                                            // [Encapsulation] invalid details never become an object
         }
         return new Specialist(id, name, workingDays, specialty, referralRequired);
     }
@@ -107,7 +107,7 @@ public class Specialist extends HealthProfessional implements Prescriber {
      */
     public static Specialist create(String id, String name, String[] workingDays, String specialty) {
         if (!check(id, name, workingDays, specialty).isEmpty()) {
-            return null;                                            // [Guard] invalid details: no object is built
+            return null;
         }
         return new Specialist(id, name, workingDays, specialty);
     }
@@ -142,20 +142,21 @@ public class Specialist extends HealthProfessional implements Prescriber {
                 Validator.checkPersonName("Patient name", patientName),
                 Validator.checkRequiredText("Test name", testName));
         if (!problems.isEmpty()) {
-            return "[WARNING] Test not ordered: " + problems;       // [Guard] incomplete request
+            return "[WARNING] Test not ordered. " + problems;
         }
         return "Test order: " + Validator.tidy(testName) + " for " + Validator.tidy(patientName)
                 + ", requested by " + getName() + " (" + specialty + ").";
     }
 
     /**
-     * Names this kind of professional, including the specialty.
+     * Names this kind of professional. The specialty is shown in the details
+     * column, so the type stays short enough for the table.
      *
-     * @return e.g. "Specialist - Cardiology"
+     * @return "Specialist"
      */
     @Override
     public String getProfessionType() {
-        return "Specialist - " + specialty;
+        return "Specialist";
     }
 
     /**
@@ -178,7 +179,7 @@ public class Specialist extends HealthProfessional implements Prescriber {
         if (referralRequired) {
             return "Bring your GP referral letter and any recent test results.";
         }
-        return "Bring any recent test results; no referral is needed.";
+        return "Bring any recent test results; no referral is needed.";  // same method, different answer by the object's own state
     }
 
     /**
@@ -204,7 +205,7 @@ public class Specialist extends HealthProfessional implements Prescriber {
                 Validator.checkPersonName("Patient name", patientName),
                 Validator.checkRequiredText("Medication", medication));
         if (!problems.isEmpty()) {
-            return "[WARNING] Prescription not written: " + problems;
+            return "[WARNING] Prescription not written. " + problems;
         }
         return "Prescription for " + Validator.tidy(patientName) + ": "
                 + Validator.tidy(medication) + " - signed by " + getName()
@@ -212,14 +213,13 @@ public class Specialist extends HealthProfessional implements Prescriber {
     }
 
     /**
-     * Presents the shared details followed by the specialist's own details.
+     * Presents the shared columns followed by the specialty and referral rule.
      *
-     * @return the details, one per line
+     * @return this specialist's table row
      */
     @Override
     public String toString() {
-        return super.toString()                                     // [Reuse] parent's lines first
-                + Display.line("Specialty", specialty)
-                + Display.line("Referral", referralRequired ? "Required" : "Not required");
+        return super.toString()                                     // [Inheritance] reuse the parent's columns instead of repeating them
+                + specialty + (referralRequired ? ", referral needed" : ", no referral needed");
     }
 }

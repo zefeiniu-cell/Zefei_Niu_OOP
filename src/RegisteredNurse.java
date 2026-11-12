@@ -1,6 +1,6 @@
 /*
  * =============================================================================
- *  System  : Health Clinic Appointment System
+ *  System  : Arcana Health Centre - Appointment System
  *  Unit    : PROG2004 Object Oriented Programming - Assessment 1
  *  Author  : Zefei Niu (zniu16, 25259175)
  *  File    : RegisteredNurse.java
@@ -18,7 +18,7 @@
  * </p>
  *
  * @author Zefei Niu
- * @version 1.0
+ * @version 2.0
  */
 public class RegisteredNurse extends Nurse {
 
@@ -36,7 +36,7 @@ public class RegisteredNurse extends Nurse {
      */
     private RegisteredNurse(String id, String name, String[] workingDays, String clinicalArea,
                             boolean authorisedImmuniser) {
-        super(id, name, workingDays, clinicalArea);                 // [Inheritance] Nurse, then HealthProfessional
+        super(id, name, workingDays, clinicalArea);                 // [Inheritance] Nurse sets its part, then HealthProfessional sets its own
         this.authorisedImmuniser = authorisedImmuniser;
     }
 
@@ -49,7 +49,7 @@ public class RegisteredNurse extends Nurse {
      * @param authorisedImmuniser true if the nurse may vaccinate independently
      */
     private RegisteredNurse(String id, String name, String clinicalArea, boolean authorisedImmuniser) {
-        super(id, name, clinicalArea);                              // [Reuse] default full-time week
+        super(id, name, clinicalArea);
         this.authorisedImmuniser = authorisedImmuniser;
     }
 
@@ -80,7 +80,7 @@ public class RegisteredNurse extends Nurse {
     public static RegisteredNurse create(String id, String name, String[] workingDays,
                                          String clinicalArea, boolean authorisedImmuniser) {
         if (!check(id, name, workingDays, clinicalArea).isEmpty()) {
-            return null;                                            // [Guard] invalid details: no object is built
+            return null;                                            // [Encapsulation] invalid details never become an object
         }
         return new RegisteredNurse(id, name, workingDays, clinicalArea, authorisedImmuniser);
     }
@@ -98,7 +98,7 @@ public class RegisteredNurse extends Nurse {
     public static RegisteredNurse create(String id, String name, String clinicalArea,
                                          boolean authorisedImmuniser) {
         if (!checkNurseDetails(id, name, clinicalArea).isEmpty()) {
-            return null;                                            // [Guard] invalid details: no object is built
+            return null;
         }
         return new RegisteredNurse(id, name, clinicalArea, authorisedImmuniser);
     }
@@ -125,10 +125,10 @@ public class RegisteredNurse extends Nurse {
                 Validator.checkPersonName("Patient name", patientName),
                 Validator.checkRequiredText("Vaccine", vaccine));
         if (!problems.isEmpty()) {
-            return "[WARNING] Vaccine not given: " + problems;      // [Guard] incomplete request
+            return "[WARNING] Vaccine not given. " + problems;
         }
         if (!authorisedImmuniser) {
-            return "[WARNING] Vaccine not given: " + getName()
+            return "[WARNING] Vaccine not given. " + getName()       // the object's own state decides, as the law does in a real clinic
                     + " is not an authorised immuniser, so a doctor's order is needed first.";
         }
         return "Vaccination: " + Validator.tidy(vaccine) + " given to "
@@ -152,17 +152,17 @@ public class RegisteredNurse extends Nurse {
      */
     @Override
     public String describeServices() {
-        return "Health checks, immunisations, wound care and blood tests";
+        return "Health checks, immunisations, wound care, blood tests";
     }
 
     /**
-     * Presents the nursing details followed by the immuniser status.
+     * Presents the nursing columns followed by the immuniser status.
      *
-     * @return the details, one per line
+     * @return this nurse's table row
      */
     @Override
     public String toString() {
-        return super.toString()                                     // [Reuse] Nurse's lines, which include the parent's
-                + Display.line("Immuniser", Display.yesNo(authorisedImmuniser));
+        return super.toString()                                     // [Inheritance] two levels of parent columns, written once each
+                + (authorisedImmuniser ? ", authorised immuniser" : "");
     }
 }

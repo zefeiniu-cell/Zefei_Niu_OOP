@@ -1,6 +1,6 @@
 /*
  * =============================================================================
- *  System  : Health Clinic Appointment System
+ *  System  : Arcana Health Centre - Appointment System
  *  Unit    : PROG2004 Object Oriented Programming - Assessment 1
  *  Author  : Zefei Niu (zniu16, 25259175)
  *  File    : HealthProfessional.java
@@ -26,14 +26,22 @@
  * can never change. The roster can change, but only through
  * {@link #updateWorkingDays(String[])}, which refuses invalid rosters.
  * </p>
+ * <p>
+ * Every professional prints as one table row: ID, name, type, days, then the
+ * details that only its own type has. This class prints the shared columns
+ * and each subclass appends its details through super.toString().
+ * </p>
  *
  * @author Zefei Niu
- * @version 2.0
+ * @version 3.0
  */
-public abstract class HealthProfessional {
+public abstract class HealthProfessional {                         // [Abstraction] abstract: a profession-less professional cannot exist
 
     /** Number of digits in every staff ID, e.g. "100101". */
     public static final int ID_LENGTH = 6;
+
+    /** A run of at least this many working days is shown as a range, e.g. "Mon-Fri". */
+    private static final int MIN_DAYS_FOR_RANGE = 3;
 
     /** Roster used when none is supplied: a standard full-time week. */
     private static final String[] FULL_TIME_DAYS =
@@ -43,13 +51,13 @@ public abstract class HealthProfessional {
      * Staff ID issued by the clinic. Stored as text rather than int: it is a
      * label that is never used in arithmetic, and text keeps leading zeros.
      */
-    private final String id;                                        // [Encapsulation] private + final: readable, never changed
+    private final String id;                                        // [Encapsulation] final and no setter: identity can never change
 
     /** Full name, tidied to single spaces. */
-    private final String name;                                      // [Encapsulation] no setter exists
+    private final String name;
 
     /** One flag per day, index 0 = Monday; true means the person works that day. */
-    private final boolean[] workingDays = new boolean[Week.DAYS_IN_WEEK];
+    private final boolean[] workingDays = new boolean[Week.DAYS_IN_WEEK]; // a fixed set of 7 values fits a fixed-size array
 
     /**
      * Builds the shared part of a professional with a given roster.
@@ -67,7 +75,7 @@ public abstract class HealthProfessional {
      */
     public HealthProfessional(String id, String name, String[] workingDays) {
         this.id = id.trim();
-        this.name = Validator.tidy(name);                           // store one clean spelling
+        this.name = Validator.tidy(name);                           // one stored spelling, so names always print and compare the same
         markWorkingDays(workingDays);
     }
 
@@ -79,7 +87,7 @@ public abstract class HealthProfessional {
      * @param name the professional's name, already validated
      */
     public HealthProfessional(String id, String name) {
-        this(id, name, FULL_TIME_DAYS);                             // [Reuse] constructor chaining with this(...)
+        this(id, name, FULL_TIME_DAYS);                             // chaining keeps the set-up code in one constructor only
     }
 
     /**
@@ -112,7 +120,7 @@ public abstract class HealthProfessional {
      */
     public static String checkWorkingDays(String[] days) {
         if (days == null || days.length == 0) {
-            return "At least one working day is required.";
+            return "At least one working day is required.";        // a professional with no days could never be booked
         }
         for (int i = 0; i < days.length; i++) {
             if (!Week.isValidDay(days[i])) {
@@ -145,7 +153,39 @@ public abstract class HealthProfessional {
      * @return an empty text if both are valid, otherwise every problem found
      */
     public static String checkCommonDetails(String id, String name) {
-        return Validator.addProblem(checkId(id), checkName(name));  // overload: no roster to check
+        return Validator.addProblem(checkId(id), checkName(name));  // the default roster is known to be valid, so it is not checked
+    }
+
+    /**
+     * Returns the heading row and underline of the professionals table,
+     * matching the columns that {@link #toString()} prints.
+     *
+     * @return two lines: column titles and dashes
+     */
+    public static String tableHeader() {
+        return headerTitles() + "\n" + headerRule();
+    }
+
+    /**
+     * Returns the column titles of the professionals table.
+     *
+     * @return one line of column titles
+     */
+    public static String headerTitles() {
+        return Display.cell("ID", Display.ID_WIDTH) + Display.cell("NAME", Display.NAME_WIDTH)
+                + Display.cell("TYPE", Display.TYPE_WIDTH) + Display.cell("DAYS", Display.DAYS_WIDTH)
+                + "DETAILS";
+    }
+
+    /**
+     * Returns the underline of the professionals table.
+     *
+     * @return one line of dashes under each column
+     */
+    public static String headerRule() {
+        return Display.dashes(Display.ID_WIDTH) + Display.dashes(Display.NAME_WIDTH)
+                + Display.dashes(Display.TYPE_WIDTH) + Display.dashes(Display.DAYS_WIDTH)
+                + "--------------------";
     }
 
     /**
@@ -180,7 +220,7 @@ public abstract class HealthProfessional {
                 next++;
             }
         }
-        return names;                                               // [Encapsulation] a fresh array, so callers cannot edit the roster
+        return names;                                               // [Encapsulation] a fresh array: editing it cannot change the roster
     }
 
     /**
@@ -206,11 +246,11 @@ public abstract class HealthProfessional {
      */
     public boolean worksOn(String day) {
         int index = Week.indexOf(day);
-        return index >= 0 && workingDays[index];                    // && stops before using index -1
+        return index >= 0 && workingDays[index];                    // && stops before index -1 could be used
     }
 
     /**
-     * Lists the working days as one readable text.
+     * Lists the working days in full, for messages.
      *
      * @return the days joined by commas, e.g. "Monday, Wednesday, Friday"
      */
@@ -228,9 +268,39 @@ public abstract class HealthProfessional {
     }
 
     /**
-     * Gives a one-line description used in lists and messages.
+     * Lists the working days compactly, for tables. Three or more days in a
+     * row are shown as a range.
      *
-     * @return e.g. "Dr Alice Wong (General Practitioner, ID 100101)"
+     * @return e.g. "Mon-Fri", "Mon Wed Fri" or "Tue-Thu Sat"
+     */
+    public String getWorkingDaysShort() {
+        String text = "";
+        int day = 0;
+        while (day < Week.DAYS_IN_WEEK) {
+            if (workingDays[day]) {
+                int last = day;
+                while (last + 1 < Week.DAYS_IN_WEEK && workingDays[last + 1]) {
+                    last++;                                         // find where this run of working days ends
+                }
+                if (last - day + 1 >= MIN_DAYS_FOR_RANGE) {
+                    text = joinWithSpace(text, Week.shortNameAt(day) + "-" + Week.shortNameAt(last));
+                } else {
+                    for (int i = day; i <= last; i++) {
+                        text = joinWithSpace(text, Week.shortNameAt(i)); // two days are clearer written out than as a range
+                    }
+                }
+                day = last + 1;
+            } else {
+                day++;
+            }
+        }
+        return text;
+    }
+
+    /**
+     * Gives a one-line description used in messages.
+     *
+     * @return e.g. "Dr Elias Magee (General Practitioner, ID 100101)"
      */
     public String getSummary() {
         return name + " (" + getProfessionType() + ", ID " + id + ")";
@@ -246,25 +316,40 @@ public abstract class HealthProfessional {
     public String updateWorkingDays(String[] newDays) {
         String problem = checkWorkingDays(newDays);
         if (!problem.isEmpty()) {
-            return problem;                                         // [Encapsulation] refused: roster stays as it was
+            return problem;                                         // [Encapsulation] the only way in refuses bad data, so the roster stays valid
         }
         markWorkingDays(newDays);
         return "";
     }
 
     /**
-     * Sets the day flags from a list of day names that has already been checked.
-     * It is private, so it cannot be overridden or called from outside.
+     * Sets the day flags from day names that have already been checked.
+     * Private so that it cannot be overridden: it is called by the
+     * constructor, and a constructor must not run subclass code.
      *
      * @param days valid day names
      */
     private void markWorkingDays(String[] days) {
         for (int i = 0; i < Week.DAYS_IN_WEEK; i++) {
-            workingDays[i] = false;                                 // start from an empty roster
+            workingDays[i] = false;                                 // a roster change replaces the old roster, it does not add to it
         }
         for (int i = 0; i < days.length; i++) {
-            workingDays[Week.indexOf(days[i])] = true;              // a repeated day just sets the same flag
+            workingDays[Week.indexOf(days[i])] = true;              // a repeated day sets the same flag again, so duplicates are harmless
         }
+    }
+
+    /**
+     * Adds a word to a space-separated list.
+     *
+     * @param text the list so far
+     * @param word the word to add
+     * @return the list with the word added
+     */
+    private static String joinWithSpace(String text, String word) {
+        if (text.isEmpty()) {
+            return word;
+        }
+        return text + " " + word;
     }
 
     /**
@@ -273,7 +358,7 @@ public abstract class HealthProfessional {
      *
      * @return the profession type
      */
-    public abstract String getProfessionType();                     // [Abstraction] declared here, defined by each type
+    public abstract String getProfessionType();                     // [Abstraction] every type must answer, so no type can forget
 
     /**
      * Describes the services this kind of professional provides.
@@ -292,17 +377,17 @@ public abstract class HealthProfessional {
     public abstract String getPreparationAdvice();
 
     /**
-     * Presents the shared details in a readable block. Subclasses add their
-     * own lines by calling super.toString() and appending to it.
+     * Presents the shared columns of this professional's table row.
+     * Each subclass appends its own details after them.
      *
-     * @return the details, one per line
+     * @return ID, name, type and days, padded to the table columns
      */
     @Override
     public String toString() {
-        return "[" + getProfessionType() + "] " + name              // [Polymorphism] each type fills in its own label
-                + Display.line("Staff ID", id)
-                + Display.line("Working days", getWorkingDaysText())
-                + Display.line("Services", describeServices());
+        return Display.cell(id, Display.ID_WIDTH)
+                + Display.cell(name, Display.NAME_WIDTH)
+                + Display.cell(getProfessionType(), Display.TYPE_WIDTH) // [Polymorphism] the object's own type answers here
+                + Display.cell(getWorkingDaysShort(), Display.DAYS_WIDTH);
     }
 
     /**
@@ -314,14 +399,14 @@ public abstract class HealthProfessional {
      */
     @Override
     public final boolean equals(Object other) {
-        if (this == other) {                                        // same object in memory
+        if (this == other) {
             return true;
         }
-        if (!(other instanceof HealthProfessional)) {               // also handles null
+        if (!(other instanceof HealthProfessional)) {               // also answers false for null
             return false;
         }
         HealthProfessional that = (HealthProfessional) other;
-        return id.equals(that.id);
+        return id.equals(that.id);                                  // the staff ID is unique, so it alone decides identity
     }
 
     /**
@@ -331,6 +416,6 @@ public abstract class HealthProfessional {
      */
     @Override
     public final int hashCode() {
-        return id.hashCode();
+        return id.hashCode();                                       // same field as equals(), or equal objects could hash differently
     }
 }

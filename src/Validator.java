@@ -1,6 +1,6 @@
 /*
  * =============================================================================
- *  System  : Health Clinic Appointment System
+ *  System  : Arcana Health Centre - Appointment System
  *  Unit    : PROG2004 Object Oriented Programming - Assessment 1
  *  Author  : Zefei Niu (zniu16, 25259175)
  *  File    : Validator.java
@@ -20,15 +20,15 @@
  * </p>
  *
  * @author Zefei Niu
- * @version 1.0
+ * @version 2.0
  */
 public class Validator {
 
     /** Longest person name accepted, in characters. */
-    public static final int MAX_NAME_LENGTH = 60;
+    public static final int MAX_NAME_LENGTH = 40;
 
     /** Longest free-text detail accepted (e.g. a specialty), in characters. */
-    public static final int MAX_TEXT_LENGTH = 80;
+    public static final int MAX_TEXT_LENGTH = 60;
 
     /**
      * Prevents objects of this class from being created.
@@ -54,12 +54,12 @@ public class Validator {
      * @return true if the text is not empty and every character is 0-9
      */
     public static boolean isAllDigits(String text) {
-        if (text == null || text.isEmpty()) {                       // [Guard] no digits at all
+        if (text == null || text.isEmpty()) {
             return false;
         }
         for (int i = 0; i < text.length(); i++) {
             char character = text.charAt(i);
-            if (character < '0' || character > '9') {               // only plain 0-9 count
+            if (character < '0' || character > '9') {               // Character.isDigit would also accept non-Latin digits
                 return false;
             }
         }
@@ -70,11 +70,11 @@ public class Validator {
      * Cleans a text for storage: trims both ends and turns every run of
      * spaces or tabs inside it into a single space.
      *
-     * @param text the text to clean, e.g. "  Dr   Alice  Wong "
-     * @return the cleaned text, e.g. "Dr Alice Wong"; an empty text for null
+     * @param text the text to clean, e.g. "  Dr   Leona  Hart "
+     * @return the cleaned text, e.g. "Dr Leona Hart"; an empty text for null
      */
     public static String tidy(String text) {
-        if (text == null) {                                         // [Guard] treat missing as empty
+        if (text == null) {
             return "";
         }
         String trimmed = text.trim();
@@ -84,7 +84,7 @@ public class Validator {
             char character = trimmed.charAt(i);
             if (Character.isWhitespace(character)) {
                 if (!lastWasSpace) {
-                    result += ' ';                                  // keep only the first space of a run
+                    result += ' ';                                  // one space survives, so names compare equal however they were typed
                 }
                 lastWasSpace = true;
             } else {
@@ -96,20 +96,21 @@ public class Validator {
     }
 
     /**
-     * Removes every space from a text, e.g. "0412 345 678" becomes "0412345678".
-     * Used for codes that people often type with spaces for readability.
+     * Removes spaces and hyphens, e.g. "0412-345 678" becomes "0412345678".
+     * People type codes with separators for readability; the system stores
+     * one plain form so that two spellings of the same code always match.
      *
      * @param text the text to compact
-     * @return the text without spaces; an empty text for null
+     * @return the text without spaces or hyphens; an empty text for null
      */
-    public static String removeSpaces(String text) {
-        if (text == null) {                                         // [Guard] treat missing as empty
+    public static String removeSeparators(String text) {
+        if (text == null) {
             return "";
         }
         String result = "";
         for (int i = 0; i < text.length(); i++) {
             char character = text.charAt(i);
-            if (!Character.isWhitespace(character)) {
+            if (!Character.isWhitespace(character) && character != '-') {
                 result += character;
             }
         }
@@ -117,7 +118,7 @@ public class Validator {
     }
 
     /**
-     * Checks a person's name. It is required, at most 60 characters, must
+     * Checks a person's name. It is required, at most 40 characters, must
      * contain a letter, and may otherwise only use spaces, hyphens,
      * apostrophes and full stops (so "Dr Mary-Jane O'Neil" is accepted).
      *
@@ -144,7 +145,7 @@ public class Validator {
             }
         }
         if (!hasLetter) {
-            return label + " must contain at least one letter.";
+            return label + " must contain at least one letter.";   // stops a name made only of punctuation, e.g. "--"
         }
         return "";
     }
@@ -171,7 +172,7 @@ public class Validator {
      * staff ID or a mobile number.
      *
      * @param label          what the code is, used in the message, e.g. "Professional ID"
-     * @param code           the code to check (it must not contain spaces)
+     * @param code           the code to check (separators must already be removed)
      * @param requiredLength how many digits the code must have
      * @return an empty text if valid, otherwise the reason it is not
      */
@@ -191,18 +192,18 @@ public class Validator {
     }
 
     /**
-     * Adds one more problem to a list of problems found so far, so that a
-     * caller can report every mistake at once instead of only the first.
+     * Adds one more problem to the problems found so far, so that a caller
+     * can report every mistake at once instead of only the first one.
      *
      * @param problems   the problems found so far (empty if none)
      * @param newProblem the result of another check (empty if that check passed)
      * @return all problems joined by a space, or an empty text if there are none
      */
     public static String addProblem(String problems, String newProblem) {
-        if (newProblem.isEmpty()) {                                 // that check passed
+        if (newProblem.isEmpty()) {
             return problems;
         }
-        if (problems.isEmpty()) {                                   // first problem found
+        if (problems.isEmpty()) {
             return newProblem;
         }
         return problems + " " + newProblem;

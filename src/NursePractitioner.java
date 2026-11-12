@@ -1,6 +1,6 @@
 /*
  * =============================================================================
- *  System  : Health Clinic Appointment System
+ *  System  : Arcana Health Centre - Appointment System
  *  Unit    : PROG2004 Object Oriented Programming - Assessment 1
  *  Author  : Zefei Niu (zniu16, 25259175)
  *  File    : NursePractitioner.java
@@ -19,11 +19,11 @@
  * </p>
  *
  * @author Zefei Niu
- * @version 1.0
+ * @version 2.0
  */
-public class NursePractitioner extends Nurse implements Prescriber {
+public class NursePractitioner extends Nurse implements Prescriber { // [Abstraction] one parent class, plus a capability from an interface
 
-    /** The area the practitioner is endorsed to prescribe in. */
+    /** The medicines the practitioner is endorsed to prescribe. */
     private final String endorsedScope;
 
     /**
@@ -37,7 +37,7 @@ public class NursePractitioner extends Nurse implements Prescriber {
      */
     private NursePractitioner(String id, String name, String[] workingDays, String clinicalArea,
                               String endorsedScope) {
-        super(id, name, workingDays, clinicalArea);                 // [Inheritance] two levels: Nurse, then HealthProfessional
+        super(id, name, workingDays, clinicalArea);                 // [Inheritance] two levels up: Nurse, then HealthProfessional
         this.endorsedScope = Validator.tidy(endorsedScope);
     }
 
@@ -64,13 +64,13 @@ public class NursePractitioner extends Nurse implements Prescriber {
      * @param name          the practitioner's name
      * @param workingDays   the days the practitioner works
      * @param clinicalArea  the clinical area, e.g. "Chronic disease"
-     * @param endorsedScope what they may prescribe, e.g. "Diabetes and blood pressure"
+     * @param endorsedScope what they may prescribe, e.g. "diabetes, blood pressure"
      * @return the new nurse practitioner, or null if the details are invalid
      */
     public static NursePractitioner create(String id, String name, String[] workingDays,
                                            String clinicalArea, String endorsedScope) {
         if (!check(id, name, workingDays, clinicalArea, endorsedScope).isEmpty()) {
-            return null;                                            // [Guard] invalid details: no object is built
+            return null;                                            // [Encapsulation] invalid details never become an object
         }
         return new NursePractitioner(id, name, workingDays, clinicalArea, endorsedScope);
     }
@@ -78,7 +78,7 @@ public class NursePractitioner extends Nurse implements Prescriber {
     /**
      * Returns the prescribing endorsement.
      *
-     * @return e.g. "Diabetes and blood pressure medicines"
+     * @return e.g. "diabetes, blood pressure"
      */
     public String getEndorsedScope() {
         return endorsedScope;
@@ -101,7 +101,7 @@ public class NursePractitioner extends Nurse implements Prescriber {
      */
     @Override
     public String describeServices() {
-        return "Advanced nursing care, diagnosis and prescribing";
+        return "Advanced nursing care, diagnosis, prescribing";
     }
 
     /**
@@ -122,7 +122,7 @@ public class NursePractitioner extends Nurse implements Prescriber {
      */
     @Override
     public String getPrescribingScope() {
-        return endorsedScope;
+        return "Medicines for " + endorsedScope;
     }
 
     /**
@@ -138,7 +138,7 @@ public class NursePractitioner extends Nurse implements Prescriber {
                 Validator.checkPersonName("Patient name", patientName),
                 Validator.checkRequiredText("Medication", medication));
         if (!problems.isEmpty()) {
-            return "[WARNING] Prescription not written: " + problems;
+            return "[WARNING] Prescription not written. " + problems;
         }
         return "Prescription for " + Validator.tidy(patientName) + ": "
                 + Validator.tidy(medication) + " - signed by " + getName()
@@ -146,13 +146,12 @@ public class NursePractitioner extends Nurse implements Prescriber {
     }
 
     /**
-     * Presents the nursing details followed by the endorsement.
+     * Presents the nursing columns followed by the prescribing endorsement.
      *
-     * @return the details, one per line
+     * @return this practitioner's table row
      */
     @Override
     public String toString() {
-        return super.toString()                                     // [Reuse] Nurse's and HealthProfessional's lines
-                + Display.line("Endorsed scope", endorsedScope);
+        return super.toString() + "; prescribes for " + endorsedScope; // [Inheritance] adds only what Nurse does not already print
     }
 }

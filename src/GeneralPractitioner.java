@@ -1,6 +1,6 @@
 /*
  * =============================================================================
- *  System  : Health Clinic Appointment System
+ *  System  : Arcana Health Centre - Appointment System
  *  Unit    : PROG2004 Object Oriented Programming - Assessment 1
  *  Author  : Zefei Niu (zniu16, 25259175)
  *  File    : GeneralPractitioner.java
@@ -13,8 +13,8 @@
  * <p>
  * A GP is a health professional (is-a, so it inherits the shared details) and
  * also a Prescriber (a capability promised through an interface). The extra
- * detail a GP records is whether the practice bulk bills, meaning Medicare
- * covers the whole fee. A GP's unique task is writing referrals to specialists.
+ * detail a GP records is whether they bulk bill, meaning Medicare covers the
+ * whole fee. A GP's unique task is writing referrals to specialists.
  * </p>
  * <p>
  * Objects are created only through the static create(...) methods, which
@@ -23,7 +23,7 @@
  * </p>
  *
  * @author Zefei Niu
- * @version 2.0
+ * @version 3.0
  */
 public class GeneralPractitioner extends HealthProfessional implements Prescriber {
 
@@ -39,7 +39,7 @@ public class GeneralPractitioner extends HealthProfessional implements Prescribe
      * @param bulkBilling true if the GP bulk bills
      */
     private GeneralPractitioner(String id, String name, String[] workingDays, boolean bulkBilling) {
-        super(id, name, workingDays);                               // [Inheritance] parent sets up the shared details
+        super(id, name, workingDays);                               // [Inheritance] the parent owns the shared fields, so it sets them
         this.bulkBilling = bulkBilling;
     }
 
@@ -51,7 +51,7 @@ public class GeneralPractitioner extends HealthProfessional implements Prescribe
      * @param bulkBilling true if the GP bulk bills
      */
     private GeneralPractitioner(String id, String name, boolean bulkBilling) {
-        super(id, name);                                            // [Reuse] parent fills in the full-time week
+        super(id, name);                                            // the parent knows the default roster, so it is not repeated here
         this.bulkBilling = bulkBilling;
     }
 
@@ -80,7 +80,7 @@ public class GeneralPractitioner extends HealthProfessional implements Prescribe
     public static GeneralPractitioner create(String id, String name, String[] workingDays,
                                              boolean bulkBilling) {
         if (!check(id, name, workingDays).isEmpty()) {
-            return null;                                            // [Guard] invalid details: no object is built
+            return null;                                            // [Encapsulation] invalid details never become an object
         }
         return new GeneralPractitioner(id, name, workingDays, bulkBilling);
     }
@@ -96,7 +96,7 @@ public class GeneralPractitioner extends HealthProfessional implements Prescribe
      */
     public static GeneralPractitioner create(String id, String name, boolean bulkBilling) {
         if (!checkCommonDetails(id, name).isEmpty()) {
-            return null;                                            // [Guard] invalid details: no object is built
+            return null;
         }
         return new GeneralPractitioner(id, name, bulkBilling);
     }
@@ -122,7 +122,7 @@ public class GeneralPractitioner extends HealthProfessional implements Prescribe
                 Validator.checkPersonName("Patient name", patientName),
                 Validator.checkRequiredText("Specialty", specialty));
         if (!problems.isEmpty()) {
-            return "[WARNING] Referral not written: " + problems;   // [Guard] incomplete request
+            return "[WARNING] Referral not written. " + problems;   // a referral with a missing name is useless to the specialist
         }
         return "Referral: " + getName() + " refers " + Validator.tidy(patientName)
                 + " to a " + Validator.tidy(specialty) + " specialist.";
@@ -145,7 +145,7 @@ public class GeneralPractitioner extends HealthProfessional implements Prescribe
      */
     @Override
     public String describeServices() {
-        return "Check-ups, common illnesses, prescriptions and referrals";
+        return "Check-ups, common illnesses, prescriptions, referrals";
     }
 
     /**
@@ -181,20 +181,20 @@ public class GeneralPractitioner extends HealthProfessional implements Prescribe
                 Validator.checkPersonName("Patient name", patientName),
                 Validator.checkRequiredText("Medication", medication));
         if (!problems.isEmpty()) {
-            return "[WARNING] Prescription not written: " + problems;
+            return "[WARNING] Prescription not written. " + problems;
         }
         return "Prescription for " + Validator.tidy(patientName) + ": "
                 + Validator.tidy(medication) + " - signed by " + getName() + ", GP.";
     }
 
     /**
-     * Presents the shared details followed by the GP's own detail.
+     * Presents the shared columns followed by the GP's billing detail.
      *
-     * @return the details, one per line
+     * @return this GP's table row
      */
     @Override
     public String toString() {
-        return super.toString()                                     // [Reuse] parent's lines first, no duplication
-                + Display.line("Bulk billing", Display.yesNo(bulkBilling));
+        return super.toString()                                     // [Inheritance] reuse the parent's columns instead of repeating them
+                + (bulkBilling ? "Bulk billing" : "Private billing");
     }
 }
