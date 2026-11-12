@@ -1,0 +1,430 @@
+==============================================================================
+  ARCANA HEALTH CENTRE  -  Appointment System
+  PROG2004 Assessment 1  |  Zefei Niu (zniu16)
+==============================================================================
+
+==============================================================================
+  PART 3 - Working with health professional objects
+==============================================================================
+
+3.1 Create the clinic's health professionals
+------------------------------------------------------------------------------
+> Create 14 professionals of 6 types
+  [OK] 14 professionals created and stored in one list.
+
+3.2 Full details of every professional (one loop, each object prints itself)
+------------------------------------------------------------------------------
+ID      NAME                TYPE                  DAYS             DETAILS
+------  ------------------  --------------------  ---------------  --------------------
+100101  Dr Elias Magee      General Practitioner  Mon-Fri          Bulk billing
+100102  Dr Solana Reyes     General Practitioner  Mon Wed Fri      Bulk billing
+100103  Dr Rex Calloway     General Practitioner  Mon Tue Thu Fri  Private billing
+100104  Dr Orla Mundy       General Practitioner  Tue-Thu          Bulk billing
+200201  Dr Leona Hart       Specialist            Wed Thu          Cardiology, referral needed
+200202  Dr Selene Marsh     Specialist            Mon Wed          Dermatology, no referral needed
+300301  Stella Rivers       Registered Nurse      Mon-Fri          Immunisation, authorised immuniser
+300302  Jude Ashworth       Registered Nurse      Wed Thu Sat      Wound care
+300303  Priya Sterling      Nurse Practitioner    Mon Wed Fri      Chronic disease; prescribes for diabetes and blood pressure
+300304  Imogen Empey        Nurse Practitioner    Tue Thu          Women's health; prescribes for contraception and menopause
+400401  Tempe Lawson        Dietitian             Wed Fri          Diabetes nutrition
+400402  Rowan Wheeler       Dietitian             Mon Tue          Sports nutrition
+500501  Charlie Rhodes      Physiotherapist       Mon Wed Fri      Sports injuries
+500502  Ingrid Hermansen    Physiotherapist       Tue Wed Sat      Back and neck pain
+
+3.3 Polymorphism: the same call gives each type's own answer
+------------------------------------------------------------------------------
+> Ask each type: what do you offer, and how should a patient prepare?
+TYPE                  SERVICES / BEFORE YOUR VISIT
+--------------------  ----------------------------
+General Practitioner  Check-ups, common illnesses, prescriptions, referrals
+                      Bring your Medicare card and a list of the medicines you take.
+Specialist            Expert assessment and treatment in Cardiology
+                      Bring your GP referral letter and any recent test results.
+Specialist            Expert assessment and treatment in Dermatology
+                      Bring any recent test results; no referral is needed.
+Registered Nurse      Health checks, immunisations, wound care, blood tests
+                      Wear a short-sleeved top. Fast for 8 hours if a blood test is planned.
+Nurse Practitioner    Advanced nursing care, diagnosis, prescribing
+                      Bring your medicines and your latest test results for review.
+Dietitian             Nutrition assessment and meal planning
+                      Keep a 3-day food diary and bring it to the appointment.
+Physiotherapist       Movement assessment, treatment, exercise programmes
+                      Wear comfortable clothes that let you move the injured area freely.
+
+3.4 Interface: who can prescribe? (Prescriber)
+------------------------------------------------------------------------------
+NAME                TYPE                  MAY PRESCRIBE
+------------------  --------------------  -------------
+Dr Elias Magee      General Practitioner  General medicines for everyday conditions
+Dr Solana Reyes     General Practitioner  General medicines for everyday conditions
+Dr Rex Calloway     General Practitioner  General medicines for everyday conditions
+Dr Orla Mundy       General Practitioner  General medicines for everyday conditions
+Dr Leona Hart       Specialist            Medicines related to Cardiology
+Dr Selene Marsh     Specialist            Medicines related to Dermatology
+Priya Sterling      Nurse Practitioner    Medicines for diabetes and blood pressure
+Imogen Empey        Nurse Practitioner    Medicines for contraception and menopause
+  [OK] 8 of 14 can prescribe: doctors and nurse practitioners, from two branches of the hierarchy.
+> Write a prescription through each Prescriber in an array of the interface type
+  Prescription for Vincent Pope: Atorvastatin 20 mg - signed by Dr Elias Magee, GP.
+  Prescription for Tara Towers: Bisoprolol 2.5 mg - signed by Dr Leona Hart, Cardiology specialist.
+  Prescription for Devlin Sweet: Metformin 500 mg - signed by Priya Sterling, Nurse Practitioner (diabetes and blood pressure).
+> Write a prescription without naming a medicine
+  [WARNING] Prescription not written. Medication is required.
+
+3.5 Behaviour unique to each type
+------------------------------------------------------------------------------
+> GP writes a referral
+  Referral: Dr Elias Magee refers Hugo Mann to a Cardiology specialist.
+> Specialist orders a test
+  Test order: Echocardiogram for Hugo Mann, requested by Dr Leona Hart (Cardiology).
+> Authorised registered nurse gives a flu vaccine
+  Vaccination: Influenza 2026 given to Romy Lovell by Stella Rivers.
+> Registered nurse who is NOT an authorised immuniser tries the same
+  [WARNING] Vaccine not given. Jude Ashworth is not an authorised immuniser, so a doctor's order is needed first.
+> Every kind of nurse takes a blood sample (written once, in abstract Nurse)
+  Blood sample: taken from Devlin Sweet by Stella Rivers (Registered Nurse) and labelled for pathology.
+  Blood sample: taken from Devlin Sweet by Jude Ashworth (Registered Nurse) and labelled for pathology.
+  Blood sample: taken from Devlin Sweet by Priya Sterling (Nurse Practitioner) and labelled for pathology.
+  Blood sample: taken from Devlin Sweet by Imogen Empey (Nurse Practitioner) and labelled for pathology.
+> Dietitian creates a meal plan
+  Meal plan: 7-day plan for Devlin Sweet aiming for steady blood sugar, prepared by Tempe Lawson.
+> Physiotherapist designs an exercise programme
+  Exercise programme: 4-week plan for Theo Lovell (knee sprain), designed by Charlie Rhodes.
+
+3.6 Identity: equals() and hashCode() compare staff IDs
+------------------------------------------------------------------------------
+> Search the list for a different object that has Dr Magee's ID 100101
+  contains = true, indexOf = 0, same hash code = true
+> Compare two different professionals
+  Dr Magee equals Dr Reyes? No
+
+3.7 Encapsulation: invalid details are refused, data is protected
+------------------------------------------------------------------------------
+> Create a GP whose staff ID contains a letter: "10A105"
+  [WARNING] Not created. Professional ID must contain digits only (got "10A105").
+> Create a GP with a 5-digit ID, a blank name and a made-up day
+  [WARNING] Not created. Professional ID must be exactly 6 digits (got 5). Professional name is required. "Funday" is not a day of the week.
+> Create a specialist with an empty roster and no specialty
+  [WARNING] Not created. At least one working day is required. Specialty is required.
+> Create a nurse practitioner named "Finn F0ley" (a zero instead of an O)
+  [WARNING] Not created. Professional name contains a character that is not allowed: '0'.
+> Edit the array returned by getWorkingDays() from outside the object
+  The edited copy now starts with Sunday; Dr Reyes still works Monday, Wednesday, Friday.
+> Change Rowan Wheeler's roster to Monday and "Someday"
+  [WARNING] Roster unchanged (Monday, Tuesday). "Someday" is not a day of the week.
+> Change Rowan Wheeler's roster to Monday, Tuesday and Thursday
+  [OK] Roster updated: Monday, Tuesday, Thursday.
+
+==============================================================================
+  PART 6 - Working with appointments (Arcana Health Centre, Wednesday)
+==============================================================================
+
+6.1 Open the clinic with the brief's schedule
+------------------------------------------------------------------------------
+> Open Arcana Health Centre on Wednesday: 08:00-16:00 in 30-minute slots
+  [OK] Arcana Health Centre is open on Wednesday: 08:00-16:00, 30-minute slots, no lunch break, 16 slots (last starts 15:30).
+  Bookable slots: 08:00 08:30 09:00 09:30 10:00 10:30 11:00 11:30 12:00 12:30 13:00 13:30 14:00 14:30 15:00 15:30
+
+6.2 Register staff (each staff ID only once)
+------------------------------------------------------------------------------
+> Register the 14 professionals from Part 3
+  [OK] 14 professionals registered.
+> Register "Dr Finn Foley" with staff ID 100101, which Dr Magee already holds
+  [WARNING] Registration refused. Staff ID 100101 already belongs to Dr Elias Magee.
+> Register a GP whose ID "10O101" has the letter O instead of a zero
+  [WARNING] Registration refused. No professional was supplied: invalid details never create an object.
+
+On duty Wednesday (11 of 14 staff):
+ID      NAME                TYPE                  DAYS             DETAILS
+------  ------------------  --------------------  ---------------  --------------------
+100101  Dr Elias Magee      General Practitioner  Mon-Fri          Bulk billing
+100102  Dr Solana Reyes     General Practitioner  Mon Wed Fri      Bulk billing
+100104  Dr Orla Mundy       General Practitioner  Tue-Thu          Bulk billing
+200201  Dr Leona Hart       Specialist            Wed Thu          Cardiology, referral needed
+200202  Dr Selene Marsh     Specialist            Mon Wed          Dermatology, no referral needed
+300301  Stella Rivers       Registered Nurse      Mon-Fri          Immunisation, authorised immuniser
+300302  Jude Ashworth       Registered Nurse      Wed Thu Sat      Wound care
+300303  Priya Sterling      Nurse Practitioner    Mon Wed Fri      Chronic disease; prescribes for diabetes and blood pressure
+400401  Tempe Lawson        Dietitian             Wed Fri          Diabetes nutrition
+500501  Charlie Rhodes      Physiotherapist       Mon Wed Fri      Sports injuries
+500502  Ingrid Hermansen    Physiotherapist       Tue Wed Sat      Back and neck pain
+Not working today: Dr Rex Calloway, Imogen Empey, Rowan Wheeler
+
+6.3 Book appointments across every type of professional
+------------------------------------------------------------------------------
+> Book Romy Lovell (0412 345 678) with Dr Elias Magee (chosen online) at 09:00
+  [OK] Booked new patient Romy Lovell (P0001) with Dr Elias Magee (General Practitioner, ID 100101) at 09:00.
+    Before the visit: Bring your Medicare card and a list of the medicines you take.
+> Book Theo Lovell (0412345678) with staff 500501 at 10:30
+  [OK] Booked new patient Theo Lovell (P0002) with Charlie Rhodes (Physiotherapist, ID 500501) at 10:30.
+    Before the visit: Wear comfortable clothes that let you move the injured area freely.
+> Book Devlin Sweet (0445 678 901) with staff 400401 at 13:00
+  [OK] Booked new patient Devlin Sweet (P0003) with Tempe Lawson (Dietitian, ID 400401) at 13:00.
+    Before the visit: Keep a 3-day food diary and bring it to the appointment.
+> Book Tara Towers (0423-456-789) with staff 200201 at 08:30
+  [OK] Booked new patient Tara Towers (P0004) with Dr Leona Hart (Specialist, ID 200201) at 08:30.
+    Before the visit: Bring your GP referral letter and any recent test results.
+> Book Hugo Mann (0434 567 890) with staff 100104 at 10:00
+  [OK] Booked new patient Hugo Mann (P0005) with Dr Orla Mundy (General Practitioner, ID 100104) at 10:00.
+    Before the visit: Bring your Medicare card and a list of the medicines you take.
+> Book Vincent Pope (0467 890 123) with staff 300303 at 11:30
+  [OK] Booked new patient Vincent Pope (P0006) with Priya Sterling (Nurse Practitioner, ID 300303) at 11:30.
+    Before the visit: Bring your medicines and your latest test results for review.
+> Book romy lovell (0412345678) with staff 300301 at 14:30
+  [OK] Booked returning patient Romy Lovell (P0001) with Stella Rivers (Registered Nurse, ID 300301) at 14:30.
+    Before the visit: Wear a short-sleeved top. Fast for 8 hours if a blood test is planned.
+> Book Justine Fairley (0456 789 012) with staff 300302 at 15:30
+  [OK] Booked new patient Justine Fairley (P0007) with Jude Ashworth (Registered Nurse, ID 300302) at 15:30.
+    Before the visit: Wear a short-sleeved top. Fast for 8 hours if a blood test is planned.
+> Book Tara Towers (0423 456 789) with staff 500502 at 11:00
+  [OK] Booked returning patient Tara Towers (P0004) with Ingrid Hermansen (Physiotherapist, ID 500502) at 11:00.
+    Before the visit: Wear comfortable clothes that let you move the injured area freely.
+> Book Hugo Mann (0434 567 890) with staff 200202 at 12:00
+  [OK] Booked returning patient Hugo Mann (P0005) with Dr Selene Marsh (Specialist, ID 200202) at 12:00.
+    Before the visit: Bring any recent test results; no referral is needed.
+> Book Vincent Pope (0467 890 123) with Dr Solana Reyes (chosen online) at 8:00
+  [OK] Booked returning patient Vincent Pope (P0006) with Dr Solana Reyes (General Practitioner, ID 100102) at 08:00.
+    Before the visit: Bring your Medicare card and a list of the medicines you take.
+> Book Devlin Sweet (0445 678 901) with staff 100101 at 15:00
+  [OK] Booked returning patient Devlin Sweet (P0003) with Dr Elias Magee (General Practitioner, ID 100101) at 15:00.
+    Before the visit: Bring your Medicare card and a list of the medicines you take.
+
+6.4 Bookings that must be refused
+------------------------------------------------------------------------------
+> Book Tara Towers (0423 456 789) with staff 100101 at 09:00
+  [WARNING] Booking refused. Dr Elias Magee is already booked at 09:00. Next free slot: 09:30.
+> Book Romy Lovell (0412 345 678) with staff 100104 at 09:00
+  [WARNING] Booking refused. Romy Lovell already has an appointment at 09:00 with Dr Elias Magee.
+> Book Hugo Mann (0434 567 890) with staff 100103 at 09:30
+  [WARNING] Booking refused. Dr Rex Calloway does not work on Wednesday (works Monday, Tuesday, Thursday, Friday).
+> Book Devlin Sweet (0445 678 901) with staff 100102 at 09:15
+  [WARNING] Booking refused. 09:15 is not a start time: appointments start every 30 minutes from 08:00.
+> Book Devlin Sweet (0445 678 901) with staff 100102 at 16:00
+  [WARNING] Booking refused. 16:00 is too late: the clinic closes at 16:00, so the last appointment starts at 15:30.
+> Book Devlin Sweet (0445 678 901) with staff 100102 at 07:30
+  [WARNING] Booking refused. 07:30 is before the clinic opens at 08:00.
+> Book Devlin Sweet (0445 678 901) with staff 100102 at 9am
+  [WARNING] Booking refused. Time "9am" must look like 09:30 (24-hour clock).
+> Book Finn F0ley (0412 34A 678) with staff 100102 at 10:00
+  [WARNING] Booking refused. Patient name contains a character that is not allowed: '0'. Mobile number must contain digits only (got "041234A678").
+> Book Devlin Sweet (0445 678 901) with staff 999999 at 10:00
+  [WARNING] Booking refused. No one with staff ID 999999 works at Arcana Health Centre.
+> Book Devlin Sweet (0445 678 901) with staff 10O101 at 10:00
+  [WARNING] Booking refused. Professional ID must contain digits only (got "10O101").
+> Book Devlin Sweet (0445 678 901) with Dr Finn Foley (chosen online) at 10:00
+  [WARNING] Booking refused. Dr Finn Foley (General Practitioner, ID 100199) is not registered at Arcana Health Centre.
+
+6.5 View all appointments, then sort them by time
+------------------------------------------------------------------------------
+All appointments, in booking order (12):
+TIME   ID      NAME                TYPE                  DAYS             DETAILS
+       PAT.    PATIENT             MOBILE
+-----  ------  ------------------  --------------------  ---------------  --------------------
+09:00  100101  Dr Elias Magee      General Practitioner  Mon-Fri          Bulk billing
+       P0001   Romy Lovell         0412 345 678
+10:30  500501  Charlie Rhodes      Physiotherapist       Mon Wed Fri      Sports injuries
+       P0002   Theo Lovell         0412 345 678
+13:00  400401  Tempe Lawson        Dietitian             Wed Fri          Diabetes nutrition
+       P0003   Devlin Sweet        0445 678 901
+08:30  200201  Dr Leona Hart       Specialist            Wed Thu          Cardiology, referral needed
+       P0004   Tara Towers         0423 456 789
+10:00  100104  Dr Orla Mundy       General Practitioner  Tue-Thu          Bulk billing
+       P0005   Hugo Mann           0434 567 890
+11:30  300303  Priya Sterling      Nurse Practitioner    Mon Wed Fri      Chronic disease; prescribes for diabetes and blood pressure
+       P0006   Vincent Pope        0467 890 123
+14:30  300301  Stella Rivers       Registered Nurse      Mon-Fri          Immunisation, authorised immuniser
+       P0001   Romy Lovell         0412 345 678
+15:30  300302  Jude Ashworth       Registered Nurse      Wed Thu Sat      Wound care
+       P0007   Justine Fairley     0456 789 012
+11:00  500502  Ingrid Hermansen    Physiotherapist       Tue Wed Sat      Back and neck pain
+       P0004   Tara Towers         0423 456 789
+12:00  200202  Dr Selene Marsh     Specialist            Mon Wed          Dermatology, no referral needed
+       P0005   Hugo Mann           0434 567 890
+08:00  100102  Dr Solana Reyes     General Practitioner  Mon Wed Fri      Bulk billing
+       P0006   Vincent Pope        0467 890 123
+15:00  100101  Dr Elias Magee      General Practitioner  Mon-Fri          Bulk billing
+       P0003   Devlin Sweet        0445 678 901
+
+All appointments, by time (12):
+TIME   ID      NAME                TYPE                  DAYS             DETAILS
+       PAT.    PATIENT             MOBILE
+-----  ------  ------------------  --------------------  ---------------  --------------------
+08:00  100102  Dr Solana Reyes     General Practitioner  Mon Wed Fri      Bulk billing
+       P0006   Vincent Pope        0467 890 123
+08:30  200201  Dr Leona Hart       Specialist            Wed Thu          Cardiology, referral needed
+       P0004   Tara Towers         0423 456 789
+09:00  100101  Dr Elias Magee      General Practitioner  Mon-Fri          Bulk billing
+       P0001   Romy Lovell         0412 345 678
+10:00  100104  Dr Orla Mundy       General Practitioner  Tue-Thu          Bulk billing
+       P0005   Hugo Mann           0434 567 890
+10:30  500501  Charlie Rhodes      Physiotherapist       Mon Wed Fri      Sports injuries
+       P0002   Theo Lovell         0412 345 678
+11:00  500502  Ingrid Hermansen    Physiotherapist       Tue Wed Sat      Back and neck pain
+       P0004   Tara Towers         0423 456 789
+11:30  300303  Priya Sterling      Nurse Practitioner    Mon Wed Fri      Chronic disease; prescribes for diabetes and blood pressure
+       P0006   Vincent Pope        0467 890 123
+12:00  200202  Dr Selene Marsh     Specialist            Mon Wed          Dermatology, no referral needed
+       P0005   Hugo Mann           0434 567 890
+13:00  400401  Tempe Lawson        Dietitian             Wed Fri          Diabetes nutrition
+       P0003   Devlin Sweet        0445 678 901
+14:30  300301  Stella Rivers       Registered Nurse      Mon-Fri          Immunisation, authorised immuniser
+       P0001   Romy Lovell         0412 345 678
+15:00  100101  Dr Elias Magee      General Practitioner  Mon-Fri          Bulk billing
+       P0003   Devlin Sweet        0445 678 901
+15:30  300302  Jude Ashworth       Registered Nurse      Wed Thu Sat      Wound care
+       P0007   Justine Fairley     0456 789 012
+
+6.6 Filter by staff ID or by patient mobile (each result sorted by time)
+------------------------------------------------------------------------------
+> Filter by staff ID 100101 (Dr Magee)
+Appointments with Dr Elias Magee, by time (2):
+TIME   ID      NAME                TYPE                  DAYS             DETAILS
+       PAT.    PATIENT             MOBILE
+-----  ------  ------------------  --------------------  ---------------  --------------------
+09:00  100101  Dr Elias Magee      General Practitioner  Mon-Fri          Bulk billing
+       P0001   Romy Lovell         0412 345 678
+15:00  100101  Dr Elias Magee      General Practitioner  Mon-Fri          Bulk billing
+       P0003   Devlin Sweet        0445 678 901
+> Filter by mobile "0412 345 678" (the Lovell family's shared phone)
+Appointments under 0412 345 678, by time (3):
+TIME   ID      NAME                TYPE                  DAYS             DETAILS
+       PAT.    PATIENT             MOBILE
+-----  ------  ------------------  --------------------  ---------------  --------------------
+09:00  100101  Dr Elias Magee      General Practitioner  Mon-Fri          Bulk billing
+       P0001   Romy Lovell         0412 345 678
+10:30  500501  Charlie Rhodes      Physiotherapist       Mon Wed Fri      Sports injuries
+       P0002   Theo Lovell         0412 345 678
+14:30  300301  Stella Rivers       Registered Nurse      Mon-Fri          Immunisation, authorised immuniser
+       P0001   Romy Lovell         0412 345 678
+> Filter by staff ID 100103 (Dr Calloway, off today)
+  [WARNING] Dr Rex Calloway does not work on Wednesday, so there are no appointments to show.
+> Filter by staff ID "12345"
+  [WARNING] Cannot filter. Professional ID must be exactly 6 digits (got 5).
+> Filter by staff ID 888888
+  [WARNING] Cannot filter. No one with staff ID 888888 works at Arcana Health Centre.
+> Filter by mobile "0499 000 111"
+  [WARNING] No appointments are booked under 0499 000 111.
+> Filter by mobile "12345"
+  [WARNING] Cannot filter. Mobile number must be exactly 10 digits (got 5).
+
+6.7 Cancel appointments, then reuse a freed slot
+------------------------------------------------------------------------------
+> Cancel by staff ID and time: 200201 at 08:30 (Tara Towers with Dr Hart)
+  [OK] Cancelled 08:30 Tara Towers (P0004) with Dr Leona Hart. That slot is free again.
+> Book Justine Fairley (0456 789 012) with staff 200201 at 08:30
+  [OK] Booked returning patient Justine Fairley (P0007) with Dr Leona Hart (Specialist, ID 200201) at 08:30.
+    Before the visit: Bring your GP referral letter and any recent test results.
+> Cancel by staff ID and time: 200201 at 09:00 (nothing booked)
+  [WARNING] Nothing cancelled. Dr Leona Hart has no appointment at 09:00.
+> Cancel by mobile "0423 456 789" (Tara Towers, one appointment left)
+  [OK] Cancelled 11:00 Tara Towers (P0004) with Ingrid Hermansen. That slot is free again.
+> Cancel by mobile "0412 345 678" (the shared Lovell phone)
+  [WARNING] Nothing cancelled. 3 appointments are booked under 0412 345 678; cancel one by staff ID and time instead:
+    - 09:00 Romy Lovell (P0001) with Dr Elias Magee (staff ID 100101)
+    - 10:30 Theo Lovell (P0002) with Charlie Rhodes (staff ID 500501)
+    - 14:30 Romy Lovell (P0001) with Stella Rivers (staff ID 300301)
+> Cancel by mobile "0499 000 111" (no bookings)
+  [WARNING] Nothing cancelled. No appointment is booked under 0499 000 111.
+> Cancel by staff ID "ABC" at "25:00"
+  [WARNING] Nothing cancelled. Professional ID must contain digits only (got "ABC"). Time "25:00" is not a real time of day.
+
+6.8 Reschedule appointments
+------------------------------------------------------------------------------
+> Move Hugo Mann's 10:00 with Dr Mundy (100104) to 14:00
+  [OK] Moved Hugo Mann (P0005) with Dr Orla Mundy from 10:00 to 14:00. 10:00 is free again.
+> Move Vincent Pope's 08:00 with Dr Reyes (100102) to 11:30
+  [WARNING] Not rescheduled. Vincent Pope already has an appointment at 11:30 with Priya Sterling.
+> Move Devlin Sweet's 15:00 with Dr Magee (100101) to 09:00
+  [WARNING] Not rescheduled. Dr Elias Magee is already booked at 09:00. Next free slot: 09:30.
+> Move Hugo Mann's 12:00 with Dr Marsh (200202) to 12:00
+  [WARNING] Not rescheduled. The appointment is already at 12:00.
+
+6.9 Find free slots
+------------------------------------------------------------------------------
+> Free slots with Dr Magee (100101)
+  [OK] Dr Elias Magee has 14 of 16 slots free: 08:00 08:30 09:30 10:00 10:30 11:00 11:30 12:00 12:30 13:00 13:30 14:00 14:30 15:30
+> Free slots with Dr Calloway (100103)
+  [WARNING] Dr Rex Calloway does not work on Wednesday.
+
+6.10 Repeat prescriptions (the clinic only relies on Prescriber)
+------------------------------------------------------------------------------
+> Vincent Pope (registered) asks for a repeat of Atorvastatin 20 mg
+  [OK] Prescription for Vincent Pope: Atorvastatin 20 mg - signed by Dr Elias Magee, GP.
+> Finn Foley (never registered) asks for a repeat prescription
+  [WARNING] No prescription issued. Finn Foley is not a registered patient here; repeat prescriptions are for existing patients.
+
+6.11 The updated day, by time, and the daily summary
+------------------------------------------------------------------------------
+All appointments, by time (11):
+TIME   ID      NAME                TYPE                  DAYS             DETAILS
+       PAT.    PATIENT             MOBILE
+-----  ------  ------------------  --------------------  ---------------  --------------------
+08:00  100102  Dr Solana Reyes     General Practitioner  Mon Wed Fri      Bulk billing
+       P0006   Vincent Pope        0467 890 123
+08:30  200201  Dr Leona Hart       Specialist            Wed Thu          Cardiology, referral needed
+       P0007   Justine Fairley     0456 789 012
+09:00  100101  Dr Elias Magee      General Practitioner  Mon-Fri          Bulk billing
+       P0001   Romy Lovell         0412 345 678
+10:30  500501  Charlie Rhodes      Physiotherapist       Mon Wed Fri      Sports injuries
+       P0002   Theo Lovell         0412 345 678
+11:30  300303  Priya Sterling      Nurse Practitioner    Mon Wed Fri      Chronic disease; prescribes for diabetes and blood pressure
+       P0006   Vincent Pope        0467 890 123
+12:00  200202  Dr Selene Marsh     Specialist            Mon Wed          Dermatology, no referral needed
+       P0005   Hugo Mann           0434 567 890
+13:00  400401  Tempe Lawson        Dietitian             Wed Fri          Diabetes nutrition
+       P0003   Devlin Sweet        0445 678 901
+14:00  100104  Dr Orla Mundy       General Practitioner  Tue-Thu          Bulk billing
+       P0005   Hugo Mann           0434 567 890
+14:30  300301  Stella Rivers       Registered Nurse      Mon-Fri          Immunisation, authorised immuniser
+       P0001   Romy Lovell         0412 345 678
+15:00  100101  Dr Elias Magee      General Practitioner  Mon-Fri          Bulk billing
+       P0003   Devlin Sweet        0445 678 901
+15:30  300302  Jude Ashworth       Registered Nurse      Wed Thu Sat      Wound care
+       P0007   Justine Fairley     0456 789 012
+
+Arcana Health Centre - Wednesday - 08:00-16:00, 30-minute slots, no lunch break, 16 slots (last starts 15:30)
+ID      NAME                TYPE                  BOOKED  FREE  BUSY
+------  ------------------  --------------------  ------  ----  ----
+100101  Dr Elias Magee      General Practitioner       2    14   12%
+100102  Dr Solana Reyes     General Practitioner       1    15    6%
+100104  Dr Orla Mundy       General Practitioner       1    15    6%
+200201  Dr Leona Hart       Specialist                 1    15    6%
+200202  Dr Selene Marsh     Specialist                 1    15    6%
+300301  Stella Rivers       Registered Nurse           1    15    6%
+300302  Jude Ashworth       Registered Nurse         1    15    6%
+300303  Priya Sterling      Nurse Practitioner         1    15    6%
+400401  Tempe Lawson        Dietitian                  1    15    6%
+500501  Charlie Rhodes      Physiotherapist            1    15    6%
+500502  Ingrid Hermansen    Physiotherapist            0    16    0%
+Total: 11 appointments, 11 of 176 staff slots booked (6%), 7 patients registered, 11 of 14 staff on duty.
+
+6.12 Same system, different schedule: a Saturday clinic with a lunch break
+------------------------------------------------------------------------------
+> Create a schedule that closes before it opens (16:00-08:00)
+  [WARNING] Schedule refused. Opening time must be before closing time.
+> Create a schedule whose lunch break is outside opening hours
+  [WARNING] Schedule refused. Lunch must fall within opening hours.
+> Open a Saturday clinic, 08:00-16:00 in 30-minute slots, lunch 12:00-13:00
+  [OK] Arcana Weekend Clinic is open on Saturday: 08:00-16:00, 30-minute slots, lunch 12:00-13:00, 14 slots (last starts 15:30).
+  Bookable slots: 08:00 08:30 09:00 09:30 10:00 10:30 11:00 11:30 13:00 13:30 14:00 14:30 15:00 15:30
+> Register the same 14 professionals at the weekend clinic
+  [OK] 14 registered; on duty Saturday: 4.
+> Book Justine Fairley (0456 789 012) with staff 300302 at 12:00
+  [WARNING] Booking refused. 12:00 falls in the lunch break (12:00-13:00).
+> Book Justine Fairley (0456 789 012) with staff 300302 at 13:00
+  [OK] Booked new patient Justine Fairley (P0001) with Jude Ashworth (Registered Nurse, ID 300302) at 13:00.
+    Before the visit: Wear a short-sleeved top. Fast for 8 hours if a blood test is planned.
+> Book Romy Lovell (0412 345 678) with staff 100101 at 09:00
+  [WARNING] Booking refused. Dr Elias Magee does not work on Saturday (works Monday, Tuesday, Wednesday, Thursday, Friday).
+> Book Romy Lovell (0412 345 678) with staff 500502 at 09:00
+  [OK] Booked new patient Romy Lovell (P0002) with Ingrid Hermansen (Physiotherapist, ID 500502) at 09:00.
+    Before the visit: Wear comfortable clothes that let you move the injured area freely.
+
+All appointments, by time (2):
+TIME   ID      NAME                TYPE                  DAYS             DETAILS
+       PAT.    PATIENT             MOBILE
+-----  ------  ------------------  --------------------  ---------------  --------------------
+09:00  500502  Ingrid Hermansen    Physiotherapist       Tue Wed Sat      Back and neck pain
+       P0002   Romy Lovell         0412 345 678
+13:00  300302  Jude Ashworth       Registered Nurse      Wed Thu Sat      Wound care
+       P0001   Justine Fairley     0456 789 012
