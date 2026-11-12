@@ -1,30 +1,34 @@
 /**
  * Abstract base class for every kind of health professional.
- * Holds the information shared by all types: id, name and working days.
+ * It holds the information shared by all types: a numeric id, a name
+ * and the days of the week the professional works.
  *
- * @author Your Name
+ * @author ZefeiNiu
  * @version 1.0
  */
 public abstract class HealthProfessional {
 
-    /** Used when no valid id is supplied (0 means "no valid id"). */
+    /** Id used when the supplied id is not valid (0 means "no valid id"). */
     private static final int DEFAULT_ID = 0;
-    /** Used when no valid name is supplied. */
+
+    /** Name used when the supplied name is blank. */
     private static final String DEFAULT_NAME = "Unknown";
-    /** Used when no valid working days are supplied. */
+
+    /** Working days used when none are supplied or the supplied ones are invalid. */
     private static final String[] DEFAULT_DAYS =
             {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
 
-    /** Numeric id of the professional. */
+    /** Numeric id that identifies the professional. */
     private int id;
+
     /** Full name of the professional. */
     private String name;
-    /** Days of the week this professional works. */
-    private String[] workingDays;
 
+    /** Days of the week the professional works. */
+    private String[] workingDays;
     /**
      * Creates a health professional with all details.
-     * Invalid values are replaced by defaults, so the object is never half-built.
+     * Invalid values are replaced by defaults, so an object is never half-built.
      *
      * @param id          positive numeric id
      * @param name        non-blank name
@@ -36,7 +40,7 @@ public abstract class HealthProfessional {
         } else {
             this.id = DEFAULT_ID;
         }
-        if (isValidName(name)) {
+        if (isNotBlank(name)) {
             this.name = name.trim();
         } else {
             this.name = DEFAULT_NAME;
@@ -49,7 +53,7 @@ public abstract class HealthProfessional {
     }
 
     /**
-     * Creates a health professional working the default days (Monday to Friday).
+     * Creates a health professional who works the default days (Monday to Friday).
      *
      * @param id   positive numeric id
      * @param name non-blank name
@@ -58,24 +62,40 @@ public abstract class HealthProfessional {
         this(id, name, DEFAULT_DAYS);
     }
 
-    /** @return true if the id is a positive number */
+
+    /**
+     * Checks whether an id is acceptable.
+     *
+     * @param id the id to check
+     * @return true if the id is a positive number
+     */
     private static boolean isValidId(int id) {
         return id > 0;
     }
 
-    /** @return true if the text is not null and not blank */
-    private static boolean isValidName(String text) {
+    /**
+     * Checks that a text is present and not just spaces.
+     *
+     * @param text the text to check
+     * @return true if the text is not null and not blank
+     */
+    private static boolean isNotBlank(String text) {
         return text != null && text.trim().length() > 0;
     }
 
-    /** @return true if days is non-empty, has no blank entries and no duplicates */
+    /**
+     * Checks that the working days are usable.
+     *
+     * @param days the days to check
+     * @return true if days is non-empty, has no blank entries and no duplicates
+     */
     private static boolean isValidDays(String[] days) {
         if (days == null || days.length == 0) {
             return false;
         }
         // First pass: every entry must be usable before we compare them.
         for (int i = 0; i < days.length; i++) {
-            if (!isValidName(days[i])) {
+            if (!isNotBlank(days[i])) {
                 return false;
             }
         }
@@ -90,7 +110,12 @@ public abstract class HealthProfessional {
         return true;
     }
 
-    /** @return a new array holding trimmed copies of the given days */
+    /**
+     * Makes an independent copy of a days array.
+     *
+     * @param days the days to copy
+     * @return a new array holding trimmed copies of the given days
+     */
     private static String[] copyDays(String[] days) {
         String[] copy = new String[days.length];
         for (int i = 0; i < days.length; i++) {
@@ -99,7 +124,11 @@ public abstract class HealthProfessional {
         return copy;
     }
 
-    /** @return the working days as readable text, e.g. "Monday, Friday" */
+    /**
+     * Joins the working days into one readable text.
+     *
+     * @return the days separated by commas, e.g. "Monday, Friday"
+     */
     private String daysAsText() {
         String text = "";
         for (int i = 0; i < workingDays.length; i++) {
@@ -111,28 +140,56 @@ public abstract class HealthProfessional {
         return text;
     }
 
-    /** @return the id */
+
+
+    /**
+     * Returns the id.
+     *
+     * @return the numeric id
+     */
     public int getId() {
         return id;
     }
 
-    /** @return the name */
+    /**
+     * Returns the name.
+     *
+     * @return the name
+     */
     public String getName() {
         return name;
     }
 
-    /** @return a copy of the working days, so callers cannot change the original */
+    /**
+     * Returns a copy of the working days, so callers cannot change the original.
+     *
+     * @return a copy of the working days
+     */
     public String[] getWorkingDays() {
         return copyDays(workingDays);
     }
 
-    /** @return the kind of professional, e.g. "General Practitioner" */
+    /**
+     * Returns the kind of professional, e.g. "General Practitioner".
+     *
+     * @return the role name
+     */
     public abstract String getRole();
 
-    /** @return a description of what this kind of professional does */
+    /**
+     * Describes what this kind of professional does.
+     * Each subclass answers in its own way.
+     *
+     * @return a description of the professional's duty
+     */
     public abstract String performDuty();
 
-    /** @return all details in one readable line; subclasses append their own */
+    /**
+     * Presents all shared details in one readable line.
+     * Subclasses call this and append their own details.
+     *
+     * @return the details as text
+     */
     @Override
     public String toString() {
         return getRole() + " | ID: " + id + " | Name: " + name
@@ -140,7 +197,7 @@ public abstract class HealthProfessional {
     }
 
     /**
-     * Two professionals are equal when they have the same id.
+     * Two professionals are the same person when they have the same id.
      *
      * @param obj the object to compare with
      * @return true if obj is a health professional with the same id
@@ -154,7 +211,11 @@ public abstract class HealthProfessional {
         return id == other.id;
     }
 
-    /** @return hash code based on id, consistent with equals */
+    /**
+     * Returns a hash code consistent with equals.
+     *
+     * @return the id, because equality is based on the id
+     */
     @Override
     public int hashCode() {
         return id;

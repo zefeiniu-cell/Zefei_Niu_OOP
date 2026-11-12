@@ -14,7 +14,7 @@ public class GeneralPractitioner extends HealthProfessional {
     private String clinicName;
 
     /**
-     * Creates a GP with explicit working days.   TODAY IS 1110? COME!!
+     * Creates a GP with explicit working days.    
      * @param id          positive numeric id  
      * @param name        non-blank name
      * @param workingDays days the GP works
