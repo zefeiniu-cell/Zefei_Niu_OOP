@@ -29,12 +29,15 @@ import java.util.ArrayList;
  * </p>
  *
  * @author Zefei Niu
- * @version 2.1
+ * @version 2.2
  */
 public class AssignmentOne {
 
     /** The clinic's name, defined once and used everywhere it is shown. */
     private static final String CLINIC_NAME = "Arcana Health Centre";
+
+    /** The day the main demonstration runs, fixed so every run gives the same output. */
+    private static final String DEMO_DAY = "Wednesday";
 
     /** Heavy line used around part titles. */
     private static final String DOUBLE_RULE =
@@ -52,13 +55,14 @@ public class AssignmentOne {
     }
 
     /**
-     * Runs the demonstration (Part 3; the appointment parts follow in later commits).
+     * Runs the demonstration: Part 3, then Part 6 using the same staff.
      *
      * @param args command line arguments (not used)
      */
     public static void main(String[] args) {
         printBanner();
-        runPartThree();
+        ArrayList<HealthProfessional> professionals = runPartThree();
+        runPartSix(professionals);
     }
 
     // =========================================================================
@@ -238,6 +242,81 @@ public class AssignmentOne {
     }
 
     // =========================================================================
+    //  PART 6 - Working with appointments
+    // =========================================================================
+
+    /**
+     * Part 6 (first half): opens the clinic, registers staff, books
+     * appointments, refuses invalid bookings and views the day.
+     *
+     * @param professionals the staff created in Part 3
+     */
+    private static void runPartSix(ArrayList<HealthProfessional> professionals) {
+        printPartTitle("PART 6 - Working with appointments (" + CLINIC_NAME + ", " + DEMO_DAY + ")");
+
+        // ---- 6.1 Open the clinic ----------------------------------------
+        printSection("6.1 Open the clinic with the brief's schedule");
+        printAttempt("Open " + CLINIC_NAME + " on " + DEMO_DAY + ": 08:00-16:00 in 30-minute slots");
+        ClinicSchedule schedule = ClinicSchedule.standard();
+        Clinic clinic = Clinic.create(CLINIC_NAME, DEMO_DAY, schedule);
+        printResult("[OK] " + clinic.getName() + " is open on " + clinic.getToday() + ": " + schedule + ".");
+        printResult("Bookable slots: " + ClinicSchedule.listTimes(schedule.getSlots()));
+
+        // ---- 6.2 Register staff -----------------------------------------
+        printSection("6.2 Register staff (each staff ID only once)");
+        printAttempt("Register the " + professionals.size() + " professionals from Part 3");
+        int registered = 0;
+        for (HealthProfessional professional : professionals) {
+            if (clinic.registerProfessional(professional).startsWith(Clinic.OK)) {
+                registered++;
+            }
+        }
+        printResult("[OK] " + registered + " professionals registered.");
+        printAttempt("Register \"Dr Finn Foley\" with staff ID 100101, which Dr Magee already holds");
+        printResult(clinic.registerProfessional(GeneralPractitioner.create("100101", "Dr Finn Foley", true)));
+        printAttempt("Register a GP whose ID \"10O101\" has the letter O instead of a zero");
+        printResult(clinic.registerProfessional(GeneralPractitioner.create("10O101", "Dr Finn Foley", true)));
+        System.out.println();
+        System.out.println(clinic.viewStaffOnDuty());
+
+        // ---- 6.3 Bookings across every type ------------------------------
+        printSection("6.3 Book appointments across every type of professional");
+        bookChosen(clinic, "Romy Lovell", "0412 345 678", clinic.findProfessional("100101"), "09:00");
+        book(clinic, "Theo Lovell", "0412345678", "500501", "10:30");       // same family phone, different person
+        book(clinic, "Devlin Sweet", "0445 678 901", "400401", "13:00");
+        book(clinic, "Tara Towers", "0423-456-789", "200201", "08:30");     // hyphens are accepted and removed
+        book(clinic, "Hugo Mann", "0434 567 890", "100104", "10:00");
+        book(clinic, "Vincent Pope", "0467 890 123", "300303", "11:30");
+        book(clinic, "romy lovell", "0412345678", "300301", "14:30");       // different case, still the same patient
+        book(clinic, "Justine Fairley", "0456 789 012", "300302", "15:30"); // the last slot of the day
+        book(clinic, "Tara Towers", "0423 456 789", "500502", "11:00");
+        book(clinic, "Hugo Mann", "0434 567 890", "200202", "12:00");
+        bookChosen(clinic, "Vincent Pope", "0467 890 123", clinic.findProfessional("100102"), "8:00");
+        book(clinic, "Devlin Sweet", "0445 678 901", "100101", "15:00");
+
+        // ---- 6.4 Bookings that must be refused ---------------------------
+        printSection("6.4 Bookings that must be refused");
+        book(clinic, "Tara Towers", "0423 456 789", "100101", "09:00");     // Dr Magee is taken at 09:00
+        book(clinic, "Romy Lovell", "0412 345 678", "100104", "09:00");     // Romy is already with Dr Magee at 09:00
+        book(clinic, "Hugo Mann", "0434 567 890", "100103", "09:30");       // Dr Calloway does not work Wednesdays
+        book(clinic, "Devlin Sweet", "0445 678 901", "100102", "09:15");
+        book(clinic, "Devlin Sweet", "0445 678 901", "100102", "16:00");
+        book(clinic, "Devlin Sweet", "0445 678 901", "100102", "07:30");
+        book(clinic, "Devlin Sweet", "0445 678 901", "100102", "9am");
+        book(clinic, "Finn F0ley", "0412 34A 678", "100102", "10:00");      // two input mistakes, both reported
+        book(clinic, "Devlin Sweet", "0445 678 901", "999999", "10:00");
+        book(clinic, "Devlin Sweet", "0445 678 901", "10O101", "10:00");
+        bookChosen(clinic, "Devlin Sweet", "0445 678 901",
+                GeneralPractitioner.create("100199", "Dr Finn Foley", true), "10:00"); // valid, but never registered
+
+        // ---- 6.5 View and sort -------------------------------------------
+        printSection("6.5 View all appointments, then sort them by time");
+        System.out.println(clinic.viewAppointmentsInBookingOrder());
+        System.out.println();
+        System.out.println(clinic.viewAppointmentsByTime());
+    }
+
+    // =========================================================================
     //  Demonstration helpers
     // =========================================================================
 
@@ -255,6 +334,39 @@ public class AssignmentOne {
             return;                                                 // a null in the list would crash every later loop
         }
         list.add(professional);
+    }
+
+    /**
+     * Books by staff ID, printing the request before the clinic's answer.
+     *
+     * @param clinic         the clinic to book at
+     * @param patientName    the patient's name
+     * @param mobile         the patient's mobile number
+     * @param professionalId the staff ID, as a receptionist would type it
+     * @param time           the requested time
+     */
+    private static void book(Clinic clinic, String patientName, String mobile, String professionalId,
+                             String time) {
+        printAttempt("Book " + patientName + " (" + mobile + ") with staff " + professionalId
+                + " at " + time);
+        printResult(clinic.bookAppointment(patientName, mobile, professionalId, time));
+    }
+
+    /**
+     * Books with a chosen professional object, as an online booking page
+     * would, printing the request before the clinic's answer.
+     *
+     * @param clinic       the clinic to book at
+     * @param patientName  the patient's name
+     * @param mobile       the patient's mobile number
+     * @param professional the chosen professional, of any type
+     * @param time         the requested time
+     */
+    private static void bookChosen(Clinic clinic, String patientName, String mobile,
+                                   HealthProfessional professional, String time) {
+        printAttempt("Book " + patientName + " (" + mobile + ") with " + professional.getName()
+                + " (chosen online) at " + time);
+        printResult(clinic.bookAppointment(patientName, mobile, professional, time)); // [Polymorphism] any type fits the parameter
     }
 
     /**
