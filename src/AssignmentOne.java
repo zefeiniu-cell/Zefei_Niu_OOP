@@ -3,8 +3,8 @@
  *  System  : Health Clinic Appointment System
  *  Unit    : PROG2004 Object Oriented Programming - Assessment 1
  *  Author  : Zefei Niu (zniu16, 25259175)
- *  File    : Prescriber.java
- *  Purpose : The capability of writing prescriptions, shared across branches.
+ *  File    : AssignmentOne.java
+ *  Purpose : Entry point: a scripted demonstration of the whole system.
  * =============================================================================
  */
 
@@ -24,7 +24,7 @@ import java.util.ArrayList;
  * </ol>
  *
  * @author Zefei Niu
- * @version 1.1
+ * @version 2.0
  */
 public class AssignmentOne {
 
@@ -66,9 +66,9 @@ public class AssignmentOne {
     private static ArrayList<HealthProfessional> runPartThree() {
         printPartTitle("PART 3 - Working with health professional objects");
 
-        // ---- 3.1 Create the staff (GPs first; other types follow in later steps)
-        printSection("3.1 Create the clinic's general practitioners");
-        printAttempt("Create 4 GPs, one of them with the default full-time roster");
+        // ---- 3.1 Create the staff: 4 GPs and 2 of every other type --------
+        printSection("3.1 Create the clinic's health professionals");
+        printAttempt("Create 14 professionals of 6 different types");
 
         GeneralPractitioner drWong = GeneralPractitioner.create("100101", "Dr Alice Wong",
                 new String[] {"Monday", "Wednesday", "Friday"}, true);
@@ -78,34 +78,105 @@ public class AssignmentOne {
                 new String[] {"Tuesday", "Wednesday", "Thursday"}, true);
         GeneralPractitioner drMurphy = GeneralPractitioner.create("100104", "Dr Daniel Murphy",
                 new String[] {"Mon", "Tue", "Thu", "Fri"}, true);   // short day names are accepted
+        Specialist drHart = Specialist.create("200201", "Dr Emily Hart",
+                new String[] {"Wednesday", "Thursday"}, "Cardiology");  // referral required by default
+        Specialist drHaddad = Specialist.create("200202", "Dr Farid Haddad",
+                new String[] {"Monday", "Wednesday"}, "Dermatology", false);
+        RegisteredNurse nurseTaylor = RegisteredNurse.create("300301", "Grace Taylor",
+                "Immunisation", true);                              // full-time default
+        RegisteredNurse nurseLee = RegisteredNurse.create("300302", "Hannah Lee",
+                new String[] {"Wednesday", "Thursday", "Saturday"}, "Wound care", false);
+        NursePractitioner npBrown = NursePractitioner.create("300303", "Isaac Brown",
+                new String[] {"Monday", "Wednesday", "Friday"}, "Chronic disease",
+                "Diabetes and blood pressure medicines");
+        NursePractitioner npWilson = NursePractitioner.create("300304", "Jade Wilson",
+                new String[] {"Tuesday", "Thursday"}, "Women's health",
+                "Contraception and women's health medicines");
+        Dietitian dtMorgan = Dietitian.create("400401", "Kate Morgan",
+                new String[] {"Wednesday", "Friday"}, "Diabetes nutrition");
+        Dietitian dtPatel = Dietitian.create("400402", "Liam Patel",
+                new String[] {"Monday", "Tuesday"}, "Sports nutrition");
+        Physiotherapist ptRobinson = Physiotherapist.create("500501", "Mia Robinson",
+                new String[] {"Monday", "Wednesday", "Friday"}, "Sports injuries");
+        Physiotherapist ptKim = Physiotherapist.create("500502", "Noah Kim",
+                new String[] {"Tuesday", "Wednesday", "Saturday"}, "Back and neck pain");
 
-        ArrayList<HealthProfessional> professionals = new ArrayList<>(); // [Polymorphism] typed as the parent
+        ArrayList<HealthProfessional> professionals = new ArrayList<>(); // [Polymorphism] one list holds every type
         addProfessional(professionals, drWong);
         addProfessional(professionals, drCarter);
         addProfessional(professionals, drNguyen);
         addProfessional(professionals, drMurphy);
+        addProfessional(professionals, drHart);
+        addProfessional(professionals, drHaddad);
+        addProfessional(professionals, nurseTaylor);
+        addProfessional(professionals, nurseLee);
+        addProfessional(professionals, npBrown);
+        addProfessional(professionals, npWilson);
+        addProfessional(professionals, dtMorgan);
+        addProfessional(professionals, dtPatel);
+        addProfessional(professionals, ptRobinson);
+        addProfessional(professionals, ptKim);
         printResult("[OK] " + professionals.size() + " professionals created and stored in one list.");
 
-        // ---- 3.2 One loop prints every professional in full --------------
+        // ---- 3.2 One loop prints every type in full -----------------------
         printSection("3.2 Full details of every professional (one loop, each prints itself)");
         for (int i = 0; i < professionals.size(); i++) {
             System.out.println("#" + (i + 1) + " " + professionals.get(i)); // [Polymorphism] the real type's toString() runs
             System.out.println();                                   // blank line between people
         }
 
-        // ---- 3.4 Interface: prescribing ----------------------------------
-        printSection("3.4 Interface: prescribing through Prescriber");
-        printAttempt("Request a prescription through a method that accepts any Prescriber");
+        // ---- 3.3 Same method call, different answer per type -------------
+        printSection("3.3 Polymorphism: the same call gives each type's own answer");
+        HealthProfessional[] oneOfEach = {drWong, drHart, drHaddad, nurseTaylor, npBrown,
+            dtMorgan, ptRobinson};                                  // an array typed as the parent
+        printAttempt("Ask each type: how should a patient prepare for a visit?");
+        for (HealthProfessional professional : oneOfEach) {
+            printResult(String.format("%-28s", professional.getProfessionType())
+                    + "| " + professional.getPreparationAdvice());
+        }
+
+        // ---- 3.4 Interface: a capability shared across branches ----------
+        printSection("3.4 Interface: who can prescribe? (Prescriber)");
+        int prescriberCount = 0;
+        for (HealthProfessional professional : professionals) {
+            if (professional instanceof Prescriber) {               // [Abstraction] check the capability, not the class
+                Prescriber prescriber = (Prescriber) professional;
+                printResult(String.format("%-17s%-26s| %s", professional.getName(),
+                        professional.getProfessionType(), prescriber.getPrescribingScope()));
+                prescriberCount++;
+            }
+        }
+        printResult("[OK] " + prescriberCount + " of " + professionals.size()
+                + " professionals can prescribe (doctors and nurse practitioners).");
+
+        printAttempt("Request prescriptions through one method that accepts any Prescriber");
         printResult(requestPrescription(drWong, "Sam Lee", "Amoxicillin 500 mg"));
+        printResult(requestPrescription(drHart, "Olivia Smith", "Atorvastatin 20 mg"));
+        printResult(requestPrescription(npBrown, "Peter Jones", "Metformin 500 mg"));
+        // requestPrescription(dtMorgan, ...) would not even compile: a Dietitian is not a Prescriber.
         printAttempt("Request a prescription without naming a medicine");
         printResult(requestPrescription(drCarter, "Sam Lee", "   "));
 
-        // ---- 3.5 Behaviour that only a GP has ----------------------------
-        printSection("3.5 Behaviour unique to a GP");
+        // ---- 3.5 Behaviour that only one type has ------------------------
+        printSection("3.5 Behaviour unique to each type");
         printAttempt("GP writes a referral");
         printResult(drWong.writeReferral("Sam Lee", "Cardiology"));
-        printAttempt("GP writes a referral without a specialty");
-        printResult(drWong.writeReferral("Sam Lee", ""));
+        printAttempt("Specialist orders a test");
+        printResult(drHart.orderTest("Sam Lee", "Echocardiogram"));
+        printAttempt("Authorised registered nurse gives a flu vaccine");
+        printResult(nurseTaylor.administerVaccine("Olivia Smith", "Influenza 2026"));
+        printAttempt("Registered nurse who is NOT an authorised immuniser tries the same");
+        printResult(nurseLee.administerVaccine("Olivia Smith", "Influenza 2026"));
+        printAttempt("Every kind of nurse takes a blood sample (written once in abstract Nurse)");
+        for (HealthProfessional professional : professionals) {
+            if (professional instanceof Nurse) {                    // RegisteredNurse and NursePractitioner
+                printResult(((Nurse) professional).takeBloodSample("Peter Jones"));
+            }
+        }
+        printAttempt("Dietitian creates a meal plan");
+        printResult(dtMorgan.createMealPlan("Peter Jones", "steady blood sugar"));
+        printAttempt("Physiotherapist designs an exercise programme");
+        printResult(ptRobinson.designExerciseProgram("Sam Lee", "knee sprain"));
 
         // ---- 3.6 Identity is the staff ID --------------------------------
         printSection("3.6 Identity: equals() and hashCode() compare staff IDs");
@@ -121,6 +192,7 @@ public class AssignmentOne {
         printSection("3.7 Encapsulation: invalid details are refused, data is protected");
         String[] twoDays = {"Monday", "Friday"};
         String[] badDays = {"Monday", "Funday"};
+        String[] noDays = {};
 
         printAttempt("Create a GP whose staff ID contains a letter: \"10A105\"");
         reportCreation(GeneralPractitioner.create("10A105", "Dr Test One", twoDays, true),
@@ -128,6 +200,12 @@ public class AssignmentOne {
         printAttempt("Create a GP with a 5-digit ID, a blank name and a made-up day");
         reportCreation(GeneralPractitioner.create("12345", "   ", badDays, true),
                 GeneralPractitioner.check("12345", "   ", badDays));
+        printAttempt("Create a specialist with an empty roster and no specialty");
+        reportCreation(Specialist.create("200203", "Dr Test Two", noDays, ""),
+                Specialist.check("200203", "Dr Test Two", noDays, ""));
+        printAttempt("Create a nurse practitioner whose name contains digits: \"Nurse 007\"");
+        reportCreation(NursePractitioner.create("300305", "Nurse 007", twoDays, "Aged care", "Pain relief"),
+                NursePractitioner.check("300305", "Nurse 007", twoDays, "Aged care", "Pain relief"));
 
         printAttempt("Edit the array returned by getWorkingDays() from outside the object");
         String[] outsideCopy = drWong.getWorkingDays();
@@ -135,11 +213,10 @@ public class AssignmentOne {
         printResult("Edited copy starts with " + outsideCopy[0] + "; Dr Wong still works "
                 + drWong.getWorkingDaysText() + ".");
 
-        printAttempt("Change Dr Nguyen's roster to Tuesday and \"Someday\"");
-        reportRosterChange(drNguyen, drNguyen.updateWorkingDays(new String[] {"Tuesday", "Someday"}));
-        printAttempt("Change Dr Nguyen's roster to Tuesday, Wednesday, Thursday and Saturday");
-        reportRosterChange(drNguyen, drNguyen.updateWorkingDays(
-                new String[] {"Tuesday", "Wednesday", "Thursday", "Saturday"}));
+        printAttempt("Change Liam Patel's roster to Monday and \"Someday\"");
+        reportRosterChange(dtPatel, dtPatel.updateWorkingDays(new String[] {"Monday", "Someday"}));
+        printAttempt("Change Liam Patel's roster to Monday, Tuesday and Thursday");
+        reportRosterChange(dtPatel, dtPatel.updateWorkingDays(new String[] {"Monday", "Tuesday", "Thursday"}));
 
         return professionals;
     }
@@ -232,7 +309,7 @@ public class AssignmentOne {
 
     /**
      * Prints a section title with a light line under it.
-     
+     *
      * @param title the section title
      */
     private static void printSection(String title) {
@@ -243,7 +320,7 @@ public class AssignmentOne {
 
     /**
      * Prints what is about to be attempted, before the attempt is made.
-     
+     *
      * @param description the action and its input
      */
     private static void printAttempt(String description) {
@@ -252,7 +329,7 @@ public class AssignmentOne {
 
     /**
      * Prints the system's answer to the latest attempt, indented under it.
-    
+     *
      * @param message the result or warning
      */
     private static void printResult(String message) {
