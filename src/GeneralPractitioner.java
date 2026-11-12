@@ -1,62 +1,131 @@
-/**
- * A general practitioner (GP): a doctor who treats common illnesses
- * and refers patients to specialists.
- *
- * @author ZefeiNiu
- * @version 1.0
+/*
+ * =============================================================================
+ *  System  : Health Clinic Appointment System
+ *  Unit    : PROG2004 Object Oriented Programming - Assessment 1
+ *  Author  : Zefei Niu (zniu16, 25259175)
+ *  File    : GeneralPractitioner.java
+ *  Purpose : A general practitioner (GP): the patient's first point of care.
+ * =============================================================================
  */
-public class GeneralPractitioner extends HealthProfessional {
 
-    /** Clinic name used when the supplied one is blank. */
-    private static final String DEFAULT_CLINIC = "Unspecified clinic";
+/**
+ * A general practitioner (GP): the patient's first point of care.
+ * <p>
+ * A GP is a health professional (is-a, so it inherits the shared details) and
+ * also a Prescriber (a capability promised through an interface). The extra
+ * detail a GP records is whether the practice bulk bills, meaning Medicare
+ * covers the whole fee. A GP's unique task is writing referrals to specialists.
+ * </p>
+ * <p>
+ * Objects are created only through the static create(...) methods, which
+ * check every detail first and return null instead of building an invalid
+ * object. The constructors are private, so this check cannot be skipped.
+ * </p>
+ *
+ * @author Zefei Niu
+ * @version 2.0
+ */
+public class GeneralPractitioner extends HealthProfessional implements Prescriber {
 
-    /** Name of the clinic where the GP works. */
-    private String clinicName;
+    /** True if the GP bulk bills, so the patient pays nothing out of pocket. */
+    private final boolean bulkBilling;
 
     /**
-     * Creates a GP with explicit working days.    
-     * @param id          positive numeric id  
-     * @param name        non-blank name
-     * @param workingDays days the GP works
-     * @param clinicName  name of the clinic
+     * Builds a GP with an explicit roster. Private: use create(...).
+     *
+     * @param id          six-digit staff ID, already validated
+     * @param name        the GP's name, already validated
+     * @param workingDays the days the GP works, already validated
+     * @param bulkBilling true if the GP bulk bills
      */
-    public GeneralPractitioner(int id, String name, String[] workingDays, String clinicName) {
-        super(id, name, workingDays);
-        this.clinicName = checkClinicName(clinicName);
+    private GeneralPractitioner(String id, String name, String[] workingDays, boolean bulkBilling) {
+        super(id, name, workingDays);                               // [Inheritance] parent sets up the shared details
+        this.bulkBilling = bulkBilling;
     }
 
     /**
-     * Creates a GP who works the default days (Monday to Friday).     
+     * Builds a full-time GP (Monday to Friday). Private: use create(...).
      *
-     * @param id         positive numeric id
-     * @param name       non-blank name
-     * @param clinicName name of the clinic
+     * @param id          six-digit staff ID, already validated
+     * @param name        the GP's name, already validated
+     * @param bulkBilling true if the GP bulk bills
      */
-    public GeneralPractitioner(int id, String name, String clinicName) {
-        super(id, name);
-        this.clinicName = checkClinicName(clinicName);
+    private GeneralPractitioner(String id, String name, boolean bulkBilling) {
+        super(id, name);                                            // [Reuse] parent fills in the full-time week
+        this.bulkBilling = bulkBilling;
     }
 
     /**
-     * Replaces a blank clinic name with the default.
+     * Explains what, if anything, is wrong with a GP's details.
+     * A GP adds no text details of its own, so only the shared rules apply.
      *
-     * @param clinicName the clinic name to check
-     * @return the trimmed name, or the default if it was blank
+     * @param id          the staff ID to check
+     * @param name        the name to check
+     * @param workingDays the roster to check
+     * @return an empty text if valid, otherwise every problem found
      */
-    private static String checkClinicName(String clinicName) {
-        if (clinicName != null && clinicName.trim().length() > 0) {
-            return clinicName.trim();
+    public static String check(String id, String name, String[] workingDays) {
+        return checkCommonDetails(id, name, workingDays);
+    }
+
+    /**
+     * Creates a GP with an explicit roster, or nothing if any detail is invalid.
+     *
+     * @param id          six-digit staff ID, e.g. "100101"
+     * @param name        the GP's name
+     * @param workingDays the days the GP works
+     * @param bulkBilling true if the GP bulk bills
+     * @return the new GP, or null if the details are invalid (see check(...))
+     */
+    public static GeneralPractitioner create(String id, String name, String[] workingDays,
+                                             boolean bulkBilling) {
+        if (!check(id, name, workingDays).isEmpty()) {
+            return null;                                            // [Guard] invalid details: no object is built
         }
-        return DEFAULT_CLINIC;
+        return new GeneralPractitioner(id, name, workingDays, bulkBilling);
     }
 
     /**
-     * Returns the clinic name.
+     * Creates a full-time GP (Monday to Friday), or nothing if any detail is
+     * invalid. Most GPs in a clinic work full time, so this is a sensible default.
      *
-     * @return the clinic name
+     * @param id          six-digit staff ID
+     * @param name        the GP's name
+     * @param bulkBilling true if the GP bulk bills
+     * @return the new GP, or null if the details are invalid
      */
-    public String getClinicName() {
-        return clinicName;
+    public static GeneralPractitioner create(String id, String name, boolean bulkBilling) {
+        if (!checkCommonDetails(id, name).isEmpty()) {
+            return null;                                            // [Guard] invalid details: no object is built
+        }
+        return new GeneralPractitioner(id, name, bulkBilling);
+    }
+
+    /**
+     * Tells whether this GP bulk bills.
+     *
+     * @return true if Medicare covers the whole fee
+     */
+    public boolean isBulkBilling() {
+        return bulkBilling;
+    }
+
+    /**
+     * Writes a referral to a specialist, the task that is unique to a GP.
+     *
+     * @param patientName the patient being referred
+     * @param specialty   the kind of specialist needed, e.g. "Cardiology"
+     * @return the referral text, or a warning explaining why it was not written
+     */
+    public String writeReferral(String patientName, String specialty) {
+        String problems = Validator.addProblem(
+                Validator.checkPersonName("Patient name", patientName),
+                Validator.checkRequiredText("Specialty", specialty));
+        if (!problems.isEmpty()) {
+            return "[WARNING] Referral not written: " + problems;   // [Guard] incomplete request
+        }
+        return "Referral: " + getName() + " refers " + Validator.tidy(patientName)
+                + " to a " + Validator.tidy(specialty) + " specialist.";
     }
 
     /**
@@ -65,30 +134,67 @@ public class GeneralPractitioner extends HealthProfessional {
      * @return "General Practitioner"
      */
     @Override
-    public String getRole() {
+    public String getProfessionType() {
         return "General Practitioner";
     }
 
     /**
-     * Describes the GP's duty.
+     * Describes what a GP provides.
      *
-     * @return a sentence describing what a GP does
+     * @return a short description of a GP's services
      */
     @Override
-    public String performDuty() {
-        return "Diagnoses common illnesses at " + clinicName
-                + " and refers patients to specialists when needed.";
+    public String describeServices() {
+        return "Check-ups, common illnesses, prescriptions and referrals";
     }
 
     /**
-     * Presents the shared details followed by the clinic.
+     * Tells a patient how to prepare for a GP visit.
      *
-     * @return the details as text
+     * @return the preparation advice
+     */
+    @Override
+    public String getPreparationAdvice() {
+        return "Bring your Medicare card and a list of the medicines you take.";
+    }
+
+    /**
+     * Describes what a GP may prescribe.
+     *
+     * @return the prescribing scope
+     */
+    @Override
+    public String getPrescribingScope() {
+        return "General medicines for everyday conditions";
+    }
+
+    /**
+     * Writes a prescription signed by this GP.
+     *
+     * @param patientName the patient the medicine is for
+     * @param medication  the medicine and dose
+     * @return the prescription text, or a warning explaining why it was not written
+     */
+    @Override
+    public String prescribe(String patientName, String medication) {
+        String problems = Validator.addProblem(
+                Validator.checkPersonName("Patient name", patientName),
+                Validator.checkRequiredText("Medication", medication));
+        if (!problems.isEmpty()) {
+            return "[WARNING] Prescription not written: " + problems;
+        }
+        return "Prescription for " + Validator.tidy(patientName) + ": "
+                + Validator.tidy(medication) + " - signed by " + getName() + ", GP.";
+    }
+
+    /**
+     * Presents the shared details followed by the GP's own detail.
+     *
+     * @return the details, one per line
      */
     @Override
     public String toString() {
-        return super.toString() + " | Clinic: " + clinicName;
+        return super.toString()                                     // [Reuse] parent's lines first, no duplication
+                + Display.line("Bulk billing", Display.yesNo(bulkBilling));
     }
 }
-
- 
