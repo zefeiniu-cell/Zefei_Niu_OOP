@@ -159,7 +159,7 @@ public class AssignmentOne {
         int prescriberCount = 0;
         for (HealthProfessional professional : professionals) {
             if (professional instanceof Prescriber) {               // [Abstraction] ask about the capability, not the class
-                Prescriber prescriber = (Prescriber) professional;
+                Prescriber prescriber = (Prescriber) professional;  // the classic cast taught in Activity 3.8 (newer pattern syntax is outside Modules 1-3)
                 System.out.println(Display.cell(professional.getName(), Display.NAME_WIDTH)
                         + Display.cell(professional.getProfessionType(), Display.TYPE_WIDTH)
                         + prescriber.getPrescribingScope());
@@ -187,10 +187,9 @@ public class AssignmentOne {
         printAttempt("Registered nurse who is NOT an authorised immuniser tries the same");
         printResult(rnAshworth.administerVaccine("Romy Lovell", "Influenza 2026"));
         printAttempt("Every kind of nurse takes a blood sample (written once, in abstract Nurse)");
-        for (HealthProfessional professional : professionals) {
-            if (professional instanceof Nurse) {                    // RegisteredNurse and NursePractitioner both inherit it
-                printResult(((Nurse) professional).takeBloodSample("Devlin Sweet"));
-            }
+        Nurse[] nurses = {rnRivers, rnAshworth, npSterling, npEmpey}; // [Inheritance] the abstract middle class is a valid type for both kinds
+        for (Nurse nurse : nurses) {
+            printResult(nurse.takeBloodSample("Devlin Sweet"));     // no cast needed: every Nurse inherits this method
         }
         printAttempt("Dietitian creates a meal plan");
         printResult(dtLawson.createMealPlan("Devlin Sweet", "steady blood sugar"));
