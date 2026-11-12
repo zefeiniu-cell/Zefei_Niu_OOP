@@ -29,7 +29,7 @@ import java.util.ArrayList;
  * </p>
  *
  * @author Zefei Niu
- * @version 2.2
+ * @version 3.0
  */
 public class AssignmentOne {
 
@@ -246,8 +246,9 @@ public class AssignmentOne {
     // =========================================================================
 
     /**
-     * Part 6 (first half): opens the clinic, registers staff, books
-     * appointments, refuses invalid bookings and views the day.
+     * Part 6: runs one day at the clinic end to end, covering every operation
+     * with both normal and error cases, then shows the same system running
+     * another clinic on a different schedule.
      *
      * @param professionals the staff created in Part 3
      */
@@ -314,6 +315,109 @@ public class AssignmentOne {
         System.out.println(clinic.viewAppointmentsInBookingOrder());
         System.out.println();
         System.out.println(clinic.viewAppointmentsByTime());
+
+        // ---- 6.6 Filter (each result sorted by time) ---------------------
+        printSection("6.6 Filter by staff ID or by patient mobile (each result sorted by time)");
+        printAttempt("Filter by staff ID 100101 (Dr Magee)");
+        System.out.println(clinic.viewAppointmentsForProfessional("100101"));
+        printAttempt("Filter by mobile \"0412 345 678\" (the Lovell family's shared phone)");
+        System.out.println(clinic.viewAppointmentsForPatient("0412 345 678"));
+        printAttempt("Filter by staff ID 100103 (Dr Calloway, off today)");
+        printResult(clinic.viewAppointmentsForProfessional("100103"));
+        printAttempt("Filter by staff ID \"12345\"");
+        printResult(clinic.viewAppointmentsForProfessional("12345"));
+        printAttempt("Filter by staff ID 888888");
+        printResult(clinic.viewAppointmentsForProfessional("888888"));
+        printAttempt("Filter by mobile \"0499 000 111\"");
+        printResult(clinic.viewAppointmentsForPatient("0499 000 111"));
+        printAttempt("Filter by mobile \"12345\"");
+        printResult(clinic.viewAppointmentsForPatient("12345"));
+
+        // ---- 6.7 Cancel, and reuse the freed slot ------------------------
+        printSection("6.7 Cancel appointments, then reuse a freed slot");
+        printAttempt("Cancel by staff ID and time: 200201 at 08:30 (Tara Towers with Dr Hart)");
+        printResult(clinic.cancelAppointment("200201", "08:30"));
+        book(clinic, "Justine Fairley", "0456 789 012", "200201", "08:30");  // the freed slot can be booked again
+        printAttempt("Cancel by staff ID and time: 200201 at 09:00 (nothing booked)");
+        printResult(clinic.cancelAppointment("200201", "09:00"));
+        printAttempt("Cancel by mobile \"0423 456 789\" (Tara Towers, one appointment left)");
+        printResult(clinic.cancelAppointment("0423 456 789"));
+        printAttempt("Cancel by mobile \"0412 345 678\" (the shared Lovell phone)");
+        printResult(clinic.cancelAppointment("0412 345 678"));
+        printAttempt("Cancel by mobile \"0499 000 111\" (no bookings)");
+        printResult(clinic.cancelAppointment("0499 000 111"));
+        printAttempt("Cancel by staff ID \"ABC\" at \"25:00\"");
+        printResult(clinic.cancelAppointment("ABC", "25:00"));
+
+        // ---- 6.8 Reschedule ---------------------------------------------
+        printSection("6.8 Reschedule appointments");
+        printAttempt("Move Hugo Mann's 10:00 with Dr Mundy (100104) to 14:00");
+        printResult(clinic.rescheduleAppointment("100104", "10:00", "14:00"));
+        printAttempt("Move Vincent Pope's 08:00 with Dr Reyes (100102) to 11:30");
+        printResult(clinic.rescheduleAppointment("100102", "08:00", "11:30"));
+        printAttempt("Move Devlin Sweet's 15:00 with Dr Magee (100101) to 09:00");
+        printResult(clinic.rescheduleAppointment("100101", "15:00", "09:00"));
+        printAttempt("Move Hugo Mann's 12:00 with Dr Marsh (200202) to 12:00");
+        printResult(clinic.rescheduleAppointment("200202", "12:00", "12:00"));
+
+        // ---- 6.9 Free slots ---------------------------------------------
+        printSection("6.9 Find free slots");
+        printAttempt("Free slots with Dr Magee (100101)");
+        printResult(clinic.viewFreeSlots("100101"));
+        printAttempt("Free slots with Dr Calloway (100103)");
+        printResult(clinic.viewFreeSlots("100103"));
+
+        // ---- 6.10 Repeat prescriptions through the interface --------------
+        printSection("6.10 Repeat prescriptions (the clinic only relies on Prescriber)");
+        printAttempt("Vincent Pope (registered) asks for a repeat of Atorvastatin 20 mg");
+        printResult(clinic.issueRepeatPrescription("Vincent Pope", "0467 890 123", "Atorvastatin 20 mg"));
+        printAttempt("Finn Foley (never registered) asks for a repeat prescription");
+        printResult(clinic.issueRepeatPrescription("Finn Foley", "0400 000 000", "Codeine 30 mg"));
+
+        // ---- 6.11 End of the day ----------------------------------------
+        printSection("6.11 The updated day, by time, and the daily summary");
+        System.out.println(clinic.viewAppointmentsByTime());
+        System.out.println();
+        System.out.println(clinic.getDailySummary());
+
+        // ---- 6.12 Same system, different schedule ------------------------
+        runWeekendClinic(professionals);
+    }
+
+    /**
+     * Shows that the schedule can change without changing any other code:
+     * a Saturday branch with a lunch break runs on the same classes.
+     *
+     * @param professionals the staff created in Part 3
+     */
+    private static void runWeekendClinic(ArrayList<HealthProfessional> professionals) {
+        printSection("6.12 Same system, different schedule: a Saturday clinic with a lunch break");
+        printAttempt("Create a schedule that closes before it opens (16:00-08:00)");
+        printResult("[WARNING] Schedule refused. " + ClinicSchedule.check("16:00", "08:00", 30));
+        printAttempt("Create a schedule whose lunch break is outside opening hours");
+        printResult("[WARNING] Schedule refused. "
+                + ClinicSchedule.check("08:00", "16:00", 30, "17:00", "18:00"));
+
+        printAttempt("Open a Saturday clinic, 08:00-16:00 in 30-minute slots, lunch 12:00-13:00");
+        ClinicSchedule lunchSchedule = ClinicSchedule.create("08:00", "16:00", 30, "12:00", "13:00");
+        Clinic weekend = Clinic.create("Arcana Weekend Clinic", "Saturday", lunchSchedule);
+        printResult("[OK] " + weekend.getName() + " is open on " + weekend.getToday() + ": "
+                + lunchSchedule + ".");
+        printResult("Bookable slots: " + ClinicSchedule.listTimes(lunchSchedule.getSlots()));
+        printAttempt("Register the same " + professionals.size() + " professionals at the weekend clinic");
+        int registered = 0;
+        for (HealthProfessional professional : professionals) {
+            if (weekend.registerProfessional(professional).startsWith(Clinic.OK)) {
+                registered++;                                       // the same staff objects serve a second clinic
+            }
+        }
+        printResult("[OK] " + registered + " registered; on duty Saturday: " + weekend.getStaffOnDuty().size() + ".");
+        book(weekend, "Justine Fairley", "0456 789 012", "300302", "12:00"); // inside the lunch break
+        book(weekend, "Justine Fairley", "0456 789 012", "300302", "13:00");
+        book(weekend, "Romy Lovell", "0412 345 678", "100101", "09:00");    // Dr Magee does not work Saturdays
+        book(weekend, "Romy Lovell", "0412 345 678", "500502", "09:00");
+        System.out.println();
+        System.out.println(weekend.viewAppointmentsByTime());
     }
 
     // =========================================================================
