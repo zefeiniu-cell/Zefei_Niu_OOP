@@ -1,55 +1,50 @@
 /*
- * =============================================================================
- *  System  : Arcana Health Centre - Appointment System
- *  Unit    : PROG2004 Object Oriented Programming - Assessment 1
- *  Author  : Zefei Niu (zniu16, 25259175)
- *  File    : Nurse.java
- *  Purpose : Abstract middle level holding what every kind of nurse shares.
- * =============================================================================
+ * Arcana Health Centre - Appointment System
+ * PROG2004 Object Oriented Programming, Assessment 1
+ * Author: Zefei Niu (zniu16)
  */
 
 /**
- * The shared middle level of the nursing branch.
- * <p>
- * Every nurse in the clinic is either a RegisteredNurse or a
- * NursePractitioner; there is no "plain" nurse, so this class is abstract.
- * It holds what all nurses share, so it is written once: a clinical area and
- * the ability to take a blood sample. Being abstract also keeps the design
- * safe without exceptions: only subclasses can call its constructors, and
- * each subclass validates through its own create(...) method first.
- * This creates a multi-level hierarchy:
- * HealthProfessional, then Nurse, then RegisteredNurse or NursePractitioner.
- * </p>
+ * The middle floor of the nursing branch:
+ * HealthProfessional -> Nurse -> RegisteredNurse or NursePractitioner.
+ *
+ * Why abstract: in this clinic every nurse is either a registered nurse or a
+ * nurse practitioner. A "plain" nurse doesn't exist, so it can't be created.
+ *
+ * Why have this level at all: both kinds of nurse share a clinical area and
+ * both take blood samples. Putting that here means it is written once. If it
+ * lived in both subclasses, a change to blood samples would have to be made
+ * twice, and sooner or later the two copies would differ.
  *
  * @author Zefei Niu
- * @version 2.0
+ * @version 1.0
  */
-public abstract class Nurse extends HealthProfessional {           // [Abstraction] every nurse is an RN or an NP, never a plain nurse
+public abstract class Nurse extends HealthProfessional { // [Abstraction] there is no "plain" nurse
 
-    /** The area the nurse works in, e.g. "Immunisation" or "Wound care". */
+    /** The nurse's area, e.g. "Immunisation" or "Wound care". */
     private final String clinicalArea;
 
     /**
-     * Builds the nursing part with an explicit roster.
-     * Reachable only from subclasses, which validate first.
+     * Sets up the nursing part with a given roster.
+     * Only subclasses call this, after they have checked the details.
      *
-     * @param id           six-digit staff ID, already validated
-     * @param name         the nurse's name, already validated
-     * @param workingDays  the days the nurse works, already validated
-     * @param clinicalArea the nurse's clinical area, already validated
+     * @param id           staff ID (already checked)
+     * @param name         the name (already checked)
+     * @param workingDays  the days worked (already checked)
+     * @param clinicalArea the clinical area (already checked)
      */
     public Nurse(String id, String name, String[] workingDays, String clinicalArea) {
-        super(id, name, workingDays);                               // [Inheritance] each level sets only the fields it owns
+        super(id, name, workingDays); // [Inheritance] each floor sets only its own fields
         this.clinicalArea = Validator.tidy(clinicalArea);
     }
 
     /**
-     * Builds the nursing part for a full-time nurse (Monday to Friday).
-     * Reachable only from subclasses, which validate first.
+     * Sets up the nursing part for a full-time nurse.
+     * Only subclasses call this, after they have checked the details.
      *
-     * @param id           six-digit staff ID, already validated
-     * @param name         the nurse's name, already validated
-     * @param clinicalArea the nurse's clinical area, already validated
+     * @param id           staff ID (already checked)
+     * @param name         the name (already checked)
+     * @param clinicalArea the clinical area (already checked)
      */
     public Nurse(String id, String name, String clinicalArea) {
         super(id, name);
@@ -57,13 +52,13 @@ public abstract class Nurse extends HealthProfessional {           // [Abstracti
     }
 
     /**
-     * Explains what, if anything, is wrong with a nurse's details.
+     * Says what is wrong with a nurse's details, if anything.
      *
-     * @param id           the staff ID to check
-     * @param name         the name to check
-     * @param workingDays  the roster to check
-     * @param clinicalArea the clinical area to check
-     * @return an empty text if valid, otherwise every problem found
+     * @param id           the staff ID
+     * @param name         the name
+     * @param workingDays  the roster
+     * @param clinicalArea the clinical area
+     * @return "" if valid, otherwise every problem found
      */
     public static String checkNurseDetails(String id, String name, String[] workingDays,
                                            String clinicalArea) {
@@ -72,12 +67,12 @@ public abstract class Nurse extends HealthProfessional {           // [Abstracti
     }
 
     /**
-     * Explains what, if anything, is wrong with a full-time nurse's details.
+     * Says what is wrong with a full-time nurse's details, if anything.
      *
-     * @param id           the staff ID to check
-     * @param name         the name to check
-     * @param clinicalArea the clinical area to check
-     * @return an empty text if valid, otherwise every problem found
+     * @param id           the staff ID
+     * @param name         the name
+     * @param clinicalArea the clinical area
+     * @return "" if valid, otherwise every problem found
      */
     public static String checkNurseDetails(String id, String name, String clinicalArea) {
         return Validator.addProblem(checkCommonDetails(id, name),
@@ -85,7 +80,7 @@ public abstract class Nurse extends HealthProfessional {           // [Abstracti
     }
 
     /**
-     * Returns the clinical area.
+     * Gives the clinical area.
      *
      * @return e.g. "Immunisation"
      */
@@ -94,26 +89,26 @@ public abstract class Nurse extends HealthProfessional {           // [Abstracti
     }
 
     /**
-     * Takes a blood sample. Written once here and inherited by every kind
-     * of nurse, because all nurses in the clinic can do it.
+     * Takes a blood sample.
+     * Written once here, and both kinds of nurse get it by inheritance.
      *
-     * @param patientName the patient giving the sample
+     * @param patientName the patient
      * @return a record of the sample, or a warning if the name is invalid
      */
     public String takeBloodSample(String patientName) {
         String problem = Validator.checkPersonName("Patient name", patientName);
         if (!problem.isEmpty()) {
-            return "[WARNING] Blood sample not taken. " + problem;  // an unlabelled sample could be given to the wrong person
+            return "[WARNING] Blood sample not taken. " + problem; // no name, no label for the tube
         }
         return "Blood sample: taken from " + Validator.tidy(patientName) + " by " + getName()
                 + " (" + getProfessionType() + ") and labelled for pathology.";
     }
 
     /**
-     * Gives the preparation advice that suits most nursing visits.
-     * A subclass may override it when its visits differ.
+     * Gives the usual advice before a nursing visit.
+     * A subclass can override it if its visits are different.
      *
-     * @return the preparation advice
+     * @return the advice
      */
     @Override
     public String getPreparationAdvice() {
@@ -121,12 +116,12 @@ public abstract class Nurse extends HealthProfessional {           // [Abstracti
     }
 
     /**
-     * Presents the shared columns followed by the clinical area.
+     * Gives the shared columns plus the clinical area.
      *
      * @return the nursing part of the table row
      */
     @Override
     public String toString() {
-        return super.toString() + clinicalArea;                     // [Inheritance] subclasses add to this in turn
+        return super.toString() + clinicalArea; // the floor above adds its own detail to this
     }
 }

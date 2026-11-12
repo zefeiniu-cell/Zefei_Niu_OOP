@@ -1,50 +1,45 @@
 /*
- * =============================================================================
- *  System  : Arcana Health Centre - Appointment System
- *  Unit    : PROG2004 Object Oriented Programming - Assessment 1
- *  Author  : Zefei Niu (zniu16, 25259175)
- *  File    : Physiotherapist.java
- *  Purpose : A physiotherapist, who treats movement problems and injuries.
- * =============================================================================
+ * Arcana Health Centre - Appointment System
+ * PROG2004 Object Oriented Programming, Assessment 1
+ * Author: Zefei Niu (zniu16)
  */
 
 /**
- * A physiotherapist, who treats movement problems and injuries.
- * <p>
- * The extra detail a physiotherapist records is their treatment focus. Like
- * a dietitian, a physiotherapist consults on set sessional days, so the
- * roster must always be given.
- * </p>
+ * A physiotherapist, who treats injuries and movement problems.
+ *
+ * The extra detail is the treatment focus. Like a dietitian, a physio
+ * usually works set days rather than a full week, so the roster always has
+ * to be given.
  *
  * @author Zefei Niu
- * @version 2.0
+ * @version 1.0
  */
 public class Physiotherapist extends HealthProfessional {
 
-    /** The physiotherapist's focus, e.g. "Sports injuries". */
+    /** The physio's focus, e.g. "Sports injuries". */
     private final String treatmentFocus;
 
     /**
-     * Builds a physiotherapist. Private: use create(...).
+     * Builds a physiotherapist. Outside code uses create(...).
      *
-     * @param id             six-digit staff ID, already validated
-     * @param name           the physiotherapist's name, already validated
-     * @param workingDays    the days the physiotherapist consults, already validated
-     * @param treatmentFocus the treatment focus, already validated
+     * @param id             staff ID (already checked)
+     * @param name           the name (already checked)
+     * @param workingDays    the days worked (already checked)
+     * @param treatmentFocus the treatment focus (already checked)
      */
     private Physiotherapist(String id, String name, String[] workingDays, String treatmentFocus) {
-        super(id, name, workingDays);                               // [Inheritance] the parent owns the shared fields, so it sets them
+        super(id, name, workingDays); // [Inheritance] the shared fields belong to the parent, so it sets them
         this.treatmentFocus = Validator.tidy(treatmentFocus);
     }
 
     /**
-     * Explains what, if anything, is wrong with a physiotherapist's details.
+     * Says what is wrong with a physiotherapist's details, if anything.
      *
-     * @param id             the staff ID to check
-     * @param name           the name to check
-     * @param workingDays    the roster to check
-     * @param treatmentFocus the treatment focus to check
-     * @return an empty text if valid, otherwise every problem found
+     * @param id             the staff ID
+     * @param name           the name
+     * @param workingDays    the roster
+     * @param treatmentFocus the treatment focus
+     * @return "" if valid, otherwise every problem found
      */
     public static String check(String id, String name, String[] workingDays, String treatmentFocus) {
         return Validator.addProblem(checkCommonDetails(id, name, workingDays),
@@ -52,24 +47,24 @@ public class Physiotherapist extends HealthProfessional {
     }
 
     /**
-     * Creates a physiotherapist, or nothing if any detail is invalid.
+     * Creates a physiotherapist.
      *
      * @param id             six-digit staff ID
-     * @param name           the physiotherapist's name
-     * @param workingDays    the days the physiotherapist consults
-     * @param treatmentFocus the treatment focus, e.g. "Sports injuries"
+     * @param name           the name
+     * @param workingDays    the days worked
+     * @param treatmentFocus e.g. "Sports injuries"
      * @return the new physiotherapist, or null if the details are invalid
      */
     public static Physiotherapist create(String id, String name, String[] workingDays,
                                          String treatmentFocus) {
         if (!check(id, name, workingDays, treatmentFocus).isEmpty()) {
-            return null;                                            // [Encapsulation] invalid details never become an object
+            return null; // [Encapsulation] bad details never turn into an object
         }
         return new Physiotherapist(id, name, workingDays, treatmentFocus);
     }
 
     /**
-     * Returns the treatment focus.
+     * Gives the treatment focus.
      *
      * @return e.g. "Sports injuries"
      */
@@ -78,20 +73,20 @@ public class Physiotherapist extends HealthProfessional {
     }
 
     /**
-     * Designs an exercise programme, the task unique to a physiotherapist.
+     * Designs an exercise program. Only a physiotherapist does this.
      *
-     * @param patientName the patient the programme is for
+     * @param patientName the patient
      * @param condition   what is being treated, e.g. "knee sprain"
-     * @return the programme summary, or a warning explaining why it was not made
+     * @return a summary of the program, or a warning saying why it wasn't made
      */
     public String designExerciseProgram(String patientName, String condition) {
         String problems = Validator.addProblem(
                 Validator.checkPersonName("Patient name", patientName),
                 Validator.checkRequiredText("Condition", condition));
         if (!problems.isEmpty()) {
-            return "[WARNING] Exercise programme not created. " + problems;
+            return "[WARNING] Exercise program not created. " + problems;
         }
-        return "Exercise programme: 4-week plan for " + Validator.tidy(patientName) + " ("
+        return "Exercise program: 4-week plan for " + Validator.tidy(patientName) + " ("
                 + Validator.tidy(condition) + "), designed by " + getName() + ".";
     }
 
@@ -106,19 +101,19 @@ public class Physiotherapist extends HealthProfessional {
     }
 
     /**
-     * Describes what a physiotherapist provides.
+     * Describes what a physiotherapist does.
      *
-     * @return a short description of the physiotherapist's services
+     * @return a short description
      */
     @Override
     public String describeServices() {
-        return "Movement assessment, treatment, exercise programmes";
+        return "Movement assessment, treatment, exercise programs";
     }
 
     /**
-     * Tells a patient how to prepare for a physiotherapy visit.
+     * Tells a patient how to get ready for a physio visit.
      *
-     * @return the preparation advice
+     * @return the advice
      */
     @Override
     public String getPreparationAdvice() {
@@ -126,12 +121,12 @@ public class Physiotherapist extends HealthProfessional {
     }
 
     /**
-     * Presents the shared columns followed by the treatment focus.
+     * Gives the shared columns plus the treatment focus.
      *
      * @return this physiotherapist's table row
      */
     @Override
     public String toString() {
-        return super.toString() + treatmentFocus;                   // [Inheritance] reuse the parent's columns instead of repeating them
+        return super.toString() + treatmentFocus; // [Inheritance] reuse the parent's four columns
     }
 }

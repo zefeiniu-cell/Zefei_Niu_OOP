@@ -1,75 +1,72 @@
 /*
- * =============================================================================
- *  System  : Arcana Health Centre - Appointment System
- *  Unit    : PROG2004 Object Oriented Programming - Assessment 1
- *  Author  : Zefei Niu (zniu16, 25259175)
- *  File    : ClinicSchedule.java
- *  Purpose : The fixed daily set of bookable slots, built from a few settings.
- * =============================================================================
+ * Arcana Health Centre - Appointment System
+ * PROG2004 Object Oriented Programming, Assessment 1
+ * Author: Zefei Niu (zniu16)
  */
 
 import java.util.ArrayList;
 
 /**
- * The fixed daily set of bookable appointment slots.
- * <p>
- * The brief's schedule (08:00-16:00 in 30-minute slots) is not typed out as a
- * list of times. Instead the schedule is generated from four settings:
- * opening time, closing time, slot length and an optional lunch break. To run
- * the clinic on different hours, only these settings change; every other part
- * of the system asks the schedule whether a time is bookable, so it keeps
- * working with the new slots without any change.
- * </p>
- * <p>
- * Interpretation of the brief: a slot must finish by closing time, so with
- * 08:00-16:00 and 30-minute slots the last appointment starts at 15:30.
- * A slot that would overlap the lunch break is not offered.
- * </p>
+ * The clinic's fixed set of bookable times for a day.
+ *
+ * Why I generate the slots instead of typing out "08:00", "08:30", ...:
+ * the brief asks for a schedule that can change without breaking anything.
+ * Here the whole day comes from four settings: opening time, closing time,
+ * slot length and an optional lunch break. Change one setting and the list
+ * of slots changes with it. Every other class only asks the schedule "is
+ * this time bookable?", so nothing else needs to be edited. The Saturday
+ * clinic in the demo proves it: it has a lunch break and no other code was
+ * changed for it.
+ *
+ * How I read the brief: an appointment must finish by closing time. With
+ * 08:00-16:00 and 30-minute slots, the last one starts at 15:30, because a
+ * 16:00 appointment would end at 16:30, after the clinic has closed.
+ * A slot that would run into lunch is not offered either.
  *
  * @author Zefei Niu
  * @version 1.0
  */
 public class ClinicSchedule {
 
-    /** Opening time of the standard schedule in the brief. */
+    /** Opening time in the brief. */
     public static final String STANDARD_OPENING = "08:00";
 
-    /** Closing time of the standard schedule in the brief. */
+    /** Closing time in the brief. */
     public static final String STANDARD_CLOSING = "16:00";
 
-    /** Slot length of the standard schedule in the brief, in minutes. */
+    /** Slot length in the brief, in minutes. */
     public static final int STANDARD_SLOT_MINUTES = 30;
 
-    /** Shortest slot length accepted, in minutes. */
+    /** Shortest slot length allowed, in minutes. */
     public static final int MIN_SLOT_MINUTES = 5;
 
-    /** Time the clinic opens. */
+    /** When the clinic opens. */
     private final TimeSlot opening;
 
-    /** Time the clinic closes; no appointment may run past it. */
+    /** When the clinic closes. No appointment may run past this. */
     private final TimeSlot closing;
 
     /** Length of every appointment, in minutes. */
     private final int slotMinutes;
 
-    /** Start of the lunch break, or null if there is no break. */
+    /** Start of lunch, or null if there is no lunch break. */
     private final TimeSlot lunchStart;
 
-    /** End of the lunch break, or null if there is no break. */
+    /** End of lunch, or null if there is no lunch break. */
     private final TimeSlot lunchEnd;
 
-    /** Every bookable start time, earliest first, built once. */
-    private final ArrayList<TimeSlot> slots = new ArrayList<>();   // [Encapsulation] only copies ever leave this class
+    /** Every bookable start time, earliest first. */
+    private final ArrayList<TimeSlot> slots = new ArrayList<>(); // [Encapsulation] only copies ever leave
 
     /**
-     * Builds a schedule from settings that have already been checked.
-     * Private: use create(...) or standard().
+     * Builds a schedule from settings that were already checked.
+     * Outside code uses create(...) or standard().
      *
      * @param opening     opening time
      * @param closing     closing time
      * @param slotMinutes slot length in minutes
-     * @param lunchStart  start of lunch, or null for no break
-     * @param lunchEnd    end of lunch, or null for no break
+     * @param lunchStart  start of lunch, or null for none
+     * @param lunchEnd    end of lunch, or null for none
      */
     private ClinicSchedule(TimeSlot opening, TimeSlot closing, int slotMinutes,
                            TimeSlot lunchStart, TimeSlot lunchEnd) {
@@ -79,7 +76,7 @@ public class ClinicSchedule {
         this.lunchStart = lunchStart;
         this.lunchEnd = lunchEnd;
         int start = opening.getStartMinute();
-        while (start + slotMinutes <= closing.getStartMinute()) {  // a slot is offered only if it finishes by closing time
+        while (start + slotMinutes <= closing.getStartMinute()) { // a slot must end by closing time
             TimeSlot slot = TimeSlot.ofMinutes(start);
             if (!overlapsLunch(slot)) {
                 slots.add(slot);
@@ -89,13 +86,12 @@ public class ClinicSchedule {
     }
 
     /**
-     * Explains what, if anything, is wrong with schedule settings that have
-     * no lunch break.
+     * Says what is wrong with schedule settings that have no lunch break.
      *
      * @param opening     opening time, e.g. "08:00"
      * @param closing     closing time, e.g. "16:00"
      * @param slotMinutes slot length in minutes
-     * @return an empty text if the settings work, otherwise every problem found
+     * @return "" if the settings work, otherwise every problem found
      */
     public static String check(String opening, String closing, int slotMinutes) {
         String problems = Validator.addProblem(labelled("Opening", TimeSlot.checkText(opening)),
@@ -105,7 +101,7 @@ public class ClinicSchedule {
                     "Slot length must be at least " + MIN_SLOT_MINUTES + " minutes.");
         }
         if (!problems.isEmpty()) {
-            return problems;                                        // the remaining checks need valid times to compare
+            return problems; // the checks below compare the times, so the times must be real first
         }
         TimeSlot open = TimeSlot.parse(opening);
         TimeSlot close = TimeSlot.parse(closing);
@@ -119,19 +115,18 @@ public class ClinicSchedule {
     }
 
     /**
-     * Explains what, if anything, is wrong with schedule settings that
-     * include a lunch break.
+     * Says what is wrong with schedule settings that include a lunch break.
      *
      * @param opening     opening time, e.g. "08:00"
      * @param closing     closing time, e.g. "16:00"
      * @param slotMinutes slot length in minutes
      * @param lunchStart  start of lunch, e.g. "12:00"
      * @param lunchEnd    end of lunch, e.g. "13:00"
-     * @return an empty text if the settings work, otherwise every problem found
+     * @return "" if the settings work, otherwise every problem found
      */
     public static String check(String opening, String closing, int slotMinutes,
                                String lunchStart, String lunchEnd) {
-        String problems = check(opening, closing, slotMinutes);     // reuse the rules every schedule must meet
+        String problems = check(opening, closing, slotMinutes); // the basic rules come first
         problems = Validator.addProblem(problems, labelled("Lunch start", TimeSlot.checkText(lunchStart)));
         problems = Validator.addProblem(problems, labelled("Lunch end", TimeSlot.checkText(lunchEnd)));
         if (!problems.isEmpty()) {
@@ -147,39 +142,38 @@ public class ClinicSchedule {
         if (start.isBefore(open) || close.isBefore(end)) {
             return "Lunch must fall within opening hours.";
         }
+        // the simplest exact test: build the schedule and count its slots
         if (new ClinicSchedule(open, close, slotMinutes, start, end).countSlots() == 0) {
-            return "The lunch break leaves no bookable slots.";    // a trial build is the simplest exact test
+            return "The lunch break leaves no bookable slots.";
         }
         return "";
     }
 
     /**
-     * Creates a schedule without a lunch break, or nothing if the settings
-     * do not work.
+     * Creates a schedule with no lunch break.
      *
      * @param opening     opening time, e.g. "08:00"
      * @param closing     closing time, e.g. "16:00"
      * @param slotMinutes slot length in minutes
-     * @return the schedule, or null if the settings are invalid (see check(...))
+     * @return the schedule, or null if the settings don't work (check(...) says why)
      */
     public static ClinicSchedule create(String opening, String closing, int slotMinutes) {
         if (!check(opening, closing, slotMinutes).isEmpty()) {
-            return null;                                            // [Encapsulation] an unusable schedule never becomes an object
+            return null; // [Encapsulation] a schedule that can't work never turns into an object
         }
         return new ClinicSchedule(TimeSlot.parse(opening), TimeSlot.parse(closing), slotMinutes,
                 null, null);
     }
 
     /**
-     * Creates a schedule with a lunch break, or nothing if the settings do
-     * not work.
+     * Creates a schedule with a lunch break.
      *
      * @param opening     opening time, e.g. "08:00"
      * @param closing     closing time, e.g. "16:00"
      * @param slotMinutes slot length in minutes
      * @param lunchStart  start of lunch, e.g. "12:00"
      * @param lunchEnd    end of lunch, e.g. "13:00"
-     * @return the schedule, or null if the settings are invalid (see check(...))
+     * @return the schedule, or null if the settings don't work (check(...) says why)
      */
     public static ClinicSchedule create(String opening, String closing, int slotMinutes,
                                         String lunchStart, String lunchEnd) {
@@ -191,22 +185,22 @@ public class ClinicSchedule {
     }
 
     /**
-     * Creates the schedule given in the brief: 08:00-16:00, 30-minute slots,
-     * no lunch break.
+     * Creates the schedule from the brief: 08:00-16:00, 30-minute slots, no lunch.
      *
      * @return the standard schedule
      */
     public static ClinicSchedule standard() {
-        return create(STANDARD_OPENING, STANDARD_CLOSING, STANDARD_SLOT_MINUTES); // the constants are valid, so this is never null
+        // never null: these constants are valid
+        return create(STANDARD_OPENING, STANDARD_CLOSING, STANDARD_SLOT_MINUTES);
     }
 
     /**
-     * Returns every bookable start time, earliest first, as a new list.
+     * Gives every bookable start time, earliest first.
      *
-     * @return a copy of the slots
+     * @return a new list of the slots
      */
     public ArrayList<TimeSlot> getSlots() {
-        return new ArrayList<>(slots);                              // [Encapsulation] callers get a copy, so no one can add or remove a slot
+        return new ArrayList<>(slots); // [Encapsulation] a copy, so outside code can't add or remove slots
     }
 
     /**
@@ -219,7 +213,7 @@ public class ClinicSchedule {
     }
 
     /**
-     * Returns the slot length.
+     * Gives the slot length.
      *
      * @return minutes per appointment
      */
@@ -228,29 +222,29 @@ public class ClinicSchedule {
     }
 
     /**
-     * Tells whether this schedule has a lunch break.
+     * Checks whether there is a lunch break.
      *
-     * @return true if there is a break
+     * @return true if there is one
      */
     public boolean hasLunchBreak() {
         return lunchStart != null;
     }
 
     /**
-     * Tells whether a time is one of the bookable slots.
+     * Checks whether a time is one of the bookable slots.
      *
-     * @param slot the time to test, possibly null
-     * @return true if it is a bookable slot
+     * @param slot the time to check, possibly null
+     * @return true if it is bookable
      */
     public boolean isBookable(TimeSlot slot) {
-        return slot != null && slots.contains(slot);                // contains() relies on TimeSlot.equals()
+        return slot != null && slots.contains(slot); // contains() works because TimeSlot has equals()
     }
 
     /**
-     * Explains whether a typed time can be booked, and if not, exactly why.
+     * Says whether a typed time can be booked, and if not, the exact reason.
      *
      * @param timeText the time as typed, e.g. "09:15"
-     * @return an empty text if it is a bookable slot, otherwise the reason it is not
+     * @return "" if bookable, otherwise the reason
      */
     public String checkBookable(String timeText) {
         String problem = TimeSlot.checkText(timeText);
@@ -261,6 +255,8 @@ public class ClinicSchedule {
         if (slots.contains(slot)) {
             return "";
         }
+        // From here on the time is real but not bookable; give the most specific reason
+        // so the person knows what to change: too early, too late, lunch, or off the grid.
         if (slot.isBefore(opening)) {
             return slot + " is before the clinic opens at " + opening + ".";
         }
@@ -272,14 +268,14 @@ public class ClinicSchedule {
             return slot + " falls in the lunch break (" + lunchStart + "-" + lunchEnd + ").";
         }
         return slot + " is not a start time: appointments start every " + slotMinutes
-                + " minutes from " + opening + ".";                // the most specific reason helps the person fix the request
+                + " minutes from " + opening + ".";
     }
 
     /**
      * Finds the bookable slot for a typed time.
      *
      * @param timeText the time as typed, e.g. "9:30"
-     * @return the slot, or null if the time is not bookable (see checkBookable)
+     * @return the slot, or null if it is not bookable (checkBookable says why)
      */
     public TimeSlot findSlot(String timeText) {
         if (!checkBookable(timeText).isEmpty()) {
@@ -289,16 +285,16 @@ public class ClinicSchedule {
     }
 
     /**
-     * Returns the first bookable slot of the day.
+     * Gives the first bookable slot of the day.
      *
      * @return the earliest slot
      */
     public TimeSlot getFirstSlot() {
-        return slots.get(0);                                        // create(...) guarantees at least one slot
+        return slots.get(0); // safe: create(...) refuses a schedule with no slots
     }
 
     /**
-     * Returns the last bookable slot of the day.
+     * Gives the last bookable slot of the day.
      *
      * @return the latest slot
      */
@@ -307,7 +303,7 @@ public class ClinicSchedule {
     }
 
     /**
-     * Lists times as one line, e.g. "08:00 08:30 09:00".
+     * Lists times on one line, e.g. "08:00 08:30 09:00".
      *
      * @param times the times to list
      * @return the times separated by spaces
@@ -324,26 +320,28 @@ public class ClinicSchedule {
     }
 
     /**
-     * Tells whether a slot starting at a given time would overlap lunch.
+     * Checks whether a slot starting at this time would run into lunch.
      *
-     * @param slot the slot start time
-     * @return true if any part of the slot falls inside the lunch break
+     * @param slot the slot's start time
+     * @return true if any part of the slot is inside the lunch break
      */
     private boolean overlapsLunch(TimeSlot slot) {
         if (!hasLunchBreak()) {
             return false;
         }
         int start = slot.getStartMinute();
+        // A partial overlap counts too: with lunch at 12:15, an 11:30-12:00 slot is fine,
+        // but a 12:00-12:30 slot would eat into lunch, so it is not offered.
         return start < lunchEnd.getStartMinute()
-                && start + slotMinutes > lunchStart.getStartMinute(); // partial overlap counts, so a slot never runs into lunch
+                && start + slotMinutes > lunchStart.getStartMinute();
     }
 
     /**
-     * Puts a label in front of a problem, leaving an empty result empty.
+     * Puts a label in front of a problem; an empty result stays empty.
      *
      * @param label   what the problem is about, e.g. "Opening"
-     * @param problem the problem, or an empty text
-     * @return the labelled problem, or an empty text
+     * @param problem the problem, or ""
+     * @return the labelled problem, or ""
      */
     private static String labelled(String label, String problem) {
         if (problem.isEmpty()) {

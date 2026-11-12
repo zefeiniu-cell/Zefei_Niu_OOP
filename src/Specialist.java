@@ -1,32 +1,26 @@
 /*
- * =============================================================================
- *  System  : Arcana Health Centre - Appointment System
- *  Unit    : PROG2004 Object Oriented Programming - Assessment 1
- *  Author  : Zefei Niu (zniu16, 25259175)
- *  File    : Specialist.java
- *  Purpose : A specialist doctor, e.g. a cardiologist or a dermatologist.
- * =============================================================================
+ * Arcana Health Centre - Appointment System
+ * PROG2004 Object Oriented Programming, Assessment 1
+ * Author: Zefei Niu (zniu16)
  */
 
 /**
- * A specialist doctor, such as a cardiologist, paediatrician or dermatologist.
- * <p>
- * One Specialist class with a specialty field is used instead of one class per
- * specialty: the specialties differ in their data (the name of the field), not
- * in their behaviour, so separate classes would only repeat the same code.
- * A specialist also records whether a GP referral is required, can prescribe
- * (Prescriber) and can order diagnostic tests.
- * </p>
+ * A specialist doctor, e.g. a cardiologist or a dermatologist.
+ *
+ * Why one Specialist class and not Cardiologist, Dermatologist and so on:
+ * the specialties differ in their data (the name of the field), not in what
+ * they do. Ten classes with the same methods would just be the same code ten
+ * times, so the specialty is a field instead.
+ *
+ * A specialist can prescribe, can order tests, and may need patients to
+ * bring a GP referral.
  *
  * @author Zefei Niu
- * @version 2.0
+ * @version 1.0
  */
 public class Specialist extends HealthProfessional implements Prescriber {
 
-    /**
-     * Used when the caller does not say: in Australia a patient needs a GP
-     * referral to claim the Medicare rebate for a specialist visit.
-     */
+    /** Default for the referral rule: in Australia a Medicare rebate for a specialist needs a GP referral. */
     private static final boolean DEFAULT_REFERRAL_REQUIRED = true;
 
     /** The medical field, e.g. "Cardiology". */
@@ -36,41 +30,43 @@ public class Specialist extends HealthProfessional implements Prescriber {
     private final boolean referralRequired;
 
     /**
-     * Builds a specialist with every detail. Private: use create(...).
+     * Builds a specialist with every detail. Outside code uses create(...).
      *
-     * @param id               six-digit staff ID, already validated
-     * @param name             the specialist's name, already validated
-     * @param workingDays      the days the specialist consults, already validated
-     * @param specialty        the medical field, already validated
+     * @param id               staff ID (already checked)
+     * @param name             the name (already checked)
+     * @param workingDays      the days worked (already checked)
+     * @param specialty        the medical field (already checked)
      * @param referralRequired true if a GP referral is needed
      */
     private Specialist(String id, String name, String[] workingDays, String specialty,
                        boolean referralRequired) {
-        super(id, name, workingDays);                               // [Inheritance] the parent owns the shared fields, so it sets them
+        super(id, name, workingDays); // [Inheritance] the shared fields belong to the parent, so it sets them
         this.specialty = Validator.tidy(specialty);
         this.referralRequired = referralRequired;
     }
 
     /**
-     * Builds a specialist who needs referrals (the usual case). Private: use create(...).
+     * Builds a specialist who needs referrals, the usual case.
+     * Outside code uses create(...).
      *
-     * @param id          six-digit staff ID, already validated
-     * @param name        the specialist's name, already validated
-     * @param workingDays the days the specialist consults, already validated
-     * @param specialty   the medical field, already validated
+     * @param id          staff ID (already checked)
+     * @param name        the name (already checked)
+     * @param workingDays the days worked (already checked)
+     * @param specialty   the medical field (already checked)
      */
     private Specialist(String id, String name, String[] workingDays, String specialty) {
-        this(id, name, workingDays, specialty, DEFAULT_REFERRAL_REQUIRED); // a named constant documents why the default is true
+        // a named constant, not a bare true, so the default explains itself
+        this(id, name, workingDays, specialty, DEFAULT_REFERRAL_REQUIRED);
     }
 
     /**
-     * Explains what, if anything, is wrong with a specialist's details.
+     * Says what is wrong with a specialist's details, if anything.
      *
-     * @param id          the staff ID to check
-     * @param name        the name to check
-     * @param workingDays the roster to check
-     * @param specialty   the specialty to check
-     * @return an empty text if valid, otherwise every problem found
+     * @param id          the staff ID
+     * @param name        the name
+     * @param workingDays the roster
+     * @param specialty   the specialty
+     * @return "" if valid, otherwise every problem found
      */
     public static String check(String id, String name, String[] workingDays, String specialty) {
         return Validator.addProblem(checkCommonDetails(id, name, workingDays),
@@ -78,31 +74,30 @@ public class Specialist extends HealthProfessional implements Prescriber {
     }
 
     /**
-     * Creates a specialist, or nothing if any detail is invalid.
+     * Creates a specialist.
      *
      * @param id               six-digit staff ID
-     * @param name             the specialist's name
-     * @param workingDays      the days the specialist consults
-     * @param specialty        the medical field, e.g. "Cardiology"
+     * @param name             the name
+     * @param workingDays      the days worked
+     * @param specialty        e.g. "Cardiology"
      * @param referralRequired true if a GP referral is needed
      * @return the new specialist, or null if the details are invalid
      */
     public static Specialist create(String id, String name, String[] workingDays, String specialty,
                                     boolean referralRequired) {
         if (!check(id, name, workingDays, specialty).isEmpty()) {
-            return null;                                            // [Encapsulation] invalid details never become an object
+            return null; // [Encapsulation] bad details never turn into an object
         }
         return new Specialist(id, name, workingDays, specialty, referralRequired);
     }
 
     /**
-     * Creates a specialist who requires a GP referral (the default),
-     * or nothing if any detail is invalid.
+     * Creates a specialist who needs a GP referral (the default).
      *
      * @param id          six-digit staff ID
-     * @param name        the specialist's name
-     * @param workingDays the days the specialist consults
-     * @param specialty   the medical field, e.g. "Cardiology"
+     * @param name        the name
+     * @param workingDays the days worked
+     * @param specialty   e.g. "Cardiology"
      * @return the new specialist, or null if the details are invalid
      */
     public static Specialist create(String id, String name, String[] workingDays, String specialty) {
@@ -113,29 +108,29 @@ public class Specialist extends HealthProfessional implements Prescriber {
     }
 
     /**
-     * Returns the medical field.
+     * Gives the specialty.
      *
-     * @return the specialty, e.g. "Cardiology"
+     * @return e.g. "Cardiology"
      */
     public String getSpecialty() {
         return specialty;
     }
 
     /**
-     * Tells whether patients need a GP referral.
+     * Checks whether patients need a GP referral.
      *
-     * @return true if a referral is required
+     * @return true if a referral is needed
      */
     public boolean isReferralRequired() {
         return referralRequired;
     }
 
     /**
-     * Orders a diagnostic test, the task that is unique to a specialist.
+     * Orders a test for a patient. Only a specialist does this.
      *
-     * @param patientName the patient to be tested
-     * @param testName    the test, e.g. "Echocardiogram"
-     * @return the test order, or a warning explaining why it was not written
+     * @param patientName the patient
+     * @param testName    e.g. "Echocardiogram"
+     * @return the test order, or a warning saying why it wasn't made
      */
     public String orderTest(String patientName, String testName) {
         String problems = Validator.addProblem(
@@ -149,8 +144,9 @@ public class Specialist extends HealthProfessional implements Prescriber {
     }
 
     /**
-     * Names this kind of professional. The specialty is shown in the details
-     * column, so the type stays short enough for the table.
+     * Names this kind of professional.
+     * The specialty goes in the details column instead, so the type column
+     * stays the same width for everyone.
      *
      * @return "Specialist"
      */
@@ -160,9 +156,9 @@ public class Specialist extends HealthProfessional implements Prescriber {
     }
 
     /**
-     * Describes what a specialist provides.
+     * Describes what this specialist does.
      *
-     * @return a short description of the specialist's services
+     * @return a short description
      */
     @Override
     public String describeServices() {
@@ -170,20 +166,21 @@ public class Specialist extends HealthProfessional implements Prescriber {
     }
 
     /**
-     * Tells a patient how to prepare; the advice depends on the referral rule.
+     * Tells a patient how to get ready. The answer depends on the referral rule.
      *
-     * @return the preparation advice
+     * @return the advice
      */
     @Override
     public String getPreparationAdvice() {
+        // same question, different answer: it depends on this object's data
         if (referralRequired) {
             return "Bring your GP referral letter and any recent test results.";
         }
-        return "Bring any recent test results; no referral is needed.";  // same method, different answer by the object's own state
+        return "Bring any recent test results; no referral is needed.";
     }
 
     /**
-     * Describes what a specialist may prescribe.
+     * Says what this specialist can prescribe.
      *
      * @return the prescribing scope
      */
@@ -195,9 +192,9 @@ public class Specialist extends HealthProfessional implements Prescriber {
     /**
      * Writes a prescription signed by this specialist.
      *
-     * @param patientName the patient the medicine is for
+     * @param patientName the patient
      * @param medication  the medicine and dose
-     * @return the prescription text, or a warning explaining why it was not written
+     * @return the prescription, or a warning saying why it wasn't written
      */
     @Override
     public String prescribe(String patientName, String medication) {
@@ -213,13 +210,13 @@ public class Specialist extends HealthProfessional implements Prescriber {
     }
 
     /**
-     * Presents the shared columns followed by the specialty and referral rule.
+     * Gives the shared columns plus the specialty and referral rule.
      *
      * @return this specialist's table row
      */
     @Override
     public String toString() {
-        return super.toString()                                     // [Inheritance] reuse the parent's columns instead of repeating them
+        return super.toString() // [Inheritance] reuse the parent's four columns
                 + specialty + (referralRequired ? ", referral needed" : ", no referral needed");
     }
 }

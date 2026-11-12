@@ -1,52 +1,48 @@
 /*
- * =============================================================================
- *  System  : Arcana Health Centre - Appointment System
- *  Unit    : PROG2004 Object Oriented Programming - Assessment 1
- *  Author  : Zefei Niu (zniu16, 25259175)
- *  File    : RegisteredNurse.java
- *  Purpose : A registered nurse (RN), the most common kind of nurse in a clinic.
- * =============================================================================
+ * Arcana Health Centre - Appointment System
+ * PROG2004 Object Oriented Programming, Assessment 1
+ * Author: Zefei Niu (zniu16)
  */
 
 /**
  * A registered nurse (RN), the most common kind of nurse in a clinic.
- * <p>
- * It inherits the clinical area and blood-sample skill from Nurse and adds
- * one detail: whether the nurse is an authorised immuniser, meaning they may
- * give vaccines without a doctor's order. Giving vaccines is the task unique
- * to this type.
- * </p>
+ *
+ * The clinical area and blood samples come from Nurse. The one extra detail
+ * is whether the nurse is an authorised immuniser. I added it because it
+ * changes what the nurse is allowed to do: an authorised immuniser can give
+ * a vaccine on their own, and any other RN needs a doctor's order first.
  *
  * @author Zefei Niu
- * @version 2.0
+ * @version 1.0
  */
 public class RegisteredNurse extends Nurse {
 
-    /** True if the nurse may vaccinate without a doctor's order. */
+    /** True if the nurse can vaccinate without a doctor's order. */
     private final boolean authorisedImmuniser;
 
     /**
-     * Builds a registered nurse with an explicit roster. Private: use create(...).
+     * Builds a registered nurse with a given roster. Outside code uses create(...).
      *
-     * @param id                  six-digit staff ID, already validated
-     * @param name                the nurse's name, already validated
-     * @param workingDays         the days the nurse works, already validated
-     * @param clinicalArea        the nurse's clinical area, already validated
-     * @param authorisedImmuniser true if the nurse may vaccinate independently
+     * @param id                  staff ID (already checked)
+     * @param name                the name (already checked)
+     * @param workingDays         the days worked (already checked)
+     * @param clinicalArea        the clinical area (already checked)
+     * @param authorisedImmuniser true if they can vaccinate on their own
      */
     private RegisteredNurse(String id, String name, String[] workingDays, String clinicalArea,
                             boolean authorisedImmuniser) {
-        super(id, name, workingDays, clinicalArea);                 // [Inheritance] Nurse sets its part, then HealthProfessional sets its own
+        // [Inheritance] Nurse sets its part, then HealthProfessional sets the rest
+        super(id, name, workingDays, clinicalArea);
         this.authorisedImmuniser = authorisedImmuniser;
     }
 
     /**
-     * Builds a full-time registered nurse. Private: use create(...).
+     * Builds a full-time registered nurse. Outside code uses create(...).
      *
-     * @param id                  six-digit staff ID, already validated
-     * @param name                the nurse's name, already validated
-     * @param clinicalArea        the nurse's clinical area, already validated
-     * @param authorisedImmuniser true if the nurse may vaccinate independently
+     * @param id                  staff ID (already checked)
+     * @param name                the name (already checked)
+     * @param clinicalArea        the clinical area (already checked)
+     * @param authorisedImmuniser true if they can vaccinate on their own
      */
     private RegisteredNurse(String id, String name, String clinicalArea, boolean authorisedImmuniser) {
         super(id, name, clinicalArea);
@@ -54,45 +50,44 @@ public class RegisteredNurse extends Nurse {
     }
 
     /**
-     * Explains what, if anything, is wrong with a registered nurse's details.
+     * Says what is wrong with a registered nurse's details, if anything.
      *
-     * @param id           the staff ID to check
-     * @param name         the name to check
-     * @param workingDays  the roster to check
-     * @param clinicalArea the clinical area to check
-     * @return an empty text if valid, otherwise every problem found
+     * @param id           the staff ID
+     * @param name         the name
+     * @param workingDays  the roster
+     * @param clinicalArea the clinical area
+     * @return "" if valid, otherwise every problem found
      */
     public static String check(String id, String name, String[] workingDays, String clinicalArea) {
         return checkNurseDetails(id, name, workingDays, clinicalArea);
     }
 
     /**
-     * Creates a registered nurse with an explicit roster, or nothing if any
-     * detail is invalid.
+     * Creates a registered nurse with a given roster.
      *
      * @param id                  six-digit staff ID
-     * @param name                the nurse's name
-     * @param workingDays         the days the nurse works
-     * @param clinicalArea        the nurse's clinical area, e.g. "Wound care"
-     * @param authorisedImmuniser true if the nurse may vaccinate independently
+     * @param name                the name
+     * @param workingDays         the days worked
+     * @param clinicalArea        e.g. "Wound care"
+     * @param authorisedImmuniser true if they can vaccinate on their own
      * @return the new nurse, or null if the details are invalid
      */
     public static RegisteredNurse create(String id, String name, String[] workingDays,
                                          String clinicalArea, boolean authorisedImmuniser) {
         if (!check(id, name, workingDays, clinicalArea).isEmpty()) {
-            return null;                                            // [Encapsulation] invalid details never become an object
+            return null; // [Encapsulation] bad details never turn into an object
         }
         return new RegisteredNurse(id, name, workingDays, clinicalArea, authorisedImmuniser);
     }
 
     /**
-     * Creates a full-time registered nurse (Monday to Friday), or nothing if
-     * any detail is invalid. Practice nurses usually work full time.
+     * Creates a full-time registered nurse (Monday to Friday).
+     * Practice nurses usually work full time, so this is the default.
      *
      * @param id                  six-digit staff ID
-     * @param name                the nurse's name
-     * @param clinicalArea        the nurse's clinical area
-     * @param authorisedImmuniser true if the nurse may vaccinate independently
+     * @param name                the name
+     * @param clinicalArea        the clinical area
+     * @param authorisedImmuniser true if they can vaccinate on their own
      * @return the new nurse, or null if the details are invalid
      */
     public static RegisteredNurse create(String id, String name, String clinicalArea,
@@ -104,7 +99,7 @@ public class RegisteredNurse extends Nurse {
     }
 
     /**
-     * Tells whether this nurse may vaccinate without a doctor's order.
+     * Checks whether this nurse can vaccinate without a doctor's order.
      *
      * @return true if authorised
      */
@@ -113,12 +108,12 @@ public class RegisteredNurse extends Nurse {
     }
 
     /**
-     * Gives a vaccine, the task unique to a registered nurse. A nurse who is
-     * not an authorised immuniser is refused, as in a real clinic.
+     * Gives a vaccine. Only a registered nurse does this, and only if they
+     * are an authorised immuniser.
      *
-     * @param patientName the patient being vaccinated
-     * @param vaccine     the vaccine, e.g. "Influenza 2026"
-     * @return a record of the vaccination, or a warning explaining the refusal
+     * @param patientName the patient
+     * @param vaccine     e.g. "Influenza 2026"
+     * @return a record of the vaccination, or a warning saying why it wasn't given
      */
     public String administerVaccine(String patientName, String vaccine) {
         String problems = Validator.addProblem(
@@ -127,8 +122,8 @@ public class RegisteredNurse extends Nurse {
         if (!problems.isEmpty()) {
             return "[WARNING] Vaccine not given. " + problems;
         }
-        if (!authorisedImmuniser) {
-            return "[WARNING] Vaccine not given. " + getName()       // the object's own state decides, as the law does in a real clinic
+        if (!authorisedImmuniser) { // this nurse's own data decides, the same as in a real clinic
+            return "[WARNING] Vaccine not given. " + getName()
                     + " is not an authorised immuniser, so a doctor's order is needed first.";
         }
         return "Vaccination: " + Validator.tidy(vaccine) + " given to "
@@ -146,9 +141,9 @@ public class RegisteredNurse extends Nurse {
     }
 
     /**
-     * Describes what a registered nurse provides.
+     * Describes what a registered nurse does.
      *
-     * @return a short description of the nurse's services
+     * @return a short description
      */
     @Override
     public String describeServices() {
@@ -156,13 +151,13 @@ public class RegisteredNurse extends Nurse {
     }
 
     /**
-     * Presents the nursing columns followed by the immuniser status.
+     * Gives the nursing columns plus the immuniser status.
      *
      * @return this nurse's table row
      */
     @Override
     public String toString() {
-        return super.toString()                                     // [Inheritance] two levels of parent columns, written once each
+        return super.toString() // [Inheritance] two floors of columns, each written once
                 + (authorisedImmuniser ? ", authorised immuniser" : "");
     }
 }

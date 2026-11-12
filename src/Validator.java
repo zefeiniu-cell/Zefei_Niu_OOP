@@ -1,57 +1,54 @@
 /*
- * =============================================================================
- *  System  : Arcana Health Centre - Appointment System
- *  Unit    : PROG2004 Object Oriented Programming - Assessment 1
- *  Author  : Zefei Niu (zniu16, 25259175)
- *  File    : Validator.java
- *  Purpose : Input rules shared by every class that accepts text from outside.
- * =============================================================================
+ * Arcana Health Centre - Appointment System
+ * PROG2004 Object Oriented Programming, Assessment 1
+ * Author: Zefei Niu (zniu16)
  */
 
 /**
- * Input rules shared by every class that accepts text from outside.
- * <p>
- * All check methods follow one convention: they return an empty text when the
- * input is acceptable, and otherwise a sentence explaining what is wrong.
- * Returning the reason (instead of throwing an exception, which is Module 5)
- * lets the caller both refuse bad input and tell the user exactly why.
- * Keeping the rules here means a person's name, for example, is checked in
- * exactly the same way for a professional and for a patient.
- * </p>
+ * Input checks that more than one class needs.
+ *
+ * The rule for every check: return "" if the input is fine, otherwise return
+ * a sentence that says what is wrong.
+ *
+ * Why return a message and not throw an exception: exceptions are Module 5,
+ * and a message is more useful here anyway. If a receptionist types a staff
+ * ID with a letter in it, "must contain digits only" tells them exactly what
+ * to fix. A patient's name and a professional's name are checked by the same
+ * method, so the two can never follow different rules.
  *
  * @author Zefei Niu
- * @version 2.0
+ * @version 1.0
  */
 public class Validator {
 
-    /** Longest person name accepted, in characters. */
+    /** Longest name allowed. */
     public static final int MAX_NAME_LENGTH = 40;
 
-    /** Longest free-text detail accepted (e.g. a specialty), in characters. */
+    /** Longest free-text detail allowed, e.g. a specialty. */
     public static final int MAX_TEXT_LENGTH = 60;
 
     /**
-     * Prevents objects of this class from being created.
-     * Validator only offers static helpers, so an instance would have no purpose.
+     * Stops anyone creating a Validator object.
+     * Everything here is static, so an object would have nothing to do.
      */
     private Validator() {
     }
 
     /**
-     * Tells whether a text is missing, empty or only spaces.
+     * Checks whether a text is missing, empty or only spaces.
      *
-     * @param text the text to test
-     * @return true if there is nothing meaningful in the text
+     * @param text the text to check
+     * @return true if there is nothing in it
      */
     public static boolean isBlank(String text) {
         return text == null || text.trim().isEmpty();
     }
 
     /**
-     * Tells whether a text is made only of the digits 0-9.
+     * Checks whether a text is made only of the digits 0-9.
      *
-     * @param text the text to test
-     * @return true if the text is not empty and every character is 0-9
+     * @param text the text to check
+     * @return true if it is not empty and every character is 0-9
      */
     public static boolean isAllDigits(String text) {
         if (text == null || text.isEmpty()) {
@@ -59,7 +56,8 @@ public class Validator {
         }
         for (int i = 0; i < text.length(); i++) {
             char character = text.charAt(i);
-            if (character < '0' || character > '9') {               // Character.isDigit would also accept non-Latin digits
+            // not Character.isDigit: it also accepts digits from other scripts (e.g. Arabic-Indic)
+            if (character < '0' || character > '9') {
                 return false;
             }
         }
@@ -67,11 +65,10 @@ public class Validator {
     }
 
     /**
-     * Cleans a text for storage: trims both ends and turns every run of
-     * spaces or tabs inside it into a single space.
+     * Trims a text and turns every run of spaces inside it into one space.
      *
      * @param text the text to clean, e.g. "  Dr   Leona  Hart "
-     * @return the cleaned text, e.g. "Dr Leona Hart"; an empty text for null
+     * @return the cleaned text, e.g. "Dr Leona Hart"; "" for null
      */
     public static String tidy(String text) {
         if (text == null) {
@@ -84,7 +81,7 @@ public class Validator {
             char character = trimmed.charAt(i);
             if (Character.isWhitespace(character)) {
                 if (!lastWasSpace) {
-                    result += ' ';                                  // one space survives, so names compare equal however they were typed
+                    result += ' '; // one space survives, so "Romy  Lovell" and "Romy Lovell" match
                 }
                 lastWasSpace = true;
             } else {
@@ -97,11 +94,9 @@ public class Validator {
 
     /**
      * Removes spaces and hyphens, e.g. "0412-345 678" becomes "0412345678".
-     * People type codes with separators for readability; the system stores
-     * one plain form so that two spellings of the same code always match.
      *
      * @param text the text to compact
-     * @return the text without spaces or hyphens; an empty text for null
+     * @return the text without spaces or hyphens; "" for null
      */
     public static String removeSeparators(String text) {
         if (text == null) {
@@ -118,13 +113,13 @@ public class Validator {
     }
 
     /**
-     * Checks a person's name. It is required, at most 40 characters, must
-     * contain a letter, and may otherwise only use spaces, hyphens,
-     * apostrophes and full stops (so "Dr Mary-Jane O'Neil" is accepted).
+     * Checks a person's name. It needs at least one letter and at most 40
+     * characters. Apart from letters, only spaces, - ' and . are allowed,
+     * so real names like "Dr Mary-Jane O'Neil" pass.
      *
-     * @param label what the name belongs to, used in the message, e.g. "Patient name"
+     * @param label what the name is for, used in the message, e.g. "Patient name"
      * @param name  the name to check
-     * @return an empty text if valid, otherwise the reason it is not
+     * @return "" if valid, otherwise the reason
      */
     public static String checkPersonName(String label, String name) {
         if (isBlank(name)) {
@@ -145,17 +140,17 @@ public class Validator {
             }
         }
         if (!hasLetter) {
-            return label + " must contain at least one letter.";   // stops a name made only of punctuation, e.g. "--"
+            return label + " must contain at least one letter."; // otherwise "--" would count as a name
         }
         return "";
     }
 
     /**
-     * Checks a required free-text detail such as a specialty or a medicine.
+     * Checks a required text detail such as a specialty or a medicine.
      *
-     * @param label what the text describes, used in the message, e.g. "Specialty"
+     * @param label what the text is, used in the message, e.g. "Specialty"
      * @param text  the text to check
-     * @return an empty text if valid, otherwise the reason it is not
+     * @return "" if valid, otherwise the reason
      */
     public static String checkRequiredText(String label, String text) {
         if (isBlank(text)) {
@@ -168,13 +163,13 @@ public class Validator {
     }
 
     /**
-     * Checks a code that must be an exact number of digits, such as a
-     * staff ID or a mobile number.
+     * Checks a code that must be an exact number of digits, like a staff ID
+     * or a mobile number.
      *
-     * @param label          what the code is, used in the message, e.g. "Professional ID"
-     * @param code           the code to check (separators must already be removed)
-     * @param requiredLength how many digits the code must have
-     * @return an empty text if valid, otherwise the reason it is not
+     * @param label          what the code is, used in the message
+     * @param code           the code to check, with separators already removed
+     * @param requiredLength how many digits it must have
+     * @return "" if valid, otherwise the reason
      */
     public static String checkDigitCode(String label, String code, int requiredLength) {
         if (isBlank(code)) {
@@ -192,12 +187,14 @@ public class Validator {
     }
 
     /**
-     * Adds one more problem to the problems found so far, so that a caller
-     * can report every mistake at once instead of only the first one.
+     * Adds one more problem to the ones found so far.
+     * This is how a check can report every mistake together: a person who
+     * typed a bad name and a bad phone number sees both at once, not one
+     * after another.
      *
-     * @param problems   the problems found so far (empty if none)
-     * @param newProblem the result of another check (empty if that check passed)
-     * @return all problems joined by a space, or an empty text if there are none
+     * @param problems   the problems so far ("" if none)
+     * @param newProblem the result of another check ("" if it passed)
+     * @return all problems joined by a space, or "" if there are none
      */
     public static String addProblem(String problems, String newProblem) {
         if (newProblem.isEmpty()) {

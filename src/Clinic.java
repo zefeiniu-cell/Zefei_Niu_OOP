@@ -1,96 +1,89 @@
 /*
- * =============================================================================
- *  System  : Arcana Health Centre - Appointment System
- *  Unit    : PROG2004 Object Oriented Programming - Assessment 1
- *  Author  : Zefei Niu (zniu16, 25259175)
- *  File    : Clinic.java
- *  Purpose : Manages one clinic's staff, patients and appointments for today.
- * =============================================================================
+ * Arcana Health Centre - Appointment System
+ * PROG2004 Object Oriented Programming, Assessment 1
+ * Author: Zefei Niu (zniu16)
  */
 
 import java.util.ArrayList;
 import java.util.Collections;
 
 /**
- * Manages one clinic's staff, patients and appointments for the current day.
- * <p>
- * This is the only place that sees every appointment at once, so it owns
- * every rule that depends on the whole day: a professional cannot be
- * double-booked, a patient cannot be in two places at once, only staff who
- * work today can be booked, and only bookable slots can be used.
- * </p>
- * <p>
- * Following the real process at a front desk, the clinic first registers its
- * staff (each staff ID only once). A patient is registered automatically on
- * their first booking and given a patient number; later bookings with the
- * same name and mobile number are recognised as the same patient.
- * </p>
- * <p>
- * Every operation returns a message instead of printing it, starting with
- * "[OK]" or "[WARNING]". A warning always says why the action could not be
- * performed, and the clinic's data is never changed by a refused action.
- * The day is passed in when the clinic is created, so the same system can be
- * run for any day (and the demonstration gives the same result every time).
- * </p>
- * <p>
- * Appointments are stored in an ArrayList: the number of bookings grows and
- * shrinks during the day, the list keeps the booking order, and it can be
- * filtered with a loop and sorted with Collections.sort, which uses the
- * natural order defined by Appointment.compareTo.
- * </p>
+ * One clinic's staff, patients and appointments for one day.
+ *
+ * Why the booking rules live here and not in Appointment: every rule that
+ * needs the whole day can only be checked by something that sees the whole
+ * day. "Is Dr Magee already busy at 09:00?" and "Is Romy already booked with
+ * someone else at 09:00?" both need every appointment, and only the clinic
+ * has them all.
+ *
+ * I followed how a real front desk works:
+ * First the clinic registers its staff (a staff ID can only be used once).
+ * Then a patient books. On their first booking they are registered and get
+ * a patient number; next time, the same name and mobile are recognised.
+ * After that the day keeps changing: cancel, reschedule, rebook a freed slot.
+ *
+ * Every operation returns a message starting with "[OK]" or "[WARNING]" and
+ * never prints. A warning always says why, and a refused action changes
+ * nothing. The day is passed in when the clinic is created, so the same code
+ * works for any day, and the demo gives the same output every time it runs.
+ *
+ * Why ArrayList for the appointments:
+ * ArrayList, not an array: bookings come and go all day, and an array can't change size.
+ * ArrayList, not HashSet: I want the booking order kept, and a set has no order.
+ * It can also be filtered with a loop and sorted with Collections.sort.
  *
  * @author Zefei Niu
  * @version 1.0
  */
 public class Clinic {
 
-    /** Start of every successful result. */
+    /** Start of every successful message. */
     public static final String OK = "[OK] ";
 
     /** Start of every refusal. */
     public static final String WARNING = "[WARNING] ";
 
-    /** Name of the clinic, e.g. "Arcana Health Centre". */
+    /** Clinic name, e.g. "Arcana Health Centre". */
     private final String name;
 
     /** The day these bookings are for, e.g. "Wednesday". */
     private final String today;
 
-    /** The day's bookable slots. */
+    /** Today's bookable times. */
     private final ClinicSchedule schedule;
 
-    /** Registered staff; any type of professional. */
-    private final ArrayList<HealthProfessional> staff = new ArrayList<>();   // [Polymorphism] one list for every type of professional
+    /** Registered staff, of any type. */
+    private final ArrayList<HealthProfessional> staff = new ArrayList<>(); // [Polymorphism] every type fits
 
-    /** Registered patients, in registration order. */
+    /** Registered patients, in the order they first came. */
     private final ArrayList<Patient> patients = new ArrayList<>();
 
-    /** Today's appointments, in booking order. */
-    private final ArrayList<Appointment> appointments = new ArrayList<>(); // [Encapsulation] private: changed only through the rules below
+    /** Today's appointments, in booking order. Only the booking rules below change it. */
+    private final ArrayList<Appointment> appointments = new ArrayList<>(); // [Encapsulation] no setter
 
-    /** The number the next new patient will receive. */
+    /** The number the next new patient gets. */
     private int nextPatientNumber = 1;
 
     /**
-     * Builds a clinic from checked details. Private: use create(...).
+     * Builds a clinic from checked details. Outside code uses create(...).
      *
-     * @param name     the clinic's name, already validated
-     * @param today    the day of the bookings, already validated
-     * @param schedule the day's schedule, not null
+     * @param name     the clinic name (already checked)
+     * @param today    the day of the bookings (already checked)
+     * @param schedule today's schedule, not null
      */
     private Clinic(String name, String today, ClinicSchedule schedule) {
         this.name = Validator.tidy(name);
-        this.today = Week.normalise(today);                         // "wed" and "Wednesday" must mean the same day everywhere
+        this.today = Week.normalise(today); // "wed" and "Wednesday" must be the same day everywhere
         this.schedule = schedule;
     }
 
     /**
-     * Explains what, if anything, is wrong with a clinic's details.
+     * Says what is wrong with a clinic's details, if anything.
      *
-     * @param name     the clinic's name
+     * @param name     the clinic name
      * @param today    the day of the bookings
-     * @param schedule the day's schedule
-     * @return an empty text if valid, otherwise every problem found
+     * @param schedule today's schedule
+     * @return "" if valid, otherwise every problem found
      */
     public static String check(String name, String today, ClinicSchedule schedule) {
         String problems = Validator.checkRequiredText("Clinic name", name);
@@ -104,22 +97,22 @@ public class Clinic {
     }
 
     /**
-     * Opens a clinic for a day, or nothing if any detail is invalid.
+     * Opens a clinic for a day.
      *
-     * @param name     the clinic's name
+     * @param name     the clinic name
      * @param today    the day of the bookings, e.g. "Wednesday"
-     * @param schedule the day's schedule
+     * @param schedule today's schedule
      * @return the clinic, or null if the details are invalid
      */
     public static Clinic create(String name, String today, ClinicSchedule schedule) {
         if (!check(name, today, schedule).isEmpty()) {
-            return null;                                            // [Encapsulation] a clinic without a valid day or schedule cannot exist
+            return null; // [Encapsulation] a clinic with no real day or schedule can't exist
         }
         return new Clinic(name, today, schedule);
     }
 
     /**
-     * Returns the clinic's name.
+     * Gives the clinic name.
      *
      * @return the name
      */
@@ -128,7 +121,7 @@ public class Clinic {
     }
 
     /**
-     * Returns the day of the bookings.
+     * Gives the day of the bookings.
      *
      * @return e.g. "Wednesday"
      */
@@ -137,30 +130,28 @@ public class Clinic {
     }
 
     /**
-     * Returns the day's schedule.
+     * Gives today's schedule.
      *
-     * @return the schedule (immutable, so it is safe to share)
+     * @return the schedule (it can't be changed, so sharing it is safe)
      */
     public ClinicSchedule getSchedule() {
         return schedule;
     }
 
-    // =========================================================================
-    //  Staff registration
-    // =========================================================================
+    // ===== Staff =====
 
     /**
-     * Registers a professional of any type as a member of staff.
+     * Registers a professional of any type as staff.
      *
-     * @param professional the professional, possibly null if create(...) refused it
-     * @return a confirmation, or a warning explaining the refusal
+     * @param professional the professional; null if create(...) refused the details
+     * @return a confirmation, or a warning saying why not
      */
     public String registerProfessional(HealthProfessional professional) {
         if (professional == null) {
             return WARNING + "Registration refused. No professional was supplied: invalid details never "
                     + "create an object.";
         }
-        if (staff.contains(professional)) {                         // contains() uses equals(), so this catches a reused staff ID
+        if (staff.contains(professional)) { // contains() uses equals(), so a reused staff ID is caught here
             HealthProfessional holder = staff.get(staff.indexOf(professional));
             return WARNING + "Registration refused. Staff ID " + professional.getId()
                     + " already belongs to " + holder.getName() + ".";
@@ -170,10 +161,10 @@ public class Clinic {
     }
 
     /**
-     * Finds a registered professional by staff ID.
+     * Finds a staff member by staff ID.
      *
-     * @param professionalId the staff ID, e.g. "100101"
-     * @return the professional, or null if no one on staff has that ID
+     * @param professionalId e.g. "100101"
+     * @return the professional, or null if nobody here has that ID
      */
     public HealthProfessional findProfessional(String professionalId) {
         for (HealthProfessional professional : staff) {
@@ -185,18 +176,18 @@ public class Clinic {
     }
 
     /**
-     * Returns every registered professional, as a new list.
+     * Gives every staff member.
      *
-     * @return a copy of the staff list
+     * @return a new list of the staff
      */
     public ArrayList<HealthProfessional> getStaff() {
-        return new ArrayList<>(staff);                              // [Encapsulation] a copy, so outside code cannot add unchecked staff
+        return new ArrayList<>(staff); // [Encapsulation] a copy, so nobody can add staff without registering
     }
 
     /**
-     * Returns the registered professionals who work today, as a new list.
+     * Gives the staff who work today.
      *
-     * @return the staff on duty today
+     * @return a new list of the staff on duty
      */
     public ArrayList<HealthProfessional> getStaffOnDuty() {
         ArrayList<HealthProfessional> onDuty = new ArrayList<>();
@@ -209,7 +200,7 @@ public class Clinic {
     }
 
     /**
-     * Shows the staff on duty today as a table, followed by who is off.
+     * Shows today's staff as a table, then who is off today.
      *
      * @return the roster for today
      */
@@ -221,7 +212,7 @@ public class Clinic {
         String text = "On duty " + today + " (" + onDuty.size() + " of " + staff.size() + " staff):\n"
                 + HealthProfessional.tableHeader();
         for (HealthProfessional professional : onDuty) {
-            text += "\n" + professional;                            // [Polymorphism] each type prints its own details column
+            text += "\n" + professional; // [Polymorphism] each type fills in its own details column
         }
         String offToday = "";
         for (HealthProfessional professional : staff) {
@@ -235,16 +226,14 @@ public class Clinic {
         return text;
     }
 
-    // =========================================================================
-    //  Patients
-    // =========================================================================
+    // ===== Patients =====
 
     /**
      * Finds a registered patient from typed details.
      *
      * @param patientName the name as typed
-     * @param mobile      the mobile number as typed
-     * @return the patient, or null if no registered patient matches both
+     * @param mobile      the mobile as typed
+     * @return the patient, or null if nobody registered matches both
      */
     public Patient findPatient(String patientName, String mobile) {
         for (Patient patient : patients) {
@@ -256,49 +245,49 @@ public class Clinic {
     }
 
     /**
-     * Returns every registered patient, as a new list.
+     * Gives every registered patient.
      *
-     * @return a copy of the patient register
+     * @return a new list of the patients
      */
     public ArrayList<Patient> getPatients() {
         return new ArrayList<>(patients);
     }
 
     /**
-     * Registers a new patient and issues the next patient number.
-     * Private: the clinic decides when registration happens.
+     * Registers a new patient and gives them the next patient number.
+     * It is private because the clinic decides when this happens: on a
+     * patient's first booking.
      *
-     * @param patientName the name, already validated
-     * @param mobile      the mobile number, already validated
+     * @param patientName the name (already checked)
+     * @param mobile      the mobile (already checked)
      * @return the new patient
      */
     private Patient registerPatient(String patientName, String mobile) {
+        // the clinic counts up, so two patients never share a number
         String number = String.format("%s%0" + Patient.NUMBER_DIGITS + "d",
-                Patient.NUMBER_PREFIX, nextPatientNumber);          // the clinic issues numbers, so they are unique by construction
+                Patient.NUMBER_PREFIX, nextPatientNumber);
         Patient patient = Patient.create(number, patientName, mobile);
         patients.add(patient);
         nextPatientNumber++;
         return patient;
     }
 
-    // =========================================================================
-    //  Booking
-    // =========================================================================
+    // ===== Booking =====
 
     /**
-     * Books an appointment with a chosen professional, as an online booking
-     * page would after the patient picks someone. The parameter accepts any
-     * type of professional.
+     * Books with a professional the patient picked, like on a booking website.
+     * The parameter is the parent type, so it takes any kind of professional.
      *
      * @param patientName  the patient's name
-     * @param mobile       the patient's mobile number, spaces allowed
+     * @param mobile       the patient's mobile, spaces allowed
      * @param professional the chosen professional, of any type
-     * @param time         the requested time, e.g. "09:30"
-     * @return a confirmation with preparation advice, or a warning explaining the refusal
+     * @param time         the time asked for, e.g. "09:30"
+     * @return a confirmation with advice for the visit, or a warning saying why not
      */
     public String bookAppointment(String patientName, String mobile, HealthProfessional professional,
                                   String time) {
-        String problems = Patient.checkName(patientName);           // every input problem is reported at once
+        // First look at all the input together, so the person sees every mistake at once.
+        String problems = Patient.checkName(patientName);
         problems = Validator.addProblem(problems, Patient.checkMobile(mobile));
         if (professional == null) {
             problems = Validator.addProblem(problems, "A health professional is required.");
@@ -308,11 +297,13 @@ public class Clinic {
             return WARNING + "Booking refused. " + problems;
         }
 
+        // Then the clinic's rules: registered? works today? slot free? patient free?
         if (!staff.contains(professional)) {
             return WARNING + "Booking refused. " + professional.getSummary() + " is not registered at "
                     + name + ".";
         }
-        HealthProfessional booked = staff.get(staff.indexOf(professional)); // use the registered record, not a look-alike object
+        // use the registered object, not a look-alike with the same ID
+        HealthProfessional booked = staff.get(staff.indexOf(professional));
         if (!booked.worksOn(today)) {
             return WARNING + "Booking refused. " + booked.getName() + " does not work on " + today
                     + " (works " + booked.getWorkingDaysText() + ").";
@@ -331,27 +322,28 @@ public class Clinic {
             }
         }
 
+        // Last, book it. A first-time patient is registered here, like at a real front desk.
         String registration = "returning patient";
         if (patient == null) {
-            patient = registerPatient(patientName, mobile);         // first visit: registration is part of booking, as at a real front desk
+            patient = registerPatient(patientName, mobile);
             registration = "new patient";
         }
         appointments.add(Appointment.create(patient, booked, slot));
         return OK + "Booked " + registration + " " + patient.getSummary() + " with "
                 + booked.getSummary() + " at " + slot + ".\n    Before the visit: "
-                + booked.getPreparationAdvice();                    // [Polymorphism] each type gives its own advice
+                + booked.getPreparationAdvice(); // [Polymorphism] each type gives its own advice
     }
 
     /**
-     * Books an appointment by staff ID, as a receptionist would type it.
-     * It finds the professional and then applies exactly the same rules as
-     * the other bookAppointment method.
+     * Books by staff ID, the way a receptionist would type it.
+     * It finds the professional, then uses exactly the same rules as the
+     * other bookAppointment.
      *
      * @param patientName    the patient's name
-     * @param mobile         the patient's mobile number, spaces allowed
-     * @param professionalId the professional's staff ID, e.g. "100101"
-     * @param time           the requested time, e.g. "09:30"
-     * @return a confirmation with preparation advice, or a warning explaining the refusal
+     * @param mobile         the patient's mobile, spaces allowed
+     * @param professionalId the staff ID, e.g. "100101"
+     * @param time           the time asked for, e.g. "09:30"
+     * @return a confirmation with advice for the visit, or a warning saying why not
      */
     public String bookAppointment(String patientName, String mobile, String professionalId,
                                   String time) {
@@ -364,27 +356,26 @@ public class Clinic {
             return WARNING + "Booking refused. No one with staff ID " + professionalId.trim()
                     + " works at " + name + ".";
         }
-        return bookAppointment(patientName, mobile, professional, time); // one place holds the booking rules, so they cannot drift apart
+        // the rules are written once, so both ways book the same
+        return bookAppointment(patientName, mobile, professional, time);
     }
 
-    // =========================================================================
-    //  Viewing, filtering and sorting
-    // =========================================================================
+    // ===== Viewing, filtering and sorting =====
 
     /**
-     * Returns every appointment in booking order, as a new list.
+     * Gives every appointment in booking order.
      *
-     * @return a copy of today's appointments
+     * @return a new list of today's appointments
      */
     public ArrayList<Appointment> getAppointments() {
-        return new ArrayList<>(appointments);                       // [Encapsulation] callers can sort or edit the copy, never the real list
+        return new ArrayList<>(appointments); // [Encapsulation] a copy; the real list can't be touched
     }
 
     /**
-     * Returns the appointments with one professional, as a new list.
+     * Gives the appointments with one professional.
      *
      * @param professionalId the staff ID, e.g. "100101"
-     * @return the matching appointments in booking order (empty if none)
+     * @return a new list in booking order (empty if none)
      */
     public ArrayList<Appointment> filterByProfessional(String professionalId) {
         ArrayList<Appointment> matches = new ArrayList<>();
@@ -397,11 +388,11 @@ public class Clinic {
     }
 
     /**
-     * Returns the appointments booked under one mobile number, as a new list.
-     * A shared family number returns every family member's appointments.
+     * Gives the appointments booked under one mobile number.
+     * A family phone gives back the whole family's appointments.
      *
-     * @param mobile the mobile number, spaces allowed
-     * @return the matching appointments in booking order (empty if none)
+     * @param mobile the mobile, spaces allowed
+     * @return a new list in booking order (empty if none)
      */
     public ArrayList<Appointment> filterByPatientMobile(String mobile) {
         ArrayList<Appointment> matches = new ArrayList<>();
@@ -414,22 +405,22 @@ public class Clinic {
     }
 
     /**
-     * Sorts any list of appointments from earliest to latest, so the same
-     * method works for all appointments or for a filtered subset.
+     * Sorts any list of appointments by time, earliest first.
+     * The same method works for all of today or for a filtered part of it.
      *
-     * @param list the appointments to sort; it is not changed
+     * @param list the appointments to sort (this list is not changed)
      * @return a new list in time order
      */
     public static ArrayList<Appointment> sortByTime(ArrayList<Appointment> list) {
-        ArrayList<Appointment> sorted = new ArrayList<>(list);      // sort a copy, so the caller's list keeps its order
-        Collections.sort(sorted);                                   // uses Appointment.compareTo (Comparable)
+        ArrayList<Appointment> sorted = new ArrayList<>(list); // sort a copy, so the caller's order is kept
+        Collections.sort(sorted); // uses Appointment.compareTo
         return sorted;
     }
 
     /**
      * Shows every appointment in the order they were booked.
      *
-     * @return the appointments table, or a warning if there are none
+     * @return the table, or a warning if there are none
      */
     public String viewAppointmentsInBookingOrder() {
         if (appointments.isEmpty()) {
@@ -439,9 +430,9 @@ public class Clinic {
     }
 
     /**
-     * Shows every appointment from earliest to latest.
+     * Shows every appointment by time.
      *
-     * @return the appointments table, or a warning if there are none
+     * @return the table, or a warning if there are none
      */
     public String viewAppointmentsByTime() {
         if (appointments.isEmpty()) {
@@ -451,10 +442,10 @@ public class Clinic {
     }
 
     /**
-     * Shows one professional's appointments from earliest to latest.
+     * Shows one professional's appointments by time.
      *
      * @param professionalId the staff ID, e.g. "100101"
-     * @return the appointments table, or a warning explaining why there is nothing to show
+     * @return the table, or a warning saying why there is nothing to show
      */
     public String viewAppointmentsForProfessional(String professionalId) {
         String problem = HealthProfessional.checkId(professionalId);
@@ -475,14 +466,14 @@ public class Clinic {
             return WARNING + professional.getName() + " has no appointments today.";
         }
         return formatAppointments("Appointments with " + professional.getName() + ", by time",
-                sortByTime(matches));                               // filter first, then sort only the subset
+                sortByTime(matches)); // filter first, then sort just that part
     }
 
     /**
-     * Shows the appointments booked under one mobile number, earliest first.
+     * Shows the appointments under one mobile number, by time.
      *
-     * @param mobile the mobile number, spaces allowed
-     * @return the appointments table, or a warning explaining why there is nothing to show
+     * @param mobile the mobile, spaces allowed
+     * @return the table, or a warning saying why there is nothing to show
      */
     public String viewAppointmentsForPatient(String mobile) {
         String problem = Patient.checkMobile(mobile);
@@ -499,10 +490,10 @@ public class Clinic {
     }
 
     /**
-     * Shows the free slots of one professional today.
+     * Shows a professional's free times today.
      *
      * @param professionalId the staff ID, e.g. "100101"
-     * @return the free times, or a warning explaining why there are none
+     * @return the free times, or a warning saying why there are none
      */
     public String viewFreeSlots(String professionalId) {
         String problem = HealthProfessional.checkId(professionalId);
@@ -525,15 +516,15 @@ public class Clinic {
     }
 
     /**
-     * Returns the slots still free with a professional today.
+     * Gives the times still free with a professional today.
      *
      * @param professional the professional, of any type
-     * @return the free times, earliest first (empty if the person is not working today)
+     * @return the free times, earliest first (empty if they don't work today)
      */
     public ArrayList<TimeSlot> getFreeSlots(HealthProfessional professional) {
         ArrayList<TimeSlot> free = new ArrayList<>();
         if (professional == null || !professional.worksOn(today)) {
-            return free;                                            // no one off duty has free slots to offer
+            return free; // someone who is off today has no free slots to offer
         }
         for (TimeSlot slot : schedule.getSlots()) {
             if (findAppointment(professional, slot) == null) {
@@ -543,12 +534,10 @@ public class Clinic {
         return free;
     }
 
-    // =========================================================================
-    //  Cancelling and rescheduling
-    // =========================================================================
+    // ===== Cancelling and rescheduling =====
 
     /**
-     * Cancels the appointment a professional has at a time.
+     * Cancels a professional's appointment at a time.
      *
      * @param professionalId the staff ID, e.g. "100101"
      * @param time           the appointment time, e.g. "09:00"
@@ -571,17 +560,18 @@ public class Clinic {
             return WARNING + "Nothing cancelled. " + professional.getName() + " has no appointment at "
                     + slot + ".";
         }
-        appointments.remove(match);                                 // removed after the search, so the list is never changed mid-loop
+        appointments.remove(match); // removed after the search loop, so the list never changes mid-loop
         return OK + "Cancelled " + match.getSummary() + ". That slot is free again.";
     }
 
     /**
-     * Cancels the appointment booked under a mobile number. If the number
-     * has several appointments (for example a family sharing one phone),
-     * nothing is cancelled, because the clinic cannot know which one is
-     * meant; the warning lists them so one can be cancelled by staff ID and time.
+     * Cancels the appointment booked under a mobile number.
+     * If the number has more than one appointment (a family sharing a phone),
+     * nothing is cancelled: the clinic can't know which one is meant, and
+     * guessing could cancel the wrong person's visit. The warning lists them
+     * so the right one can be cancelled by staff ID and time.
      *
-     * @param mobile the mobile number, spaces allowed
+     * @param mobile the mobile, spaces allowed
      * @return a confirmation, or a warning if nothing could be cancelled
      */
     public String cancelAppointment(String mobile) {
@@ -601,7 +591,7 @@ public class Clinic {
                         + appointment.getProfessional().getId() + ")";
             }
             return WARNING + "Nothing cancelled. " + matches.size() + " appointments are booked under "
-                    + shown + "; cancel one by staff ID and time instead:" + list; // guessing could cancel the wrong person's visit
+                    + shown + "; cancel one by staff ID and time instead:" + list;
         }
         Appointment match = matches.get(0);
         appointments.remove(match);
@@ -609,13 +599,13 @@ public class Clinic {
     }
 
     /**
-     * Moves an appointment to another time with the same professional,
-     * applying the same rules as a new booking.
+     * Moves an appointment to another time with the same professional.
+     * The new time goes through the same rules as a new booking.
      *
      * @param professionalId the staff ID, e.g. "100101"
-     * @param currentTime    the current appointment time
-     * @param newTime        the requested new time
-     * @return a confirmation, or a warning explaining why nothing changed
+     * @param currentTime    the appointment's time now
+     * @param newTime        the time asked for
+     * @return a confirmation, or a warning saying why nothing changed
      */
     public String rescheduleAppointment(String professionalId, String currentTime, String newTime) {
         String problems = Validator.addProblem(HealthProfessional.checkId(professionalId),
@@ -649,26 +639,26 @@ public class Clinic {
                     + patientClash.getProfessional().getName() + ".";
         }
         appointments.remove(current);
-        appointments.add(Appointment.create(current.getPatient(), professional, newSlot)); // appointments are immutable, so a move is a replacement
+        // an Appointment can't change, so moving it means replacing it
+        appointments.add(Appointment.create(current.getPatient(), professional, newSlot));
         return OK + "Moved " + current.getPatient().getSummary() + " with " + professional.getName()
                 + " from " + current.getTimeSlot() + " to " + newSlot + ". " + current.getTimeSlot()
                 + " is free again.";
     }
 
-    // =========================================================================
-    //  Prescriptions and the daily summary
-    // =========================================================================
+    // ===== Prescriptions and the end of the day =====
 
     /**
-     * Issues a repeat prescription for a registered patient, signed by the
-     * first prescriber on duty today. The clinic only needs the capability,
-     * so it works through the Prescriber interface and never needs to know
-     * whether that person is a GP, a specialist or a nurse practitioner.
+     * Writes a repeat prescription for a registered patient, signed by the
+     * first prescriber who works today.
+     * The clinic only cares that someone can prescribe, so it works through
+     * the Prescriber interface. It never needs to know if that person is a
+     * GP, a specialist or a nurse practitioner.
      *
      * @param patientName the patient's name
-     * @param mobile      the patient's mobile number
+     * @param mobile      the patient's mobile
      * @param medication  the medicine and dose
-     * @return the prescription, or a warning explaining why none was issued
+     * @return the prescription, or a warning saying why none was written
      */
     public String issueRepeatPrescription(String patientName, String mobile, String medication) {
         String problems = Validator.addProblem(Patient.checkName(patientName), Patient.checkMobile(mobile));
@@ -683,7 +673,8 @@ public class Clinic {
         }
         for (HealthProfessional professional : staff) {
             if (professional instanceof Prescriber && professional.worksOn(today)) {
-                Prescriber prescriber = (Prescriber) professional;  // [Abstraction] the clinic relies on the capability, not the class
+                // [Abstraction] the clinic needs the ability, not the class
+                Prescriber prescriber = (Prescriber) professional;
                 return OK + prescriber.prescribe(patient.getName(), medication);
             }
         }
@@ -691,7 +682,7 @@ public class Clinic {
     }
 
     /**
-     * Summarises the day: how busy each professional on duty is, plus totals.
+     * Sums up the day: how busy each person on duty is, plus totals.
      *
      * @return the summary table
      */
@@ -721,21 +712,20 @@ public class Clinic {
         return text;
     }
 
-    // =========================================================================
-    //  Private helpers
-    // =========================================================================
+    // ===== Private helpers =====
 
     /**
      * Finds a professional's appointment at a time.
      *
      * @param professional the professional
      * @param slot         the time
-     * @return the appointment, or null if that slot is free
+     * @return the appointment, or null if that time is free
      */
     private Appointment findAppointment(HealthProfessional professional, TimeSlot slot) {
         for (Appointment appointment : appointments) {
+            // both use equals(): same staff ID, same minute
             if (appointment.isWith(professional) && appointment.startsAt(slot)) {
-                return appointment;                                 // equals() on both: same staff ID and same minute
+                return appointment;
             }
         }
         return null;
@@ -758,27 +748,28 @@ public class Clinic {
     }
 
     /**
-     * Suggests the next free slot after a taken one, for a helpful warning.
+     * Suggests the next free time after a taken one, for a more helpful warning.
+     * A real receptionist doesn't just say "taken", they offer another time.
      *
-     * @param professional the professional who is busy
-     * @param after        the taken slot
-     * @return a sentence naming the next free slot, or saying there is none
+     * @param professional the busy professional
+     * @param after        the taken time
+     * @return a sentence with the next free time, or saying there isn't one
      */
     private String suggestNextFreeSlot(HealthProfessional professional, TimeSlot after) {
         for (TimeSlot slot : getFreeSlots(professional)) {
             if (after.isBefore(slot)) {
-                return " Next free slot: " + slot + ".";            // a refusal with an alternative is what a real receptionist gives
+                return " Next free slot: " + slot + ".";
             }
         }
         return " No later slot is free today.";
     }
 
     /**
-     * Formats a list of appointments as a table under a title.
+     * Puts a list of appointments into a table under a title.
      *
      * @param title the table title
-     * @param list  the appointments to show, in the order given
-     * @return the title, heading and two lines per appointment
+     * @param list  the appointments, in the order to show them
+     * @return the title, the heading and two lines per appointment
      */
     private static String formatAppointments(String title, ArrayList<Appointment> list) {
         String text = title + " (" + list.size() + "):\n" + Appointment.tableHeader();

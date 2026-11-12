@@ -1,23 +1,19 @@
 /*
- * =============================================================================
- *  System  : Arcana Health Centre - Appointment System
- *  Unit    : PROG2004 Object Oriented Programming - Assessment 1
- *  Author  : Zefei Niu (zniu16, 25259175)
- *  File    : Dietitian.java
- *  Purpose : A dietitian, who gives nutrition advice and meal plans.
- * =============================================================================
+ * Arcana Health Centre - Appointment System
+ * PROG2004 Object Oriented Programming, Assessment 1
+ * Author: Zefei Niu (zniu16)
  */
 
 /**
  * A dietitian, who gives nutrition advice and builds meal plans.
- * <p>
- * The extra detail a dietitian records is their focus area. There is no
- * full-time default roster for this type: dietitians in a clinic usually
- * consult on set sessional days, so the roster must always be given.
- * </p>
+ *
+ * The extra detail is the dietitian's focus area. Unlike GPs and nurses,
+ * there is no full-time default here: dietitians in a clinic usually come in
+ * on set days, so a default Monday-to-Friday roster would be wrong more often
+ * than right. The roster always has to be given.
  *
  * @author Zefei Niu
- * @version 2.0
+ * @version 1.0
  */
 public class Dietitian extends HealthProfessional {
 
@@ -25,26 +21,26 @@ public class Dietitian extends HealthProfessional {
     private final String focusArea;
 
     /**
-     * Builds a dietitian. Private: use create(...).
+     * Builds a dietitian. Outside code uses create(...).
      *
-     * @param id          six-digit staff ID, already validated
-     * @param name        the dietitian's name, already validated
-     * @param workingDays the days the dietitian consults, already validated
-     * @param focusArea   the focus area, already validated
+     * @param id          staff ID (already checked)
+     * @param name        the name (already checked)
+     * @param workingDays the days worked (already checked)
+     * @param focusArea   the focus area (already checked)
      */
     private Dietitian(String id, String name, String[] workingDays, String focusArea) {
-        super(id, name, workingDays);                               // [Inheritance] the parent owns the shared fields, so it sets them
+        super(id, name, workingDays); // [Inheritance] the shared fields belong to the parent, so it sets them
         this.focusArea = Validator.tidy(focusArea);
     }
 
     /**
-     * Explains what, if anything, is wrong with a dietitian's details.
+     * Says what is wrong with a dietitian's details, if anything.
      *
-     * @param id          the staff ID to check
-     * @param name        the name to check
-     * @param workingDays the roster to check
-     * @param focusArea   the focus area to check
-     * @return an empty text if valid, otherwise every problem found
+     * @param id          the staff ID
+     * @param name        the name
+     * @param workingDays the roster
+     * @param focusArea   the focus area
+     * @return "" if valid, otherwise every problem found
      */
     public static String check(String id, String name, String[] workingDays, String focusArea) {
         return Validator.addProblem(checkCommonDetails(id, name, workingDays),
@@ -52,23 +48,23 @@ public class Dietitian extends HealthProfessional {
     }
 
     /**
-     * Creates a dietitian, or nothing if any detail is invalid.
+     * Creates a dietitian.
      *
      * @param id          six-digit staff ID
-     * @param name        the dietitian's name
-     * @param workingDays the days the dietitian consults
-     * @param focusArea   the focus area, e.g. "Diabetes nutrition"
+     * @param name        the name
+     * @param workingDays the days worked
+     * @param focusArea   e.g. "Diabetes nutrition"
      * @return the new dietitian, or null if the details are invalid
      */
     public static Dietitian create(String id, String name, String[] workingDays, String focusArea) {
         if (!check(id, name, workingDays, focusArea).isEmpty()) {
-            return null;                                            // [Encapsulation] invalid details never become an object
+            return null; // [Encapsulation] bad details never turn into an object
         }
         return new Dietitian(id, name, workingDays, focusArea);
     }
 
     /**
-     * Returns the focus area.
+     * Gives the focus area.
      *
      * @return e.g. "Diabetes nutrition"
      */
@@ -77,11 +73,11 @@ public class Dietitian extends HealthProfessional {
     }
 
     /**
-     * Builds a meal plan, the task unique to a dietitian.
+     * Builds a meal plan. Only a dietitian does this.
      *
-     * @param patientName the patient the plan is for
-     * @param goal        what the plan should achieve, e.g. "steady blood sugar"
-     * @return the meal plan summary, or a warning explaining why it was not made
+     * @param patientName the patient
+     * @param goal        what the plan is for, e.g. "steady blood sugar"
+     * @return a summary of the plan, or a warning saying why it wasn't made
      */
     public String createMealPlan(String patientName, String goal) {
         String problems = Validator.addProblem(
@@ -105,9 +101,9 @@ public class Dietitian extends HealthProfessional {
     }
 
     /**
-     * Describes what a dietitian provides.
+     * Describes what a dietitian does.
      *
-     * @return a short description of the dietitian's services
+     * @return a short description
      */
     @Override
     public String describeServices() {
@@ -115,9 +111,9 @@ public class Dietitian extends HealthProfessional {
     }
 
     /**
-     * Tells a patient how to prepare for a dietitian visit.
+     * Tells a patient how to get ready for a dietitian visit.
      *
-     * @return the preparation advice
+     * @return the advice
      */
     @Override
     public String getPreparationAdvice() {
@@ -125,12 +121,12 @@ public class Dietitian extends HealthProfessional {
     }
 
     /**
-     * Presents the shared columns followed by the focus area.
+     * Gives the shared columns plus the focus area.
      *
      * @return this dietitian's table row
      */
     @Override
     public String toString() {
-        return super.toString() + focusArea;                        // [Inheritance] reuse the parent's columns instead of repeating them
+        return super.toString() + focusArea; // [Inheritance] reuse the parent's four columns
     }
 }

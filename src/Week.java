@@ -1,57 +1,51 @@
 /*
- * =============================================================================
- *  System  : Arcana Health Centre - Appointment System
- *  Unit    : PROG2004 Object Oriented Programming - Assessment 1
- *  Author  : Zefei Niu (zniu16, 25259175)
- *  File    : Week.java
- *  Purpose : The fixed set of seven day names and their positions in the week.
- * =============================================================================
+ * Arcana Health Centre - Appointment System
+ * PROG2004 Object Oriented Programming, Assessment 1
+ * Author: Zefei Niu (zniu16)
  */
 
 /**
- * The fixed set of the seven days of the week.
- * <p>
- * Enum is not part of Modules 1-3, so the day names live in one private
- * constant array, and every other class works with days only through the
- * static methods below. Because every conversion goes through this one class,
- * a day can never be spelled two different ways in the system:
- * "monday", " Mon " and "MONDAY" all become "Monday".
- * </p>
+ * The seven days of the week, kept in one place.
+ *
+ * Why this class: every professional has working days and every clinic has
+ * a "today", so the system needs one agreed way to write a day. Without it,
+ * "Mon", "monday" and "Monday" would be three different Strings and a
+ * simple equals() check would fail. An enum would also solve this, but enum
+ * is not taught in Modules 1-3, so I use a private array and static methods.
  *
  * @author Zefei Niu
- * @version 2.0
+ * @version 1.0
  */
 public class Week {
 
-    /** Number of days in a week; also the size of every per-day array. */
+    /** Days in a week, also the size of every per-day array. */
     public static final int DAYS_IN_WEEK = 7;
 
-    /** Length of a short day name such as "Mon". */
+    /** Length of a short day name, e.g. "Mon". */
     public static final int SHORT_NAME_LENGTH = 3;
 
-    /** The fixed day names, Monday first. */
-    private static final String[] DAY_NAMES = {               // [Encapsulation] private, so no class can rename a day
+    /** The day names, Monday first. */
+    private static final String[] DAY_NAMES = { // [Encapsulation] private, so no other class can rename a day
         "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
     };
 
     /**
-     * Prevents objects of this class from being created.
-     * Week only offers static helpers, so an instance would have no purpose.
+     * Stops anyone creating a Week object.
+     * Everything here is static, so an object would have nothing to do.
      */
     private Week() {
     }
 
     /**
-     * Finds the position of a day in the week.
-     * Case and surrounding spaces are ignored, and the short form
-     * ("Mon", "Tue", ...) is accepted as well as the full name.
+     * Finds where a day sits in the week.
+     * Case and extra spaces don't matter, and "Mon", "Tue" etc. work too.
      *
-     * @param dayName the day to look up, e.g. "Wednesday" or "wed"
+     * @param dayName the day, e.g. "Wednesday" or "wed"
      * @return 0 for Monday up to 6 for Sunday, or -1 if it is not a day
      */
     public static int indexOf(String dayName) {
         if (dayName == null) {
-            return -1;                                              // callers test for -1 instead of handling an exception
+            return -1;
         }
         String text = dayName.trim();
         for (int i = 0; i < DAYS_IN_WEEK; i++) {
@@ -64,9 +58,9 @@ public class Week {
     }
 
     /**
-     * Tells whether a text names a day of the week.
+     * Checks whether a text is a day of the week.
      *
-     * @param dayName the text to test, e.g. "Friday"
+     * @param dayName the text to check
      * @return true if it is a full or short day name
      */
     public static boolean isValidDay(String dayName) {
@@ -74,23 +68,23 @@ public class Week {
     }
 
     /**
-     * Returns the full name of the day at a position.
+     * Gives the full name of the day at a position.
      *
      * @param index 0 for Monday up to 6 for Sunday
-     * @return the day name, or an empty text if the position is outside the week
+     * @return the day name, or "" if the position is outside the week
      */
     public static String nameAt(int index) {
         if (index < 0 || index >= DAYS_IN_WEEK) {
-            return "";                                              // an empty name is safer to print than a crash
+            return ""; // an empty name prints fine; a bad index would crash
         }
         return DAY_NAMES[index];
     }
 
     /**
-     * Returns the three-letter name of the day at a position, for tables.
+     * Gives the three-letter name of the day at a position.
      *
      * @param index 0 for Monday up to 6 for Sunday
-     * @return e.g. "Wed", or an empty text if the position is outside the week
+     * @return e.g. "Wed", or "" if the position is outside the week
      */
     public static String shortNameAt(int index) {
         String name = nameAt(index);
@@ -101,12 +95,12 @@ public class Week {
     }
 
     /**
-     * Converts any accepted spelling of a day into its standard full name.
+     * Turns any accepted spelling of a day into its full name.
      *
      * @param dayName the day as typed, e.g. " wed "
-     * @return the standard name, e.g. "Wednesday", or an empty text if it is not a day
+     * @return e.g. "Wednesday", or "" if it is not a day
      */
     public static String normalise(String dayName) {
-        return nameAt(indexOf(dayName));                            // nameAt(-1) already returns "", so no extra check is needed
+        return nameAt(indexOf(dayName)); // nameAt(-1) already returns "", so no extra check
     }
 }
