@@ -311,7 +311,7 @@ public class Clinic {
             problems = Validator.addProblem(problems, "A health professional is required.");
         }
         problems = Validator.addProblem(problems, schedule.checkBookable(time));
-        if (!problems.isEmpty()) {
+        if (professional == null || !problems.isEmpty()) {
             return WARNING + "Booking refused. " + problems;
         }
 
