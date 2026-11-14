@@ -4,21 +4,19 @@ PROG2004 Assessment 1 - Arcana Health Centre
 
 Zefei Niu (`zniu16`)
 
-This is a Java appointment system for one day at Arcana Health Centre. The examples use fourteen staff: four GPs and two of each of the other five types. A patient can book a time, view their appointments, cancel one or move it to another time.
-
-The tutor's feedback on 13 November was that patients should be able to make choices while the program runs. I kept the Part 3 and Part 6 demonstration and added a patient console. Both call the same methods in `Clinic`, so the booking rules are written in one place.
+This project models appointments for one day at Arcana Health Centre. It has patient input and a scripted demonstration. Both use the same `Clinic` methods. The examples use fourteen staff: four GPs and two of each of the other five types.
 
 ## How to run it
 
 Open the project folder in VS Code with Java support and a JDK set up. Open `src/AssignmentOne.java` and run `main`.
 
-| Launch choice | What it does |
+| Startup choice | Action |
 | --- | --- |
-| `1` | Opens patient input for the weekday you enter |
-| `2` | Runs the Part 3 and Part 6 examples, including cases that must be refused |
-| `0` | Exits |
+| `1` | Start patient input for the weekday you enter |
+| `2` | Run the Part 3 and Part 6 scripted examples |
+| `0` | Exit |
 
-The program uses the Java standard library. If the JDK commands are available in your terminal, these commands compile and run it from the project folder:
+The project uses the Java standard library. From the project folder:
 
 ```text
 javac -Xlint:all -d bin -sourcepath src src/AssignmentOne.java
@@ -31,34 +29,34 @@ To run the scripted demonstration directly:
 java -cp bin AssignmentOne --demo
 ```
 
-`expected-output.txt` matches the `--demo` command above. If you choose `2` instead, the output also includes the launch menu.
+`expected-output.txt` matches the `--demo` run. Choice `2` runs the same examples after the startup choices are printed. The records are kept in memory and disappear when the program ends.
 
 ## Patient input
 
-Enter today's weekday, your mobile and your name. For a test, use `Wednesday`, `0412345678` and `Romy Lovell`.
+Choose `1`, then enter a weekday, mobile and name. For a test, use `Wednesday`, `0412345678` and `Romy Lovell`.
 
 | Patient choice | Action |
 | --- | --- |
-| `1 Book` | Choose an on-duty professional, see their details and select a free time |
-| `2 My appointments` | See your appointments from earliest to latest |
-| `3 Doctors` | See the doctors and other health professionals working that day |
-| `4 Cancel` | Select one of your numbered appointments, then confirm |
+| `1 Book` | Choose an on-duty professional, view their details and select a free start time |
+| `2 My appointments` | Show your appointments from earliest to latest |
+| `3 Doctors` | Show the doctors and other professionals working that day |
+| `4 Cancel` | Select one of your numbered appointments and confirm cancellation |
 | `5 Change time` | Select an appointment and choose another time with the same professional |
-| `0 Change patient` | Go back to the mobile prompt; the day's bookings stay in the clinic |
+| `0 Change patient` | Return to the mobile prompt while keeping the day's records |
 
-For the first test booking, choose `1`, staff ID `100101` and time `09:00`, then enter `y`. The clinic registers the patient when the first booking succeeds. Booking again with the same details uses the existing record.
+For a first booking, choose `1`, staff ID `100101`, time `09:00`, then `y` to confirm. The patient record is created when the booking succeeds. Booking again with matching details uses that record.
 
-When cancelling or changing time, enter the number beside the appointment in your list. Entering `n` at confirmation leaves it as it is. Input `0` goes back, or ends the session if you are at the mobile prompt. Closing the program clears the records.
+For cancellation or a time change, select the number beside an appointment in your list. Entering `n` at confirmation keeps it unchanged. Entering `0` goes back; at the mobile prompt it ends the patient session.
 
 ## Rules used in this model
 
-- You enter the weekday for the clinic day. The program does not read the system date or clock. The demonstration uses Wednesday, then a separate Saturday clinic.
+- The patient session uses the weekday entered at startup. The scripted demonstration uses Wednesday, then a separate Saturday clinic. The model receives the weekday as data; it does not read the system date or clock.
 - Normal hours are 08:00-16:00, with a booking every thirty minutes. I use 16:00 as closing time, so the last booking starts at 15:30. `ClinicSchedule` can also use different hours, intervals and a lunch break.
 - A professional must be registered and work that day. I lock the roster after registration so an edit cannot hide an existing booking. A new staff object is needed for a different roster.
 - Staff IDs are strings containing six digits. This keeps starting zeroes. Two professional objects with the same ID represent the same person, and the clinic uses the registered object's details.
 - A mobile has ten digits starting with `04`. Spaces and hyphens are removed. One mobile belongs to one patient, so another name cannot register with it. Patient numbers are given out from `P0001` to `P9999` in each clinic.
 - A professional or patient cannot be booked twice at the same time within the clinic. If a booking or move is refused, the old records stay. Cancelling or moving frees the old slot.
-- Entering a name and mobile selects a patient record; it is not account authentication. The clinical service and prescription methods return example text.
+- Names and mobiles identify model records. There is no login or account authentication. Clinical service and prescription methods return example text.
 
 ## Source files
 
@@ -67,7 +65,7 @@ The project has nineteen Java source files in `src`.
 | File | Responsibility |
 | --- | --- |
 | [AssignmentOne.java](src/AssignmentOne.java) | Entry point, staff examples and demonstration |
-| [PatientConsole.java](src/PatientConsole.java) | Patient input, results and confirmation |
+| [PatientConsole.java](src/PatientConsole.java) | Patient input, confirmations and displayed results |
 | [Clinic.java](src/Clinic.java) | Staff, patients, appointments and booking rules |
 | [HealthProfessional.java](src/HealthProfessional.java) | Abstract parent: ID, name, working days and shared behaviour |
 | [Nurse.java](src/Nurse.java) | Abstract nursing class with a clinical area and shared blood-sample method |
@@ -92,26 +90,26 @@ The project has nineteen Java source files in `src`.
 | --- | --- | --- |
 | Encapsulation | Private fields, `HealthProfessional.getWorkingDays()` and `updateWorkingDays()`, and the list getters in `Clinic` | The getters return copies. Changes go through methods that check the input, and a registered roster stays fixed. |
 | Inheritance | `RegisteredNurse extends Nurse extends HealthProfessional`; `super(...)` and `super.toString()` | Both nurse types reuse the common nursing code. Each level sets up and prints its own fields. |
-| Polymorphism | `ArrayList<HealthProfessional>`, `PatientConsole.book()`, and `getPreparationAdvice()` in `Clinic.bookAppointment()` | One list holds all six types. The same method call gives the details or advice for the actual object. |
+| Polymorphism | `ArrayList<HealthProfessional>`, the staff loop in `AssignmentOne`, and `getPreparationAdvice()` in `Clinic.bookAppointment()` | One list holds all six types. The same method call gives the details or advice for the actual object. |
 | Abstraction | Abstract `HealthProfessional` and `Nurse`, plus the `Prescriber` interface | The parent defines the shared questions. `Prescriber` lets doctors and nurse practitioners share an ability while keeping their own parent classes. |
 
 `Appointment` holds a patient, a professional and a time slot. `Clinic` keeps the staff, patients and appointment lists. These are the has-a relationships in the model.
 
 ## Why I put the rules here
 
-A single appointment only knows its own details. To find a time clash, I need to compare it with the other bookings, so that check belongs in `Clinic`. `PatientConsole` reads the choice and calls the clinic method.
+A single appointment only knows its own details. To find a time clash, I need to compare it with the other bookings, so that check belongs in `Clinic`. The demonstration calls these methods with fixed examples. `PatientConsole` reads choices and calls the same clinic methods.
 
 `TimeSlot` turns both `9:30` and `09:30` into 570 minutes. I can compare that with 600 for `10:00`, or add thirty minutes for the next slot. `Appointment.compareTo()` uses this comparison. `Clinic.sortByTime()` sorts a copy so the original booking order stays available.
 
 The six concrete professional types have private constructors. Their `create(...)` methods check the details before making an object. Bad input returns `null`, and `check(...)` gives the reason. `Appointment.create(...)` also refuses missing references. A new subclass must follow the same checking rule: `abstract` alone does not make its input valid.
 
-When a patient cancels or moves a booking, the clinic checks the mobile, staff ID and current time together. It then uses the existing operation. The mobile-only cancellation method gives a warning if there is more than one booking to choose from. Methods with the same name and different parameters show overloading. A subclass giving its own version of an inherited instance method shows overriding.
+The cancellation and time-change overloads that take a mobile also check the staff ID and current appointment time. They then call the existing operation. The mobile-only cancellation method gives a warning if there is more than one booking to choose from. Methods with the same name and different parameters show overloading. A subclass giving its own version of an inherited instance method shows overriding.
 
 ## Checks
 
 The demonstration uses the different professional types and checks ID equality, bad input, returned copies, booking clashes, filters and sorting. It also shows cancellation by staff ID and time or by mobile, rebooking a freed slot, time changes and a Saturday clinic with lunch.
 
-In the patient console, try booking, moving, cancelling and booking the freed time again. Also try a busy slot or a professional who is off that day. After a refused change, `2 My appointments` should still show the original booking.
+The examples print the appointments again after changes. A failed move keeps the original time, and a cancelled slot can be booked by another patient.
 
 ## Naming
 

@@ -1,29 +1,10 @@
-/*
- * Arcana Health Centre - Appointment System
- * PROG2004 Object Oriented Programming, Assessment 1
- * Author: Zefei Niu (zniu16)
- */
-
 /**
- * A patient registered at the clinic.
- *
- * Why Patient is its own class and not two Strings inside Appointment: one
- * person can hold several appointments in a day. As a class, the name and
- * mobile rules live in one place, the patient is registered once, and every
- * appointment just points to the same Patient (has-a, like a BankAccount
- * has-a Customer in Activity 2.3).
- *
- * The two identifiers follow different rules on purpose:
- * - The patient number ("P0001") is made by the clinic, so it can't be wrong.
- * - The mobile number is typed by a person, so it is checked and then stored
- *   in one plain form. It is a String, not a number: it starts with 0, nobody
- *   does maths with it, and people type it with spaces.
+ * A patient record reused by their appointments.
+ * The mobile is stored as digits so spaces and hyphens do not change a match.
  *
  * @author Zefei Niu
- * @version 1.0
  */
 public class Patient {
-
     /** Digits in an Australian mobile number. */
     public static final int MOBILE_LENGTH = 10;
 
@@ -36,32 +17,25 @@ public class Patient {
     /** Digits after the "P" in a patient number. */
     public static final int NUMBER_DIGITS = 4;
 
-    /** Patient number given by the clinic, e.g. "P0001". */
-    private final String patientNumber; // [Encapsulation] all fields final: a record can't change by mistake
+    /* Patient number given by the clinic, e.g. "P0001". */
+    private final String patientNumber;
 
-    /** Full name. */
+    /* Full name. */
     private final String name;
 
-    /** Mobile number as 10 plain digits, e.g. "0412345678". */
+    /* Mobile number as 10 plain digits, e.g. "0412345678". */
     private final String mobile;
 
-    /**
-     * Builds a patient from checked details. Outside code uses create(...).
-     *
-     * @param patientNumber the clinic's number (already checked)
-     * @param name          the name (already checked)
-     * @param mobile        the mobile number (already checked)
-     */
+    /* Builds a patient from checked details. Outside code uses create(...). */
     private Patient(String patientNumber, String name, String mobile) {
         this.patientNumber = patientNumber.trim();
         this.name = Validator.tidy(name);
-        this.mobile = normaliseMobile(mobile); // one stored form, so "0412 345 678" and "0412345678" match
+        this.mobile = normaliseMobile(mobile);
     }
 
     /**
      * Checks a patient's name.
      *
-     * @param name the name to check
      * @return "" if valid, otherwise the reason
      */
     public static String checkName(String name) {
@@ -71,7 +45,6 @@ public class Patient {
     /**
      * Checks an Australian mobile number. Spaces and hyphens are fine and get removed.
      *
-     * @param mobile the number as typed, e.g. "0412 345 678"
      * @return "" if valid, otherwise the reason
      */
     public static String checkMobile(String mobile) {
@@ -89,7 +62,6 @@ public class Patient {
     /**
      * Checks a patient number: "P" and then four digits.
      *
-     * @param patientNumber the number to check
      * @return "" if valid, otherwise the reason
      */
     public static String checkPatientNumber(String patientNumber) {
@@ -108,9 +80,6 @@ public class Patient {
     /**
      * Says what is wrong with a patient's details, if anything.
      *
-     * @param patientNumber the clinic's number
-     * @param name          the name
-     * @param mobile        the mobile number
      * @return "" if valid, otherwise every problem found
      */
     public static String check(String patientNumber, String name, String mobile) {
@@ -123,34 +92,21 @@ public class Patient {
     /**
      * Creates a patient.
      *
-     * @param patientNumber the clinic's number, e.g. "P0001"
-     * @param name          the name
-     * @param mobile        the mobile number, spaces allowed
      * @return the new patient, or null if the details are invalid
      */
     public static Patient create(String patientNumber, String name, String mobile) {
         if (!check(patientNumber, name, mobile).isEmpty()) {
-            return null; // [Encapsulation] bad details never turn into an object
+            return null;
         }
         return new Patient(patientNumber, name, mobile);
     }
 
-    /**
-     * Turns a typed mobile number into the stored form.
-     *
-     * @param mobile e.g. "0412-345 678"
-     * @return the plain digits, e.g. "0412345678"
-     */
+    /** Turns a typed mobile number into the stored form. */
     public static String normaliseMobile(String mobile) {
         return Validator.removeSeparators(mobile);
     }
 
-    /**
-     * Groups a stored mobile number so it is easy to read: "0412 345 678".
-     *
-     * @param mobile 10 plain digits
-     * @return the grouped number, or the input as it was if it isn't 10 digits
-     */
+    /** Groups a stored mobile number so it is easy to read: "0412 345 678". */
     public static String formatMobile(String mobile) {
         if (mobile == null || mobile.length() != MOBILE_LENGTH) {
             return mobile;
@@ -158,61 +114,38 @@ public class Patient {
         return mobile.substring(0, 4) + " " + mobile.substring(4, 7) + " " + mobile.substring(7);
     }
 
-    /**
-     * Gives the patient number.
-     *
-     * @return e.g. "P0001"
-     */
+    /** Gives the patient number. */
     public String getPatientNumber() {
         return patientNumber;
     }
 
-    /**
-     * Gives the name.
-     *
-     * @return the name
-     */
+    /** Gives the name. */
     public String getName() {
         return name;
     }
 
-    /**
-     * Gives the mobile number in its stored form.
-     *
-     * @return 10 plain digits
-     */
+    /** Gives the mobile number in its stored form. */
     public String getMobile() {
         return mobile;
     }
 
     /**
-     * Checks whether typed details belong to this patient.
-     * Upper/lower case and extra spaces in the name don't matter, and
-     * neither do separators in the mobile number.
-     *
-     * @param otherName   the name as typed
-     * @param otherMobile the mobile number as typed
-     * @return true if both match
+     * Checks whether typed details belong to this patient. Upper/lower case and extra spaces
+     * in the name don't matter, and neither do separators in the mobile number.
      */
     public boolean matches(String otherName, String otherMobile) {
         return name.equalsIgnoreCase(Validator.tidy(otherName))
                 && mobile.equals(normaliseMobile(otherMobile));
     }
 
-    /**
-     * Gives a one-line description for messages.
-     *
-     * @return e.g. "Romy Lovell (P0001)"
-     */
+    /** Gives a one-line description for messages. */
     public String getSummary() {
         return name + " (" + patientNumber + ")";
     }
 
     /**
-     * Gives the patient as a table row. The columns line up under the ID,
-     * name and type columns of a professional's row.
-     *
-     * @return patient number, name and mobile number
+     * Gives the patient as a table row. The columns line up under the ID, name and type
+     * columns of a professional's row.
      */
     @Override
     public String toString() {
@@ -221,15 +154,7 @@ public class Patient {
                 + formatMobile(mobile);
     }
 
-    /**
-     * Two patient records are the same person when the name (any case) and
-     * the mobile number both match.
-     * Why not the mobile alone: families often share one phone. Romy and Theo
-     * Lovell in the demo share a number but are clearly two different people.
-     *
-     * @param other the object to compare with
-     * @return true if it is a patient with the same name and mobile
-     */
+    /** Compares the recorded name and mobile; patient numbers belong to a clinic. */
     @Override
     public boolean equals(Object other) {
         if (this == other) {
@@ -242,13 +167,10 @@ public class Patient {
         return matches(that.name, that.mobile);
     }
 
-    /**
-     * Gives a hash code that matches equals.
-     *
-     * @return a code based on the mobile, which all equal patient objects share
-     */
+    /** Gives a hash code that matches equals. */
     @Override
     public int hashCode() {
-        return mobile.hashCode(); // equal patients must share this value, including Unicode case pairs
+        // Equal patients share this mobile. Different names may still have the same hash.
+        return mobile.hashCode();
     }
 }

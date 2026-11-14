@@ -1,44 +1,29 @@
-/*
- * Arcana Health Centre - Appointment System
- * PROG2004 Object Oriented Programming, Assessment 1
- * Author: Zefei Niu (zniu16)
- */
-
 import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * Reads a patient's booking, cancellation and time-change choices for one day.
- * Clinic keeps the records and checks the rules; this class only reads
- * choices and shows the result. Changing patient keeps the same clinic.
+ * Reads booking, cancellation and time-change choices.
+ * Clinic stores the records and checks whether the requested action is allowed.
  *
  * @author Zefei Niu
  */
 public class PatientConsole {
-
-    /** The same clinic is used until the whole booking session ends. */
+    /* The same clinic is used until the whole booking session ends. */
     private final Clinic clinic;
 
-    /** The reader opened by main; this class does not close it. */
+    /* The reader opened by main; this class does not close it. */
     private final Scanner input;
 
-    /** Stops the loops if input ends partway through an operation. */
+    /* Stops the loops if input ends partway through an operation. */
     private boolean inputEnded;
 
-    /**
-     * Connects the booking desk to the open clinic and keyboard reader.
-     *
-     * @param clinic the day's clinic, with its staff already registered
-     * @param input the shared keyboard reader
-     */
+    /** Connects the booking desk to the open clinic and keyboard reader. */
     public PatientConsole(Clinic clinic, Scanner input) {
         this.clinic = clinic;
         this.input = input;
     }
 
-    /**
-     * Lets patients take turns booking into the same day.
-     */
+    /** Lets patients take turns booking into the same day. */
     public void run() {
         System.out.println("\n" + clinic.getName() + " | " + clinic.getToday());
         System.out.println(clinic.getSchedule());
@@ -57,10 +42,8 @@ public class PatientConsole {
         System.out.println("Booking session closed.");
     }
 
-    /**
+    /*
      * Reads and checks the mobile before any booking is attempted.
-     *
-     * @return the normalised mobile, or null to finish the session
      */
     private String readMobile() {
         while (!inputEnded) {
@@ -77,12 +60,9 @@ public class PatientConsole {
         return null;
     }
 
-    /**
-     * Reads a name and checks an existing mobile's record if there is one.
-     * This selects a record in a local simulation, rather than logging in.
-     *
-     * @param mobile the checked mobile
-     * @return the patient's name, or null to choose a different mobile
+    /*
+     * Reads a name and checks an existing mobile's record if there is one. This selects a
+     * record in a local simulation, rather than logging in.
      */
     private String readName(String mobile) {
         while (!inputEnded) {
@@ -110,12 +90,7 @@ public class PatientConsole {
         return null;
     }
 
-    /**
-     * Keeps one patient's choices together until they leave the desk.
-     *
-     * @param name the checked name
-     * @param mobile the checked mobile
-     */
+    /* Keeps one patient's choices together until they leave the desk. */
     private void servePatient(String name, String mobile) {
         while (!inputEnded) {
             System.out.println("\n" + name + " | " + Patient.formatMobile(mobile));
@@ -146,9 +121,7 @@ public class PatientConsole {
         }
     }
 
-    /**
-     * Shows today's staff together so the patient can compare them.
-     */
+    /* Shows today's staff together so the patient can compare them. */
     private void showDoctors() {
         ArrayList<HealthProfessional> onDuty = clinic.getStaffOnDuty();
         System.out.println("\nProfessionals working " + clinic.getToday());
@@ -165,12 +138,7 @@ public class PatientConsole {
         }
     }
 
-    /**
-     * Reads the professional and time, then asks before making the booking.
-     *
-     * @param name the current patient's name
-     * @param mobile the current patient's mobile
-     */
+    /* Reads the professional and time, then asks before making the booking. */
     private void book(String name, String mobile) {
         showDoctors();
         String id = read("Professional ID (0 to go back): ");
@@ -188,7 +156,7 @@ public class PatientConsole {
             return;
         }
         System.out.println(HealthProfessional.tableHeader());
-        System.out.println(professional); // [Polymorphism] the selected type prints its own details
+        System.out.println(professional);
         System.out.println("Services: " + professional.describeServices());
         showFreeSlots(free);
         String time = read("Start time (HH:mm, 0 to go back): ");
@@ -209,12 +177,7 @@ public class PatientConsole {
         }
     }
 
-    /**
-     * Shows only the current patient's appointments, from earliest to latest.
-     *
-     * @param mobile the current patient's mobile
-     * @return the sorted copies used for the numbered selection
-     */
+    /* Shows only the current patient's appointments, from earliest to latest. */
     private ArrayList<Appointment> showAppointments(String mobile) {
         ArrayList<Appointment> list = Clinic.sortByTime(clinic.filterByPatientMobile(mobile));
         if (list.isEmpty()) {
@@ -231,11 +194,8 @@ public class PatientConsole {
         return list;
     }
 
-    /**
+    /*
      * Selects from this patient's list, not the clinic's full booking list.
-     *
-     * @param mobile the current patient's mobile
-     * @return the chosen appointment, or null to go back
      */
     private Appointment chooseAppointment(String mobile) {
         ArrayList<Appointment> list = showAppointments(mobile);
@@ -249,7 +209,7 @@ public class PatientConsole {
             }
             for (int i = 0; i < list.size(); i++) {
                 if (String.valueOf(i + 1).equals(choice)) {
-                    return list.get(i); // only a displayed number can select a booking
+                    return list.get(i);
                 }
             }
             System.out.println("[WARNING] Choose a number from your appointment list.");
@@ -257,11 +217,7 @@ public class PatientConsole {
         return null;
     }
 
-    /**
-     * Confirms the patient's selection before removing it.
-     *
-     * @param mobile the current patient's mobile
-     */
+    /* Confirms the patient's selection before removing it. */
     private void cancel(String mobile) {
         Appointment appointment = chooseAppointment(mobile);
         if (appointment != null && confirm("Cancel " + appointment.getSummary() + "?")) {
@@ -271,11 +227,7 @@ public class PatientConsole {
         }
     }
 
-    /**
-     * Reads a new time without removing the old appointment first.
-     *
-     * @param mobile the current patient's mobile
-     */
+    /* Reads a new time without removing the old appointment first. */
     private void move(String mobile) {
         Appointment appointment = chooseAppointment(mobile);
         if (appointment == null) {
@@ -304,11 +256,7 @@ public class PatientConsole {
         }
     }
 
-    /**
-     * Keeps the free-time display the same for booking and changing time.
-     *
-     * @param free the available start times, in order
-     */
+    /* Keeps the free-time display the same for booking and changing time. */
     private void showFreeSlots(ArrayList<TimeSlot> free) {
         System.out.println("Free start times:");
         for (int i = 0; i < free.size(); i++) {
@@ -319,11 +267,8 @@ public class PatientConsole {
         }
     }
 
-    /**
+    /*
      * Prints a prompt before reading and stops cleanly at end of input.
-     *
-     * @param prompt the text shown before input
-     * @return the trimmed input, or null if input has ended
      */
     private String read(String prompt) {
         System.out.print(prompt);
@@ -334,22 +279,12 @@ public class PatientConsole {
         return input.nextLine().trim();
     }
 
-    /**
-     * Checks for the shared back choice before using an input value.
-     *
-     * @param value the input, possibly null
-     * @return true for 0 or end of input
-     */
+    /* Checks for the shared back choice before using an input value. */
     private boolean back(String value) {
         return value == null || "0".equals(value);
     }
 
-    /**
-     * Requires a clear yes before changing the appointment collection.
-     *
-     * @param question the proposed change
-     * @return true only when the patient enters y
-     */
+    /* Requires a clear yes before changing the appointment collection. */
     private boolean confirm(String question) {
         while (!inputEnded) {
             String answer = read(question + " (y/n): ");
