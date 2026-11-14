@@ -96,9 +96,10 @@ public class ClinicSchedule {
     public static String check(String opening, String closing, int slotMinutes) {
         String problems = Validator.addProblem(labelled("Opening", TimeSlot.checkText(opening)),
                 labelled("Closing", TimeSlot.checkText(closing)));
-        if (slotMinutes < MIN_SLOT_MINUTES) {
+        if (slotMinutes < MIN_SLOT_MINUTES || slotMinutes > TimeSlot.MINUTES_PER_DAY) {
             problems = Validator.addProblem(problems,
-                    "Slot length must be at least " + MIN_SLOT_MINUTES + " minutes.");
+                    "Slot length must be between " + MIN_SLOT_MINUTES + " and "
+                    + TimeSlot.MINUTES_PER_DAY + " minutes.");
         }
         if (!problems.isEmpty()) {
             return problems; // the checks below compare the times, so the times must be real first

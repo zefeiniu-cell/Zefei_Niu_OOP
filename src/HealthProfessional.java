@@ -16,12 +16,11 @@
  * methods also force every type to answer the same three questions in its
  * own way: what are you, what do you offer, how should a patient prepare.
  *
- * How I keep every object valid without exceptions (they are Module 5):
- * check first, then create. The static check methods below say what is
- * wrong, and each subclass only builds objects in create(...) after those
- * checks pass. Its constructors are private, so nobody can skip the check.
- * After that, the ID and name can never change, and the roster can only
- * change through updateWorkingDays(...), which also checks first.
+ * The six supplied concrete types check their details before create(...)
+ * constructs an object. Their constructors are private. A future subclass
+ * must follow the same rule; abstract alone does not validate its input.
+ * The ID and name cannot change. The roster can be edited before joining
+ * a clinic, then stays fixed for that registered clinic session.
  *
  * Each professional prints as one table row: ID, name, type, days, then the
  * details that only its own type has.
@@ -50,10 +49,13 @@ public abstract class HealthProfessional { // [Abstraction] a professional with 
     /** Working days: picture 7 boxes, Monday first. A ticked box (true) means a working day. */
     private final boolean[] workingDays = new boolean[Week.DAYS_IN_WEEK]; // one yes/no box per day
 
+    /** Keeps the registered session's availability from changing behind its bookings. */
+    private boolean rosterLocked;
+
     /**
      * Sets up the shared part of a professional.
-     * Only a subclass can call this, because the class is abstract, and every
-     * subclass checks the details in create(...) before it gets here.
+     * Subclasses call this after validating their details. The constructor
+     * itself trusts that contract, so a new subclass must also validate first.
      *
      * @param id          six-digit staff ID (already checked)
      * @param name        the name (already checked)
@@ -290,19 +292,30 @@ public abstract class HealthProfessional { // [Abstraction] a professional with 
     }
 
     /**
-     * Changes the roster, e.g. when someone starts working different days.
-     * A bad roster is refused and the old one stays.
+     * Changes the roster before the professional joins a clinic session.
+     * A registered roster or a bad replacement is refused, keeping the old days.
      *
      * @param newDays the new working days
      * @return "" if changed, otherwise why it was refused
      */
     public String updateWorkingDays(String[] newDays) {
+        if (rosterLocked) {
+            return "Roster unchanged: it is fixed for this registered clinic session.";
+        }
         String problem = checkWorkingDays(newDays);
         if (!problem.isEmpty()) {
             return problem; // [Encapsulation] the only way to change the roster checks it first
         }
         markWorkingDays(newDays);
         return "";
+    }
+
+    /**
+     * Keeps the weekly roster fixed once a clinic registers this object.
+     * A new session needing a different roster should use a new staff object.
+     */
+    public final void lockWorkingDays() {
+        rosterLocked = true;
     }
 
     /**

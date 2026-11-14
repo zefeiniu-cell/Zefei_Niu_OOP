@@ -24,9 +24,10 @@ import java.util.Collections;
  * cannot silently create another record under that mobile.
  * After that the day keeps changing: cancel, reschedule, rebook a freed slot.
  *
- * Every operation returns a message starting with "[OK]" or "[WARNING]" and
- * never prints. A warning always says why, and a refused action changes
- * nothing. The day is passed in when the clinic is created, so the same code
+ * Booking, cancellation and time changes return result messages rather than
+ * printing. Query methods return objects, copied lists or formatted text.
+ * Refused actions leave the records unchanged. The day is passed in when
+ * the clinic is created, so the same code
  * works for any day, and the demo gives the same output every time it runs.
  *
  * Why ArrayList for the appointments:
@@ -159,6 +160,7 @@ public class Clinic {
                     + " already belongs to " + holder.getName() + ".";
         }
         staff.add(professional);
+        professional.lockWorkingDays(); // keep the availability advertised for this session
         return OK + "Registered " + professional.getSummary() + ".";
     }
 
@@ -347,6 +349,9 @@ public class Clinic {
         // Last, book it. A first-time patient is registered here, like at a real front desk.
         String registration = "returning patient";
         if (patient == null) {
+            if (String.valueOf(nextPatientNumber).length() > Patient.NUMBER_DIGITS) {
+                return WARNING + "Booking refused. No patient numbers remain for this clinic session.";
+            }
             patient = registerPatient(patientName, mobile);
             registration = "new patient";
         }
@@ -541,15 +546,19 @@ public class Clinic {
      * Gives the times still free with a professional today.
      *
      * @param professional the professional, of any type
-     * @return the free times, earliest first (empty if they don't work today)
+     * @return the free times, earliest first (empty if unregistered or off today)
      */
     public ArrayList<TimeSlot> getFreeSlots(HealthProfessional professional) {
         ArrayList<TimeSlot> free = new ArrayList<>();
-        if (professional == null || !professional.worksOn(today)) {
+        if (professional == null || !staff.contains(professional)) {
+            return free;
+        }
+        HealthProfessional registered = staff.get(staff.indexOf(professional));
+        if (!registered.worksOn(today)) {
             return free; // someone who is off today has no free slots to offer
         }
         for (TimeSlot slot : schedule.getSlots()) {
-            if (findAppointment(professional, slot) == null) {
+            if (findAppointment(registered, slot) == null) {
                 free.add(slot);
             }
         }

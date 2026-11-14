@@ -112,7 +112,7 @@ public abstract class Nurse extends HealthProfessional { // [Abstraction] there 
      */
     @Override
     public String getPreparationAdvice() {
-        return "Wear a short-sleeved top. Fast for 8 hours if a blood test is planned.";
+        return "Bring any test requests and follow the preparation instructions from your clinician.";
     }
 
     /**

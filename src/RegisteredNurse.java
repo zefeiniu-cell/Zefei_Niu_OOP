@@ -158,6 +158,6 @@ public class RegisteredNurse extends Nurse {
     @Override
     public String toString() {
         return super.toString() // [Inheritance] two floors of columns, each written once
-                + (authorisedImmuniser ? ", authorised immuniser" : "");
+                + ", authorised immuniser: " + Display.yesNo(authorisedImmuniser);
     }
 }

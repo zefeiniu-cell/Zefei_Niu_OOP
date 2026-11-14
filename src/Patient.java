@@ -245,10 +245,10 @@ public class Patient {
     /**
      * Gives a hash code that matches equals.
      *
-     * @return a code built from the lower-case name and the mobile number
+     * @return a code based on the mobile, which all equal patient objects share
      */
     @Override
     public int hashCode() {
-        return 31 * name.toLowerCase().hashCode() + mobile.hashCode(); // lower case to match equals
+        return mobile.hashCode(); // equal patients must share this value, including Unicode case pairs
     }
 }
