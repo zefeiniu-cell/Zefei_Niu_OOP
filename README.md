@@ -1,23 +1,24 @@
 # Zefei_Niu_OOP
 
-**PROG2004 Assessment 1 - Arcana Health Centre**  
-**Author:** Zefei Niu (`zniu16`)
+PROG2004 Assessment 1 - Arcana Health Centre
 
-Arcana Health Centre models one clinic day's appointments in Java. It has fourteen example staff across six types: four GPs and two of each other type. Patients can book, view, cancel and change appointment times.
+Zefei Niu (`zniu16`)
 
-The patient console follows the tutor's feedback on 13 November about making choices while the program runs. A separate demonstration covers Parts 3 and 6. Both modes use the same booking rules.
+This is a Java appointment system for one day at Arcana Health Centre. The examples use fourteen staff: four GPs and two of each of the other five types. A patient can book a time, view their appointments, cancel one or move it to another time.
 
-## Running the program
+The tutor's feedback on 13 November was that patients should be able to make choices while the program runs. I kept the Part 3 and Part 6 demonstration and added a patient console. Both call the same methods in `Clinic`, so the booking rules are written in one place.
 
-Open the project folder in VS Code with Java support and a JDK configured. Open `src/AssignmentOne.java` and run `main`.
+## How to run it
+
+Open the project folder in VS Code with Java support and a JDK set up. Open `src/AssignmentOne.java` and run `main`.
 
 | Launch choice | What it does |
 | --- | --- |
-| `1` | Opens the patient booking desk for the weekday entered |
-| `2` | Runs the staff and appointment demonstration, including refused operations |
+| `1` | Opens patient input for the weekday you enter |
+| `2` | Runs the Part 3 and Part 6 examples, including cases that must be refused |
 | `0` | Exits |
 
-Only the Java standard library is needed. With JDK commands available, compile and run from the project root:
+The program uses the Java standard library. If the JDK commands are available in your terminal, these commands compile and run it from the project folder:
 
 ```text
 javac -Xlint:all -d bin -sourcepath src src/AssignmentOne.java
@@ -30,34 +31,34 @@ To run the scripted demonstration directly:
 java -cp bin AssignmentOne --demo
 ```
 
-`expected-output.txt` matches the direct `--demo` run. Choosing `2` adds launch-menu lines before the same demonstration.
+`expected-output.txt` matches the `--demo` command above. If you choose `2` instead, the output also includes the launch menu.
 
-## Using the patient console
+## Patient input
 
-Enter today's weekday, then a mobile number and patient name. For example, use `Wednesday`, `0412345678` and `Romy Lovell`.
+Enter today's weekday, your mobile and your name. For a test, use `Wednesday`, `0412345678` and `Romy Lovell`.
 
 | Patient choice | Action |
 | --- | --- |
-| `1 Book` | Shows on-duty professionals, then the selected person's details and free times |
-| `2 My appointments` | Shows this patient's appointments in time order |
-| `3 Doctors` | Lists the day's doctors and other health professionals |
-| `4 Cancel` | Lets the patient select a numbered appointment and confirm cancellation |
-| `5 Change time` | Lets the patient select a booking and request another time with the same professional |
-| `0 Change patient` | Returns to the mobile-number prompt, keeping the same day's records |
+| `1 Book` | Choose an on-duty professional, see their details and select a free time |
+| `2 My appointments` | See your appointments from earliest to latest |
+| `3 Doctors` | See the doctors and other health professionals working that day |
+| `4 Cancel` | Select one of your numbered appointments, then confirm |
+| `5 Change time` | Select an appointment and choose another time with the same professional |
+| `0 Change patient` | Go back to the mobile prompt; the day's bookings stay in the clinic |
 
-To book, choose `1`, enter staff ID `100101`, time `09:00`, then confirm with `y`. The first successful booking creates the patient record; later bookings reuse it.
+For the first test booking, choose `1`, staff ID `100101` and time `09:00`, then enter `y`. The clinic registers the patient when the first booking succeeds. Booking again with the same details uses the existing record.
 
-For cancellation or a time change, select the number beside your appointment. This number is its list position. Confirmation `n` leaves the record unchanged. Input `0` goes back; at the mobile prompt it ends the session. Records clear when the program closes.
+When cancelling or changing time, enter the number beside the appointment in your list. Entering `n` at confirmation leaves it as it is. Input `0` goes back, or ends the session if you are at the mobile prompt. Closing the program clears the records.
 
-## Model rules and assumptions
+## Rules used in this model
 
-- The operator supplies today's weekday. The program models that day without reading the system date or clock. The scripted examples use Wednesday and a separate Saturday clinic.
-- The standard schedule is 08:00-16:00 in thirty-minute slots. I treat 16:00 as closing time, giving a last start of 15:30. `ClinicSchedule` also supports other hours, intervals and lunch breaks.
-- Staff must be registered and work that day. Their roster can change before registration, then stays fixed for that object. A different roster needs a new staff object, keeping advertised availability consistent with bookings.
-- Staff IDs are six-digit strings. This is a model choice and keeps leading zeroes. Equality between professionals is based on ID, so another object with the same ID is matched to the registered professional.
-- Mobiles have ten digits beginning with `04`; spaces and hyphens are removed. Each mobile belongs to one patient. A different name cannot reuse it. Each clinic allocates internal patient numbers from `P0001` to `P9999`.
-- Within a clinic, neither the professional nor the patient can have two appointments at the same time. A failed booking or move leaves the existing records unchanged. A cancelled or moved appointment releases its old slot.
-- The patient console selects a local patient record; it has no account authentication. Clinical service and prescription methods produce demonstration text.
+- You enter the weekday for the clinic day. The program does not read the system date or clock. The demonstration uses Wednesday, then a separate Saturday clinic.
+- Normal hours are 08:00-16:00, with a booking every thirty minutes. I use 16:00 as closing time, so the last booking starts at 15:30. `ClinicSchedule` can also use different hours, intervals and a lunch break.
+- A professional must be registered and work that day. I lock the roster after registration so an edit cannot hide an existing booking. A new staff object is needed for a different roster.
+- Staff IDs are strings containing six digits. This keeps starting zeroes. Two professional objects with the same ID represent the same person, and the clinic uses the registered object's details.
+- A mobile has ten digits starting with `04`. Spaces and hyphens are removed. One mobile belongs to one patient, so another name cannot register with it. Patient numbers are given out from `P0001` to `P9999` in each clinic.
+- A professional or patient cannot be booked twice at the same time within the clinic. If a booking or move is refused, the old records stay. Cancelling or moving frees the old slot.
+- Entering a name and mobile selects a patient record; it is not account authentication. The clinical service and prescription methods return example text.
 
 ## Source files
 
@@ -69,14 +70,14 @@ The project has nineteen Java source files in `src`.
 | [PatientConsole.java](src/PatientConsole.java) | Patient input, results and confirmation |
 | [Clinic.java](src/Clinic.java) | Staff, patients, appointments and booking rules |
 | [HealthProfessional.java](src/HealthProfessional.java) | Abstract parent: ID, name, working days and shared behaviour |
-| [Nurse.java](src/Nurse.java) | Abstract nursing branch with a clinical area and shared blood-sample behaviour |
-| [Prescriber.java](src/Prescriber.java) | Capability contract for prescribing scope and prescription text |
-| [GeneralPractitioner.java](src/GeneralPractitioner.java) | Billing and referrals; implements `Prescriber` |
-| [Specialist.java](src/Specialist.java) | Specialty, referral rule and tests; implements `Prescriber` |
+| [Nurse.java](src/Nurse.java) | Abstract nursing class with a clinical area and shared blood-sample method |
+| [Prescriber.java](src/Prescriber.java) | Interface for prescribing scope and prescription text |
+| [GeneralPractitioner.java](src/GeneralPractitioner.java) | Bulk-billing flag and referral method; implements `Prescriber` |
+| [Specialist.java](src/Specialist.java) | Specialty, referral flag and test-order method; implements `Prescriber` |
 | [RegisteredNurse.java](src/RegisteredNurse.java) | Nurse with an authorised-immuniser flag |
 | [NursePractitioner.java](src/NursePractitioner.java) | Nurse with prescribing scope; implements `Prescriber` |
-| [Dietitian.java](src/Dietitian.java) | Nutrition focus and meal-plan behaviour |
-| [Physiotherapist.java](src/Physiotherapist.java) | Treatment focus and exercise-program behaviour |
+| [Dietitian.java](src/Dietitian.java) | Nutrition focus and meal-plan method |
+| [Physiotherapist.java](src/Physiotherapist.java) | Treatment focus and exercise-program method |
 | [Patient.java](src/Patient.java) | Patient number, name, normalised mobile and equality |
 | [Appointment.java](src/Appointment.java) | Links a patient, professional and time; implements `Comparable` |
 | [TimeSlot.java](src/TimeSlot.java) | Valid clock time stored as minutes; comparison and display |
@@ -85,82 +86,74 @@ The project has nineteen Java source files in `src`.
 | [Validator.java](src/Validator.java) | Shared checks and text normalisation |
 | [Display.java](src/Display.java) | Shared table formatting and small display helpers |
 
-## Four pillars in this design
+## OOP in this project
 
-| Pillar | Where to look | Why it is useful here |
+| Pillar | Where to look | Why I used it |
 | --- | --- | --- |
-| Encapsulation | `HealthProfessional.getWorkingDays()` and `updateWorkingDays()`; private fields and `Clinic` list-copy getters | Outside code receives copies and uses checked operations to change data. Registered working days stay fixed. |
-| Inheritance | `RegisteredNurse extends Nurse extends HealthProfessional`; `super(...)` and `super.toString()` | Common fields and behaviour are reused down the hierarchy; subclasses add their own details. |
-| Polymorphism | `ArrayList<HealthProfessional>`; `PatientConsole.book()`; `Clinic.bookAppointment()` calling `getPreparationAdvice()` | A common type accepts all six professional types, while each object supplies its own services and output. |
-| Abstraction | `HealthProfessional` abstract methods, abstract `Nurse`, and `Prescriber` | Shared contracts define what callers can ask. Prescribing is a capability spanning different branches. |
+| Encapsulation | Private fields, `HealthProfessional.getWorkingDays()` and `updateWorkingDays()`, and the list getters in `Clinic` | The getters return copies. Changes go through methods that check the input, and a registered roster stays fixed. |
+| Inheritance | `RegisteredNurse extends Nurse extends HealthProfessional`; `super(...)` and `super.toString()` | Both nurse types reuse the common nursing code. Each level sets up and prints its own fields. |
+| Polymorphism | `ArrayList<HealthProfessional>`, `PatientConsole.book()`, and `getPreparationAdvice()` in `Clinic.bookAppointment()` | One list holds all six types. The same method call gives the details or advice for the actual object. |
+| Abstraction | Abstract `HealthProfessional` and `Nurse`, plus the `Prescriber` interface | The parent defines the shared questions. `Prescriber` lets doctors and nurse practitioners share an ability while keeping their own parent classes. |
 
-`Appointment` has a patient, professional and time slot; `Clinic` has their collections. These has-a relationships assemble collaborating objects.
+`Appointment` holds a patient, a professional and a time slot. `Clinic` keeps the staff, patients and appointment lists. These are the has-a relationships in the model.
 
-## Main design choices
+## Why I put the rules here
 
-I keep booking rules in `Clinic` because clash checks need the whole appointment list. `PatientConsole` collects choices and calls those methods.
+A single appointment only knows its own details. To find a time clash, I need to compare it with the other bookings, so that check belongs in `Clinic`. `PatientConsole` reads the choice and calls the clinic method.
 
-`TimeSlot` turns both `9:30` and `09:30` into 570 minutes, simplifying comparison and interval calculations. `Appointment.compareTo()` delegates to it. `Clinic.sortByTime()` sorts a copy, preserving booking order.
+`TimeSlot` turns both `9:30` and `09:30` into 570 minutes. I can compare that with 600 for `10:00`, or add thirty minutes for the next slot. `Appointment.compareTo()` uses this comparison. `Clinic.sortByTime()` sorts a copy so the original booking order stays available.
 
-The six concrete professional types have private constructors and validating `create(...)` methods. Bad input returns `null`; `check(...)` supplies the reason. `Appointment.create(...)` rejects missing references. Future subclasses must follow the validation contract: `abstract` alone does not validate constructor arguments.
+The six concrete professional types have private constructors. Their `create(...)` methods check the details before making an object. Bad input returns `null`, and `check(...)` gives the reason. `Appointment.create(...)` also refuses missing references. A new subclass must follow the same checking rule: `abstract` alone does not make its input valid.
 
-Patient cancellation and time changes check mobile, staff ID and current time before calling the existing operation. General cancellation methods remain available. Mobile-only cancellation refuses to guess between several bookings. These parameter variations are overloading; subclass implementations of shared behaviour demonstrate overriding.
+When a patient cancels or moves a booking, the clinic checks the mobile, staff ID and current time together. It then uses the existing operation. The mobile-only cancellation method gives a warning if there is more than one booking to choose from. Methods with the same name and different parameters show overloading. A subclass giving its own version of an inherited instance method shows overriding.
 
-## Checking the behaviour
+## Checks
 
-The demonstration covers mixed types, identity by ID, validation, defensive copies, booking conflicts, filtering, sorting, both general cancellation methods, rebooking, time changes and a Saturday lunch schedule.
+The demonstration uses the different professional types and checks ID equality, bad input, returned copies, booking clashes, filters and sorting. It also shows cancellation by staff ID and time or by mobile, rebooking a freed slot, time changes and a Saturday clinic with lunch.
 
-For a console check, book, move, cancel and rebook the freed time. Try an occupied slot or off-duty professional. After refusal, use `2 My appointments` to check that the original booking remains.
+In the patient console, try booking, moving, cancelling and booking the freed time again. Also try a busy slot or a professional who is off that day. After a refused change, `2 My appointments` should still show the original booking.
 
 ## Naming
 
-### The idea
+Arcana Health Centre comes from the phrase Major Arcana. I kept the clinic and character names within the same theme.
 
-Arcana Health Centre takes its name from the phrase *Major Arcana*. I used one card theme for the fictional cast, so the clinic name, staff names and patient examples belong together.
+For staff, I linked a card to their profession or area of care. For patients and invalid-input examples, I linked it to what happens in the demonstration. Some names use wordplay; others use an image or idea from the card.
 
-The naming follows three rules:
-
-1. Each staff member has a card association linked to their profession or area of care.
-2. Each patient or validation example has an association linked to its part in the demonstration.
-3. Some names echo a card's name; others suggest its imagery or theme. These are creative links chosen for this project.
-
-The mapping below uses VIII for Strength and XI for Justice. Staff IDs and patient mobiles still determine identity in the program; the cards describe the fictional cast.
+These are the naming links chosen for this project. I use VIII for Strength and XI for Justice. The program still identifies professionals by ID and patient records by mobile.
 
 ### Staff
 
 | Professional | Role in the model | Card | Naming link |
 | --- | --- | --- | --- |
-| Dr Elias Magee | General practitioner | I - The Magician | Magee echoes the Magician; the broad skill theme fits a GP. |
-| Dr Solana Reyes | General practitioner | XIX - The Sun | The name suggests sunlight, matching the health and energy theme. |
-| Dr Rex Calloway | General practitioner | IV - The Emperor | A ruler-like name connects with order and leadership. |
-| Dr Orla Mundy | General practitioner | XXI - The World | Completeness connects the World with a GP's whole-person view. |
-| Dr Leona Hart | Cardiology specialist | VIII - Strength | Lion and heart wordplay links the name with strength and cardiology. |
-| Dr Selene Marsh | Dermatology specialist | XVIII - The Moon | Moon imagery and looking beneath the surface link the name and specialty. |
-| Stella Rivers | Registered nurse, immunisation | XVII - The Star | Star and flowing-water imagery connect the name with care and hope. |
-| Jude Ashworth | Registered nurse, wound care | XX - Judgement | Renewal and recovery fit the wound-care example. |
-| Priya Sterling | Nurse practitioner, chronic disease | II - The High Priestess | The knowledge theme fits the advanced nursing role. |
-| Imogen Empey | Nurse practitioner, women's health | III - The Empress | Nurturing and care connect the card with the chosen clinical area. |
-| Tempe Lawson | Dietitian, diabetes nutrition | XIV - Temperance | Tempe echoes Temperance; balance and moderation fit nutrition. |
-| Rowan Wheeler | Dietitian, sports nutrition | X - Wheel of Fortune | Wheeler echoes the Wheel, with cycles linking to the sports-training theme. |
-| Charlie Rhodes | Physiotherapist, sports injuries | VII - The Chariot | Movement and direction fit sports rehabilitation. |
-| Ingrid Hermansen | Physiotherapist, back and neck pain | IX - The Hermit | Hermansen hints at the Hermit, with a quiet, gradual-recovery theme. |
+| Dr Elias Magee | General practitioner | I - The Magician | Magee echoes Magician. The broad-skills idea fits a GP. |
+| Dr Solana Reyes | General practitioner | XIX - The Sun | Solana was chosen to suggest sunlight, health and energy. |
+| Dr Rex Calloway | General practitioner | IV - The Emperor | Rex suggests a ruler and the Emperor's order theme. |
+| Dr Orla Mundy | General practitioner | XXI - The World | The World suggests completeness, which I linked to a GP's whole-person care. |
+| Dr Leona Hart | Cardiology specialist | VIII - Strength | Leona suggests a lion and Hart sounds like heart, linking the name to cardiology. |
+| Dr Selene Marsh | Dermatology specialist | XVIII - The Moon | I linked Selene with the Moon, and looking under the surface with skin care. |
+| Stella Rivers | Registered nurse, immunisation | XVII - The Star | Stars and water connect the name with care and hope. |
+| Jude Ashworth | Registered nurse, wound care | XX - Judgement | Recovery and starting again fit the wound-care example. |
+| Priya Sterling | Nurse practitioner, chronic disease | II - The High Priestess | Knowledge is the link to advanced nursing. |
+| Imogen Empey | Nurse practitioner, women's health | III - The Empress | I used the nurture theme for women's health. |
+| Tempe Lawson | Dietitian, diabetes nutrition | XIV - Temperance | Tempe echoes Temperance. Balance and moderation connect it with nutrition. |
+| Rowan Wheeler | Dietitian, sports nutrition | X - Wheel of Fortune | Wheeler points to the Wheel; training cycles give the sports-nutrition link. |
+| Charlie Rhodes | Physiotherapist, sports injuries | VII - The Chariot | Movement is the link to sports rehabilitation. |
+| Ingrid Hermansen | Physiotherapist, back and neck pain | IX - The Hermit | Hermansen hints at the Hermit. Its quiet mood gives the recovery theme. |
 
-Rex's leadership association is part of the naming idea. His implemented role is GP; the model does not assign him a separate clinic-manager role.
+Rex's role in the code is GP. The Emperor connection is used for the name.
 
 ### Patients and validation examples
 
 | Character | Card | Part in the current demonstration | Naming link |
 | --- | --- | --- | --- |
-| Finn Foley / `Finn F0ley` | 0 - The Fool | Invalid or unregistered details are refused. | Foley echoes the Fool and marks the deliberate mistake examples. |
-| Vincent Pope | V - The Hierophant | A registered patient requests a repeat prescription. | Pope and the tradition theme fit a returning patient's routine visit. |
-| Romy and Theo Lovell | VI - The Lovers | Two separate patient records; reusing Romy's mobile for Theo is refused. | Lovell links the pair to the relationship theme. |
-| Justine Fairley | XI - Justice | Books a slot freed by another patient's cancellation. | Justine and Fairley use justice and fairness wordplay. |
-| Hugo Mann | XII - The Hanged Man | His 10:00 appointment is moved to 14:00. | Mann echoes Man; pausing and reconsidering fit a time change. |
-| Devlin Sweet | XV - The Devil | Appears in the nutrition and meal-plan examples. | Devlin and Sweet use temptation-and-food wordplay. |
-| Tara Towers | XVI - The Tower | Attempts a time already booked with another patient. | Towers echoes the Tower, linking disruption with a booking conflict. |
+| Finn Foley / `Finn F0ley` | 0 - The Fool | Invalid or unregistered details are refused. | Foley echoes Fool and marks the deliberate input mistakes. |
+| Vincent Pope | V - The Hierophant | A registered patient asks for a repeat prescription. | Pope and tradition fit the returning-patient example. |
+| Romy and Theo Lovell | VI - The Lovers | Separate records; Theo's attempt to use Romy's mobile is refused. | Lovell links the two names with the relationship theme. |
+| Justine Fairley | XI - Justice | Books a slot after another patient cancels it. | Justine suggests justice, and Fairley suggests fairness. |
+| Hugo Mann | XII - The Hanged Man | The 10:00 booking moves to 14:00. | Mann echoes Man; reconsidering a plan connects it to a time change. |
+| Devlin Sweet | XV - The Devil | Appears in the nutrition and meal-plan examples. | Devlin and Sweet give the food-and-temptation wordplay. |
+| Tara Towers | XVI - The Tower | Tries a time already booked for another patient. | Towers points to the Tower; the booking clash is the disruption. |
 
-Romy uses `0412345678`; Theo uses `0488123456`. Their linked names keep the relationship theme while each has a separate mobile. The ambiguous mobile-only cancellation example comes from Romy's own two bookings. Finn is used for refusal examples and is not a successfully registered demonstration patient.
+Romy uses `0412345678` and Theo uses `0488123456`. They keep separate records. The mobile-only cancellation warning comes from Romy's two bookings, not a shared family number. Finn's examples are refused, so they do not add a registered demonstration patient.
 
-### The card left out
-
-The tables use twenty-one card associations. XIII - Death is deliberately left unassigned because its name would set the wrong tone for this fictional health centre.
+I left XIII - Death out because its name felt out of place in a health centre. The tables use the other twenty-one card links.
