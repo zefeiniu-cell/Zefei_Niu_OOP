@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * Reads a patient's booking choices for one day's clinic.
+ * Reads a patient's booking, cancellation and time-change choices for one day.
  * Clinic keeps the records and checks the rules; this class only reads
  * choices and shows the result. Changing patient keeps the same clinic.
  *
@@ -119,7 +119,7 @@ public class PatientConsole {
     private void servePatient(String name, String mobile) {
         while (!inputEnded) {
             System.out.println("\n" + name + " | " + Patient.formatMobile(mobile));
-            System.out.println("1 Book  2 My appointments  3 Doctors  0 Change patient");
+            System.out.println("1 Book  2 My appointments  3 Doctors  4 Cancel  5 Change time  0 Change patient");
             String choice = read("Choose: ");
             if (back(choice)) {
                 return;
@@ -133,6 +133,12 @@ public class PatientConsole {
                     break;
                 case "3":
                     showDoctors();
+                    break;
+                case "4":
+                    cancel(mobile);
+                    break;
+                case "5":
+                    move(mobile);
                     break;
                 default:
                     System.out.println("[WARNING] Choose one of the numbers shown.");
@@ -184,13 +190,7 @@ public class PatientConsole {
         System.out.println(HealthProfessional.tableHeader());
         System.out.println(professional); // [Polymorphism] the selected type prints its own details
         System.out.println("Services: " + professional.describeServices());
-        System.out.println("Free start times:");
-        for (int i = 0; i < free.size(); i++) {
-            System.out.print(free.get(i) + "  ");
-            if ((i + 1) % 8 == 0 || i == free.size() - 1) {
-                System.out.println();
-            }
-        }
+        showFreeSlots(free);
         String time = read("Start time (HH:mm, 0 to go back): ");
         if (back(time)) {
             return;
@@ -213,18 +213,109 @@ public class PatientConsole {
      * Shows only the current patient's appointments, from earliest to latest.
      *
      * @param mobile the current patient's mobile
+     * @return the sorted copies used for the numbered selection
      */
-    private void showAppointments(String mobile) {
+    private ArrayList<Appointment> showAppointments(String mobile) {
         ArrayList<Appointment> list = Clinic.sortByTime(clinic.filterByPatientMobile(mobile));
         if (list.isEmpty()) {
             System.out.println("[WARNING] You have no appointments today.");
-            return;
+            return list;
         }
         System.out.println("Your appointments, by time:");
-        for (Appointment appointment : list) {
-            System.out.println(appointment.getTimeSlot() + " | "
+        for (int i = 0; i < list.size(); i++) {
+            Appointment appointment = list.get(i);
+            System.out.println((i + 1) + ". " + appointment.getTimeSlot() + " | "
                     + appointment.getProfessional().getName() + " | "
                     + appointment.getProfessional().getProfessionType());
+        }
+        return list;
+    }
+
+    /**
+     * Selects from this patient's list, not the clinic's full booking list.
+     *
+     * @param mobile the current patient's mobile
+     * @return the chosen appointment, or null to go back
+     */
+    private Appointment chooseAppointment(String mobile) {
+        ArrayList<Appointment> list = showAppointments(mobile);
+        if (list.isEmpty()) {
+            return null;
+        }
+        while (!inputEnded) {
+            String choice = read("Appointment number (0 to go back): ");
+            if (back(choice)) {
+                return null;
+            }
+            for (int i = 0; i < list.size(); i++) {
+                if (String.valueOf(i + 1).equals(choice)) {
+                    return list.get(i); // only a displayed number can select a booking
+                }
+            }
+            System.out.println("[WARNING] Choose a number from your appointment list.");
+        }
+        return null;
+    }
+
+    /**
+     * Confirms the patient's selection before removing it.
+     *
+     * @param mobile the current patient's mobile
+     */
+    private void cancel(String mobile) {
+        Appointment appointment = chooseAppointment(mobile);
+        if (appointment != null && confirm("Cancel " + appointment.getSummary() + "?")) {
+            System.out.println(clinic.cancelAppointment(mobile,
+                    appointment.getProfessional().getId(), appointment.getTimeSlot().toString()));
+            showAppointments(mobile);
+        }
+    }
+
+    /**
+     * Reads a new time without removing the old appointment first.
+     *
+     * @param mobile the current patient's mobile
+     */
+    private void move(String mobile) {
+        Appointment appointment = chooseAppointment(mobile);
+        if (appointment == null) {
+            return;
+        }
+        ArrayList<TimeSlot> free = clinic.getFreeSlots(appointment.getProfessional());
+        if (free.isEmpty()) {
+            System.out.println("[WARNING] No alternative slots are free with this professional today.");
+            return;
+        }
+        System.out.println("Current booking: " + appointment.getSummary());
+        showFreeSlots(free);
+        String time = read("New start time (HH:mm, 0 to go back): ");
+        if (back(time)) {
+            return;
+        }
+        String problem = clinic.getSchedule().checkBookable(time);
+        if (!problem.isEmpty()) {
+            System.out.println(Clinic.WARNING + problem);
+            return;
+        }
+        if (confirm("Move " + appointment.getSummary() + " to " + time + "?")) {
+            System.out.println(clinic.rescheduleAppointment(mobile,
+                    appointment.getProfessional().getId(), appointment.getTimeSlot().toString(), time));
+            showAppointments(mobile);
+        }
+    }
+
+    /**
+     * Keeps the free-time display the same for booking and changing time.
+     *
+     * @param free the available start times, in order
+     */
+    private void showFreeSlots(ArrayList<TimeSlot> free) {
+        System.out.println("Free start times:");
+        for (int i = 0; i < free.size(); i++) {
+            System.out.print(free.get(i) + "  ");
+            if ((i + 1) % 8 == 0 || i == free.size() - 1) {
+                System.out.println();
+            }
         }
     }
 
@@ -256,7 +347,7 @@ public class PatientConsole {
     /**
      * Requires a clear yes before changing the appointment collection.
      *
-     * @param question the proposed booking
+     * @param question the proposed change
      * @return true only when the patient enters y
      */
     private boolean confirm(String question) {

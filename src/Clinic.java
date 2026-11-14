@@ -559,6 +559,22 @@ public class Clinic {
     // ===== Cancelling and rescheduling =====
 
     /**
+     * Cancels the selection only if it is booked under this patient's mobile.
+     *
+     * @param mobile the current patient's mobile
+     * @param professionalId the selected staff ID
+     * @param time the selected appointment time
+     * @return a confirmation, or a warning with nothing changed
+     */
+    public String cancelAppointment(String mobile, String professionalId, String time) {
+        String problem = checkPatientAppointment(mobile, professionalId, time);
+        if (!problem.isEmpty()) {
+            return WARNING + "Nothing cancelled. " + problem;
+        }
+        return cancelAppointment(professionalId, time); // reuse the existing removal rule
+    }
+
+    /**
      * Cancels a professional's appointment at a time.
      *
      * @param professionalId the staff ID, e.g. "100101"
@@ -588,9 +604,9 @@ public class Clinic {
 
     /**
      * Cancels the appointment booked under a mobile number.
-     * If the number has more than one appointment (a family sharing a phone),
+     * If the patient has more than one appointment,
      * nothing is cancelled: the clinic can't know which one is meant, and
-     * guessing could cancel the wrong person's visit. The warning lists them
+     * guessing could cancel the wrong visit. The warning lists them
      * so the right one can be cancelled by staff ID and time.
      *
      * @param mobile the mobile, spaces allowed
@@ -618,6 +634,25 @@ public class Clinic {
         Appointment match = matches.get(0);
         appointments.remove(match);
         return OK + "Cancelled " + match.getSummary() + ". That slot is free again.";
+    }
+
+    /**
+     * Moves the selection only if it is booked under this patient's mobile.
+     * All time and conflict checks still happen in the existing operation.
+     *
+     * @param mobile the current patient's mobile
+     * @param professionalId the selected staff ID
+     * @param currentTime the currently booked time
+     * @param newTime the requested new time
+     * @return a confirmation, or a warning with the original booking kept
+     */
+    public String rescheduleAppointment(String mobile, String professionalId,
+                                       String currentTime, String newTime) {
+        String problem = checkPatientAppointment(mobile, professionalId, currentTime);
+        if (!problem.isEmpty()) {
+            return WARNING + "Not rescheduled. " + problem;
+        }
+        return rescheduleAppointment(professionalId, currentTime, newTime);
     }
 
     /**
@@ -735,6 +770,30 @@ public class Clinic {
     }
 
     // ===== Private helpers =====
+
+    /**
+     * Checks the selected staff ID and time against this patient's bookings.
+     *
+     * @param mobile the patient's mobile
+     * @param professionalId the selected staff ID
+     * @param time the selected appointment time
+     * @return an empty string for a match, otherwise the reason
+     */
+    private String checkPatientAppointment(String mobile, String professionalId, String time) {
+        String problems = Patient.checkMobile(mobile);
+        problems = Validator.addProblem(problems, HealthProfessional.checkId(professionalId));
+        problems = Validator.addProblem(problems, TimeSlot.checkText(time));
+        if (!problems.isEmpty()) {
+            return problems;
+        }
+        TimeSlot slot = TimeSlot.parse(time);
+        for (Appointment appointment : filterByPatientMobile(mobile)) {
+            if (appointment.isWith(professionalId) && appointment.startsAt(slot)) {
+                return "";
+            }
+        }
+        return "No matching appointment is booked under this mobile.";
+    }
 
     /**
      * Finds a professional's appointment at a time.
