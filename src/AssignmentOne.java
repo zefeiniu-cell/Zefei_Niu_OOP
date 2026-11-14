@@ -5,16 +5,12 @@
  */
 
 import java.util.ArrayList;
+import java.util.Scanner;
 
 /**
- * Runs the whole system as a scripted demo.
- *
- * There is no menu and no keyboard input, because the brief asks for
- * neither. Instead, main plays the people who use the clinic. Every step
- * follows the same pattern, so the output is easy to follow:
- * First print what is about to be tried, with its input (a line starting with ">").
- * Then do it.
- * Last print the system's answer, which shows whether the input was accepted.
+ * Starts the patient booking desk or the scripted code demonstration.
+ * The booking desk reads choices; Clinic still checks the booking rules.
+ * The demonstration keeps the normal and refused cases together for review.
  *
  * About the names: the cast comes from the 22 Major Arcana of the tarot.
  * Each staff member's card matches their job, and each patient's card
@@ -48,14 +44,78 @@ public class AssignmentOne {
     }
 
     /**
-     * Runs Part 3, then Part 6 with the same staff.
+     * Chooses how to run the same appointment model.
      *
-     * @param args command line arguments (not used)
+     * @param args use --demo to run the scripted examples directly
      */
     public static void main(String[] args) {
         printBanner();
-        ArrayList<HealthProfessional> professionals = runPartThree();
-        runPartSix(professionals);
+        if (args.length > 0 && "--demo".equals(args[0])) {
+            runPartSix(runPartThree(true));
+            return;
+        }
+        Scanner input = new Scanner(System.in);
+        String mode = readMode(input);
+        if ("1".equals(mode)) {
+            String day = readClinicDay(input);
+            if (day != null) {
+                Clinic clinic = Clinic.create(CLINIC_NAME, day, ClinicSchedule.standard());
+                for (HealthProfessional professional : runPartThree(false)) {
+                    clinic.registerProfessional(professional);
+                }
+                PatientConsole console = new PatientConsole(clinic, input);
+                console.run();
+            }
+        } else if ("2".equals(mode)) {
+            runPartSix(runPartThree(true));
+        }
+        input.close(); // both paths have finished reading before the shared reader is closed
+    }
+
+    /**
+     * Reads the launch choice without parsing an unchecked number.
+     *
+     * @param input the shared keyboard reader
+     * @return 1 for patient input, 2 for the demonstration, or 0 to exit
+     */
+    private static String readMode(Scanner input) {
+        while (true) {
+            System.out.println("1 Patient booking");
+            System.out.println("2 Code demonstration");
+            System.out.println("0 Exit");
+            System.out.print("Choose: ");
+            if (!input.hasNextLine()) {
+                return "0";
+            }
+            String choice = input.nextLine().trim();
+            if ("1".equals(choice) || "2".equals(choice) || "0".equals(choice)) {
+                return choice;
+            }
+            System.out.println("[WARNING] Choose 1, 2 or 0.");
+        }
+    }
+
+    /**
+     * Sets today's weekday for this single-day session.
+     *
+     * @param input the shared keyboard reader
+     * @return the weekday, or null to stop before opening the clinic
+     */
+    private static String readClinicDay(Scanner input) {
+        while (true) {
+            System.out.print("Today's weekday (Mon-Sun, 0 to exit): ");
+            if (!input.hasNextLine()) {
+                return null;
+            }
+            String day = input.nextLine().trim();
+            if ("0".equals(day)) {
+                return null;
+            }
+            if (Week.isValidDay(day)) {
+                return Week.normalise(day);
+            }
+            System.out.println("[WARNING] Enter a weekday such as Saturday or Sat.");
+        }
     }
 
     // ===== Part 3 - Working with health professional objects =====
@@ -64,14 +124,15 @@ public class AssignmentOne {
      * Part 3: creates a realistic mix of professionals and shows that they
      * can be stored, printed and used together through their parent type.
      *
+     * @param showDemo false creates the same staff without printing the examples
      * @return every professional created, so Part 6 can use the same staff
      */
-    private static ArrayList<HealthProfessional> runPartThree() {
-        printPartTitle("PART 3 - Working with health professional objects");
-
-        // 3.1 The staff: 4 GPs and 2 of every other type
-        printSection("3.1 Create the clinic's health professionals");
-        printAttempt("Create 14 professionals of 6 types");
+    private static ArrayList<HealthProfessional> runPartThree(boolean showDemo) {
+        if (showDemo) {
+            printPartTitle("PART 3 - Working with health professional objects");
+            printSection("3.1 Create the clinic's health professionals");
+            printAttempt("Create 14 professionals of 6 types");
+        }
 
         GeneralPractitioner drMagee = GeneralPractitioner.create("100101", "Dr Elias Magee",
                 true); // no roster given, so the full-time default applies
@@ -120,6 +181,9 @@ public class AssignmentOne {
         addProfessional(professionals, dtWheeler);
         addProfessional(professionals, ptRhodes);
         addProfessional(professionals, ptHermansen);
+        if (!showDemo) {
+            return professionals; // the patient path starts with staff but no scripted bookings
+        }
         printResult("[OK] " + professionals.size() + " professionals created and stored in one list.");
 
         // 3.2 One loop prints every type in full
@@ -275,7 +339,7 @@ public class AssignmentOne {
         // 6.3 Bookings across every type
         printSection("6.3 Book appointments across every type of professional");
         bookChosen(clinic, "Romy Lovell", "0412 345 678", clinic.findProfessional("100101"), "09:00");
-        book(clinic, "Theo Lovell", "0412345678", "500501", "10:30");       // same phone, different person
+        book(clinic, "Theo Lovell", "0488 123 456", "500501", "10:30"); // one mobile per patient
         book(clinic, "Devlin Sweet", "0445 678 901", "400401", "13:00");
         book(clinic, "Tara Towers", "0423-456-789", "200201", "08:30");     // hyphens are removed
         book(clinic, "Hugo Mann", "0434 567 890", "100104", "10:00");
@@ -289,6 +353,7 @@ public class AssignmentOne {
 
         // 6.4 Bookings that must be refused
         printSection("6.4 Bookings that must be refused");
+        book(clinic, "Theo Lovell", "0412 345 678", "100102", "10:30"); // this mobile belongs to Romy
         book(clinic, "Tara Towers", "0423 456 789", "100101", "09:00");     // Dr Magee is taken at 09:00
         book(clinic, "Romy Lovell", "0412 345 678", "100104", "09:00");     // Romy is already booked at 09:00
         book(clinic, "Hugo Mann", "0434 567 890", "100103", "09:30");       // Dr Calloway is off Wednesdays
@@ -313,7 +378,7 @@ public class AssignmentOne {
         printSection("6.6 Filter by staff ID or by patient mobile (each result sorted by time)");
         printAttempt("Filter by staff ID 100101 (Dr Magee)");
         System.out.println(clinic.viewAppointmentsForProfessional("100101"));
-        printAttempt("Filter by mobile \"0412 345 678\" (the Lovell family's shared phone)");
+        printAttempt("Filter by mobile \"0412 345 678\" (Romy's two appointments)");
         System.out.println(clinic.viewAppointmentsForPatient("0412 345 678"));
         printAttempt("Filter by staff ID 100103 (Dr Calloway, off today)");
         printResult(clinic.viewAppointmentsForProfessional("100103"));
@@ -335,7 +400,7 @@ public class AssignmentOne {
         printResult(clinic.cancelAppointment("200201", "09:00"));
         printAttempt("Cancel by mobile \"0423 456 789\" (Tara Towers, one appointment left)");
         printResult(clinic.cancelAppointment("0423 456 789"));
-        printAttempt("Cancel by mobile \"0412 345 678\" (the shared Lovell phone)");
+        printAttempt("Cancel by mobile \"0412 345 678\" (Romy has two appointments; select one explicitly)");
         printResult(clinic.cancelAppointment("0412 345 678"));
         printAttempt("Cancel by mobile \"0499 000 111\" (no bookings)");
         printResult(clinic.cancelAppointment("0499 000 111"));

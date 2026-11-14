@@ -48,7 +48,7 @@ Nurse Practitioner    Advanced nursing care, diagnosis, prescribing
                       Bring your medicines and your latest test results for review.
 Dietitian             Nutrition assessment and meal planning
                       Keep a 3-day food diary and bring it to the appointment.
-Physiotherapist       Movement assessment, treatment, exercise programmes
+Physiotherapist       Movement assessment, treatment, exercise programs
                       Wear comfortable clothes that let you move the injured area freely.
 
 3.4 Interface: who can prescribe? (Prescriber)
@@ -88,8 +88,8 @@ Imogen Empey        Nurse Practitioner    Medicines for contraception and menopa
   Blood sample: taken from Devlin Sweet by Imogen Empey (Nurse Practitioner) and labelled for pathology.
 > Dietitian creates a meal plan
   Meal plan: 7-day plan for Devlin Sweet aiming for steady blood sugar, prepared by Tempe Lawson.
-> Physiotherapist designs an exercise programme
-  Exercise programme: 4-week plan for Theo Lovell (knee sprain), designed by Charlie Rhodes.
+> Physiotherapist designs an exercise program
+  Exercise program: 4-week plan for Theo Lovell (knee sprain), designed by Charlie Rhodes.
 
 3.6 Identity: equals() and hashCode() compare staff IDs
 ------------------------------------------------------------------------------
@@ -155,7 +155,7 @@ Not working today: Dr Rex Calloway, Imogen Empey, Rowan Wheeler
 > Book Romy Lovell (0412 345 678) with Dr Elias Magee (chosen online) at 09:00
   [OK] Booked new patient Romy Lovell (P0001) with Dr Elias Magee (General Practitioner, ID 100101) at 09:00.
     Before the visit: Bring your Medicare card and a list of the medicines you take.
-> Book Theo Lovell (0412345678) with staff 500501 at 10:30
+> Book Theo Lovell (0488 123 456) with staff 500501 at 10:30
   [OK] Booked new patient Theo Lovell (P0002) with Charlie Rhodes (Physiotherapist, ID 500501) at 10:30.
     Before the visit: Wear comfortable clothes that let you move the injured area freely.
 > Book Devlin Sweet (0445 678 901) with staff 400401 at 13:00
@@ -191,6 +191,8 @@ Not working today: Dr Rex Calloway, Imogen Empey, Rowan Wheeler
 
 6.4 Bookings that must be refused
 ------------------------------------------------------------------------------
+> Book Theo Lovell (0412 345 678) with staff 100102 at 10:30
+  [WARNING] Booking refused. This mobile is already registered to another name. Use the recorded name or a different mobile.
 > Book Tara Towers (0423 456 789) with staff 100101 at 09:00
   [WARNING] Booking refused. Dr Elias Magee is already booked at 09:00. Next free slot: 09:30.
 > Book Romy Lovell (0412 345 678) with staff 100104 at 09:00
@@ -223,7 +225,7 @@ TIME   ID      NAME                TYPE                  DAYS             DETAIL
 09:00  100101  Dr Elias Magee      General Practitioner  Mon-Fri          Bulk billing
        P0001   Romy Lovell         0412 345 678
 10:30  500501  Charlie Rhodes      Physiotherapist       Mon Wed Fri      Sports injuries
-       P0002   Theo Lovell         0412 345 678
+       P0002   Theo Lovell         0488 123 456
 13:00  400401  Tempe Lawson        Dietitian             Wed Fri          Diabetes nutrition
        P0003   Devlin Sweet        0445 678 901
 08:30  200201  Dr Leona Hart       Specialist            Wed Thu          Cardiology, referral needed
@@ -258,7 +260,7 @@ TIME   ID      NAME                TYPE                  DAYS             DETAIL
 10:00  100104  Dr Orla Mundy       General Practitioner  Tue-Thu          Bulk billing
        P0005   Hugo Mann           0434 567 890
 10:30  500501  Charlie Rhodes      Physiotherapist       Mon Wed Fri      Sports injuries
-       P0002   Theo Lovell         0412 345 678
+       P0002   Theo Lovell         0488 123 456
 11:00  500502  Ingrid Hermansen    Physiotherapist       Tue Wed Sat      Back and neck pain
        P0004   Tara Towers         0423 456 789
 11:30  300303  Priya Sterling      Nurse Practitioner    Mon Wed Fri      Chronic disease; prescribes for diabetes and blood pressure
@@ -285,15 +287,13 @@ TIME   ID      NAME                TYPE                  DAYS             DETAIL
        P0001   Romy Lovell         0412 345 678
 15:00  100101  Dr Elias Magee      General Practitioner  Mon-Fri          Bulk billing
        P0003   Devlin Sweet        0445 678 901
-> Filter by mobile "0412 345 678" (the Lovell family's shared phone)
-Appointments under 0412 345 678, by time (3):
+> Filter by mobile "0412 345 678" (Romy's two appointments)
+Appointments under 0412 345 678, by time (2):
 TIME   ID      NAME                TYPE                  DAYS             DETAILS
        PAT.    PATIENT             MOBILE
 -----  ------  ------------------  --------------------  ---------------  --------------------
 09:00  100101  Dr Elias Magee      General Practitioner  Mon-Fri          Bulk billing
        P0001   Romy Lovell         0412 345 678
-10:30  500501  Charlie Rhodes      Physiotherapist       Mon Wed Fri      Sports injuries
-       P0002   Theo Lovell         0412 345 678
 14:30  300301  Stella Rivers       Registered Nurse      Mon-Fri          Immunisation, authorised immuniser
        P0001   Romy Lovell         0412 345 678
 > Filter by staff ID 100103 (Dr Calloway, off today)
@@ -318,10 +318,9 @@ TIME   ID      NAME                TYPE                  DAYS             DETAIL
   [WARNING] Nothing cancelled. Dr Leona Hart has no appointment at 09:00.
 > Cancel by mobile "0423 456 789" (Tara Towers, one appointment left)
   [OK] Cancelled 11:00 Tara Towers (P0004) with Ingrid Hermansen. That slot is free again.
-> Cancel by mobile "0412 345 678" (the shared Lovell phone)
-  [WARNING] Nothing cancelled. 3 appointments are booked under 0412 345 678; cancel one by staff ID and time instead:
+> Cancel by mobile "0412 345 678" (Romy has two appointments; select one explicitly)
+  [WARNING] Nothing cancelled. 2 appointments are booked under 0412 345 678; cancel one by staff ID and time instead:
     - 09:00 Romy Lovell (P0001) with Dr Elias Magee (staff ID 100101)
-    - 10:30 Theo Lovell (P0002) with Charlie Rhodes (staff ID 500501)
     - 14:30 Romy Lovell (P0001) with Stella Rivers (staff ID 300301)
 > Cancel by mobile "0499 000 111" (no bookings)
   [WARNING] Nothing cancelled. No appointment is booked under 0499 000 111.
@@ -366,7 +365,7 @@ TIME   ID      NAME                TYPE                  DAYS             DETAIL
 09:00  100101  Dr Elias Magee      General Practitioner  Mon-Fri          Bulk billing
        P0001   Romy Lovell         0412 345 678
 10:30  500501  Charlie Rhodes      Physiotherapist       Mon Wed Fri      Sports injuries
-       P0002   Theo Lovell         0412 345 678
+       P0002   Theo Lovell         0488 123 456
 11:30  300303  Priya Sterling      Nurse Practitioner    Mon Wed Fri      Chronic disease; prescribes for diabetes and blood pressure
        P0006   Vincent Pope        0467 890 123
 12:00  200202  Dr Selene Marsh     Specialist            Mon Wed          Dermatology, no referral needed
@@ -391,7 +390,7 @@ ID      NAME                TYPE                  BOOKED  FREE  BUSY
 200201  Dr Leona Hart       Specialist                 1    15    6%
 200202  Dr Selene Marsh     Specialist                 1    15    6%
 300301  Stella Rivers       Registered Nurse           1    15    6%
-300302  Jude Ashworth       Registered Nurse         1    15    6%
+300302  Jude Ashworth       Registered Nurse           1    15    6%
 300303  Priya Sterling      Nurse Practitioner         1    15    6%
 400401  Tempe Lawson        Dietitian                  1    15    6%
 500501  Charlie Rhodes      Physiotherapist            1    15    6%
@@ -408,7 +407,7 @@ Total: 11 appointments, 11 of 176 staff slots booked (6%), 7 patients registered
   [OK] Arcana Weekend Clinic is open on Saturday: 08:00-16:00, 30-minute slots, lunch 12:00-13:00, 14 slots (last starts 15:30).
   Bookable slots: 08:00 08:30 09:00 09:30 10:00 10:30 11:00 11:30 13:00 13:30 14:00 14:30 15:00 15:30
 > Register the same 14 professionals at the weekend clinic
-  [OK] 14 registered; on duty Saturday: 4.
+  [OK] 14 registered; on duty Saturday: 2.
 > Book Justine Fairley (0456 789 012) with staff 300302 at 12:00
   [WARNING] Booking refused. 12:00 falls in the lunch break (12:00-13:00).
 > Book Justine Fairley (0456 789 012) with staff 300302 at 13:00

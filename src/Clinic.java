@@ -20,6 +20,8 @@ import java.util.Collections;
  * First the clinic registers its staff (a staff ID can only be used once).
  * Then a patient books. On their first booking they are registered and get
  * a patient number; next time, the same name and mobile are recognised.
+ * For this model, one mobile belongs to one patient; a different name
+ * cannot silently create another record under that mobile.
  * After that the day keeps changing: cancel, reschedule, rebook a freed slot.
  *
  * Every operation returns a message starting with "[OK]" or "[WARNING]" and
@@ -245,6 +247,22 @@ public class Clinic {
     }
 
     /**
+     * Finds the record that already uses this mobile.
+     *
+     * @param mobile the number as typed, with optional spaces or hyphens
+     * @return the matching patient, or null
+     */
+    public Patient findPatientByMobile(String mobile) {
+        String normalised = Patient.normaliseMobile(mobile);
+        for (Patient patient : patients) {
+            if (patient.getMobile().equals(normalised)) {
+                return patient;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Gives every registered patient.
      *
      * @return a new list of the patients
@@ -313,7 +331,11 @@ public class Clinic {
             return WARNING + "Booking refused. " + booked.getName() + " is already booked at " + slot
                     + "." + suggestNextFreeSlot(booked, slot);
         }
-        Patient patient = findPatient(patientName, mobile);
+        Patient patient = findPatientByMobile(mobile);
+        if (patient != null && !patient.matches(patientName, mobile)) {
+            return WARNING + "Booking refused. This mobile is already registered to another name. "
+                    + "Use the recorded name or a different mobile.";
+        }
         if (patient != null) {
             Appointment clash = findAppointment(patient, slot);
             if (clash != null) {
