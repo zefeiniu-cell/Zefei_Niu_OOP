@@ -1,4 +1,6 @@
 /**
+ * Arcana Health Centre - Appointment System.
+ *
  * A health professional with a treatment focus and an exercise-program method.
  *
  * @author Zefei Niu
@@ -7,7 +9,7 @@ public class Physiotherapist extends HealthProfessional {
     /* The physio's focus, e.g. "Sports injuries". */
     private final String treatmentFocus;
 
-    /* Builds a physiotherapist. Outside code uses create(...). */
+    /** Builds a physiotherapist. Outside code uses create(...). */
     private Physiotherapist(String id, String name, String[] workingDays, String treatmentFocus) {
         super(id, name, workingDays);
         this.treatmentFocus = Validator.tidy(treatmentFocus);

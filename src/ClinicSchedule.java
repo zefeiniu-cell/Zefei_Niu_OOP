@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 
 /**
+ * Arcana Health Centre - Appointment System.
+ *
  * Generates the day's start times from the opening hours and slot length.
  * Each appointment must finish by closing time and avoid any lunch break.
  *
@@ -37,7 +39,7 @@ public class ClinicSchedule {
     /* Every bookable start time, earliest first. */
     private final ArrayList<TimeSlot> slots = new ArrayList<>();
 
-    /*
+    /**
      * Builds a schedule from settings that were already checked. Outside code uses create(...)
      * or standard().
      */
@@ -236,7 +238,7 @@ public class ClinicSchedule {
         return text;
     }
 
-    /* Checks whether a slot starting at this time would run into lunch. */
+    /** Checks whether a slot starting at this time would run into lunch. */
     private boolean overlapsLunch(TimeSlot slot) {
         if (!hasLunchBreak()) {
             return false;
@@ -248,8 +250,10 @@ public class ClinicSchedule {
                 && start + slotMinutes > lunchStart.getStartMinute();
     }
 
-    /*
+    /**
      * Puts a label in front of a problem; an empty result stays empty.
+     *
+     * @return an empty string if there is no problem, otherwise the label and problem
      */
     private static String labelled(String label, String problem) {
         if (problem.isEmpty()) {

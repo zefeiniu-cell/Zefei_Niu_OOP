@@ -1,4 +1,6 @@
 /**
+ * Arcana Health Centre - Appointment System.
+ *
  * Shared clinical area and blood-sample method for both nurse types.
  *
  * @author Zefei Niu

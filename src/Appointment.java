@@ -1,4 +1,6 @@
 /**
+ * Arcana Health Centre - Appointment System.
+ *
  * One booking linking a patient, a professional and a start time.
  * Clinic checks this booking against the rest of the day.
  *
@@ -14,7 +16,7 @@ public class Appointment implements Comparable<Appointment> {
     /* When the appointment starts. */
     private final TimeSlot timeSlot;
 
-    /* Builds an appointment from parts that were already checked. Outside code uses create(...). */
+    /** Builds an appointment from parts that were already checked. Outside code uses create(...). */
     private Appointment(Patient patient, HealthProfessional professional, TimeSlot timeSlot) {
         this.patient = patient;
         this.professional = professional;
@@ -109,7 +111,7 @@ public class Appointment implements Comparable<Appointment> {
         return timeSlot + " " + patient.getSummary() + " with " + professional.getName();
     }
 
-/** Orders bookings by start time. Equal times compare as zero. */
+    /** Orders bookings by start time. Equal times compare as zero. */
     @Override
     public int compareTo(Appointment other) {
         return timeSlot.compareTo(other.timeSlot);

@@ -1,4 +1,6 @@
 /**
+ * Arcana Health Centre - Appointment System.
+ *
  * Column widths and formatting used by the console tables.
  *
  * @author Zefei Niu
@@ -22,7 +24,7 @@ public class Display {
     /** Space between two columns. */
     public static final String GAP = "  ";
 
-    /*
+    /**
      * Stops anyone creating a Display object. Everything here is static, so an object would
      * have nothing to do.
      */

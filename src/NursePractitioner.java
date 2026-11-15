@@ -1,4 +1,6 @@
 /**
+ * Arcana Health Centre - Appointment System.
+ *
  * A nurse with an endorsed prescribing scope.
  * It inherits the nursing methods and implements Prescriber.
  *
@@ -8,7 +10,7 @@ public class NursePractitioner extends Nurse implements Prescriber {
     /* What the NP is endorsed to prescribe for, e.g. "diabetes and blood pressure". */
     private final String endorsedScope;
 
-    /* Builds a nurse practitioner. Outside code uses create(...). */
+    /** Builds a nurse practitioner. Outside code uses create(...). */
     private NursePractitioner(String id, String name, String[] workingDays, String clinicalArea,
                               String endorsedScope) {
         super(id, name, workingDays, clinicalArea);
@@ -56,7 +58,7 @@ public class NursePractitioner extends Nurse implements Prescriber {
         return "Advanced nursing care, diagnosis, prescribing";
     }
 
-/** Returns the preparation text used for a nurse practitioner. */
+    /** Returns the preparation text used for a nurse practitioner. */
     @Override
     public String getPreparationAdvice() {
         return "Bring your medicines and your latest test results for review.";

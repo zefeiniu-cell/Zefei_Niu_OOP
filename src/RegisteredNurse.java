@@ -1,4 +1,6 @@
 /**
+ * Arcana Health Centre - Appointment System.
+ *
  * A nurse with an authorised-immuniser flag used by the vaccine example.
  *
  * @author Zefei Niu
@@ -7,14 +9,14 @@ public class RegisteredNurse extends Nurse {
     /* True if the nurse can vaccinate without a doctor's order. */
     private final boolean authorisedImmuniser;
 
-    /* Builds a registered nurse with a given roster. Outside code uses create(...). */
+    /** Builds a registered nurse with a given roster. Outside code uses create(...). */
     private RegisteredNurse(String id, String name, String[] workingDays, String clinicalArea,
                             boolean authorisedImmuniser) {
         super(id, name, workingDays, clinicalArea);
         this.authorisedImmuniser = authorisedImmuniser;
     }
 
-    /* Builds a full-time registered nurse. Outside code uses create(...). */
+    /** Builds a full-time registered nurse. Outside code uses create(...). */
     private RegisteredNurse(String id, String name, String clinicalArea, boolean authorisedImmuniser) {
         super(id, name, clinicalArea);
         this.authorisedImmuniser = authorisedImmuniser;
@@ -42,7 +44,7 @@ public class RegisteredNurse extends Nurse {
         return new RegisteredNurse(id, name, workingDays, clinicalArea, authorisedImmuniser);
     }
 
-/**
+    /**
      * Creates a registered nurse using the default Monday-to-Friday roster.
      *
      * @return the new nurse, or null for invalid details
@@ -60,7 +62,7 @@ public class RegisteredNurse extends Nurse {
         return authorisedImmuniser;
     }
 
-/**
+    /**
      * Returns vaccination example text when the immuniser flag allows it.
      *
      * @return the example text, or a warning if the name, vaccine or flag is unsuitable

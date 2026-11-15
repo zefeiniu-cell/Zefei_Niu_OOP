@@ -1,4 +1,6 @@
 /**
+ * Arcana Health Centre - Appointment System.
+ *
  * Shared ID, name and weekly working days for all professionals.
  * Each profession supplies its own type, services and preparation advice.
  * The concrete classes validate their details before calling these constructors.
@@ -234,7 +236,7 @@ public abstract class HealthProfessional {
         rosterLocked = true;
     }
 
-/* Stores the validated day names in the weekly roster. */
+    /** Stores the validated day names in the weekly roster. */
     private void markWorkingDays(String[] days) {
         // Replace the old roster rather than adding days to it.
         for (int i = 0; i < Week.DAYS_IN_WEEK; i++) {
@@ -245,7 +247,7 @@ public abstract class HealthProfessional {
         }
     }
 
-    /* Adds a word to a list separated by spaces. */
+    /** Adds a word to a list separated by spaces. */
     private static String joinWithSpace(String text, String word) {
         if (text.isEmpty()) {
             return word;

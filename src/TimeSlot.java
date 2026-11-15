@@ -1,4 +1,6 @@
 /**
+ * Arcana Health Centre - Appointment System.
+ *
  * A clock time stored as minutes after midnight.
  * It can be compared in time order and displayed as HH:mm.
  *
@@ -14,7 +16,7 @@ public class TimeSlot implements Comparable<TimeSlot> {
     /* Minutes since midnight, e.g. 570 for 09:30. */
     private final int startMinute;
 
-    /* Builds a time from minutes since midnight. Outside code uses ofMinutes(...), of(...) or parse(...). */
+    /** Builds a time from minutes since midnight. Outside code uses ofMinutes(...), of(...) or parse(...). */
     private TimeSlot(int startMinute) {
         this.startMinute = startMinute;
     }

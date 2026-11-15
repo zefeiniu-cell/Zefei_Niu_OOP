@@ -1,4 +1,6 @@
 /**
+ * Arcana Health Centre - Appointment System.
+ *
  * Checks and text formatting reused by the model classes.
  * A check returns an empty string when valid, or a message describing the problem.
  *
@@ -11,7 +13,7 @@ public class Validator {
     /** Longest free-text detail allowed, e.g. a specialty. */
     public static final int MAX_TEXT_LENGTH = 60;
 
-    /*
+    /**
      * Stops anyone creating a Validator object. Everything here is static, so an object would
      * have nothing to do.
      */
@@ -151,7 +153,7 @@ public class Validator {
         return "";
     }
 
-/**
+    /**
      * Joins non-empty problem messages with one space.
      *
      * @return the combined problems, or an empty string when there are none

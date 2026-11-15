@@ -2,6 +2,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
+ * Arcana Health Centre - Appointment System.
+ *
  * Keeps one day's staff, patients and appointments.
  * Booking changes return a result message. Refused changes leave the records as they were.
  *
@@ -35,7 +37,7 @@ public class Clinic {
     /* The number the next new patient gets. */
     private int nextPatientNumber = 1;
 
-    /* Builds a clinic from checked details. Outside code uses create(...). */
+    /** Builds a clinic from checked details. Outside code uses create(...). */
     private Clinic(String name, String today, ClinicSchedule schedule) {
         this.name = Validator.tidy(name);
         this.today = Week.normalise(today);
@@ -135,7 +137,11 @@ public class Clinic {
         return onDuty;
     }
 
-    /** Shows today's staff as a table, then who is off today. */
+    /**
+     * Shows today's staff as a table, then who is off today.
+     *
+     * @return the staff table, or a [WARNING] message when no registered staff work today
+     */
     public String viewStaffOnDuty() {
         ArrayList<HealthProfessional> onDuty = getStaffOnDuty();
         if (onDuty.isEmpty()) {
@@ -192,7 +198,7 @@ public class Clinic {
         return new ArrayList<>(patients);
     }
 
-    /*
+    /**
      * Registers a new patient and gives them the next patient number. It is private because
      * the clinic decides when this happens: on a patient's first booking.
      */
@@ -205,7 +211,7 @@ public class Clinic {
         return patient;
     }
 
-/**
+    /**
      * Checks the patient, staff availability and time conflicts before adding a booking.
      *
      * @return a booking confirmation, or a warning without changing the records
@@ -265,7 +271,7 @@ public class Clinic {
                 + booked.getPreparationAdvice();
     }
 
-/**
+    /**
      * Finds the staff member by ID, then uses the object-based booking method.
      *
      * @return a booking confirmation, or a warning without changing the records
@@ -301,7 +307,7 @@ public class Clinic {
         return matches;
     }
 
-/** Finds this patient's bookings using the normalised mobile. */
+    /** Finds this patient's bookings using the normalised mobile. */
     public ArrayList<Appointment> filterByPatientMobile(String mobile) {
         ArrayList<Appointment> matches = new ArrayList<>();
         for (Appointment appointment : appointments) {
@@ -474,7 +480,7 @@ public class Clinic {
         return OK + "Cancelled " + match.getSummary() + ". That slot is free again.";
     }
 
-/**
+    /**
      * Cancels by mobile when exactly one appointment matches.
      *
      * @return a confirmation, or a warning if there is no match or more than one
@@ -564,7 +570,7 @@ public class Clinic {
                 + " is free again.";
     }
 
-/**
+    /**
      * Returns example prescription text from the first on-duty Prescriber.
      *
      * @return the example text, or a warning if the details or prescriber are unavailable
@@ -616,7 +622,11 @@ public class Clinic {
         return text;
     }
 
-    /* Checks the selected staff ID and time against this patient's bookings. */
+    /**
+     * Checks the selected staff ID and time against this patient's bookings.
+     *
+     * @return an empty string for a matching booking, otherwise a problem message
+     */
     private String checkPatientAppointment(String mobile, String professionalId, String time) {
         String problems = Patient.checkMobile(mobile);
         problems = Validator.addProblem(problems, HealthProfessional.checkId(professionalId));
@@ -633,8 +643,10 @@ public class Clinic {
         return "No matching appointment is booked under this mobile.";
     }
 
-    /*
+    /**
      * Finds a professional's appointment at a time.
+     *
+     * @return the matching appointment, or null if the professional is free at that time
      */
     private Appointment findAppointment(HealthProfessional professional, TimeSlot slot) {
         for (Appointment appointment : appointments) {
@@ -645,8 +657,10 @@ public class Clinic {
         return null;
     }
 
-    /*
+    /**
      * Finds a patient's appointment at a time, with anyone.
+     *
+     * @return the matching appointment, or null if the patient has no booking at that time
      */
     private Appointment findAppointment(Patient patient, TimeSlot slot) {
         for (Appointment appointment : appointments) {
@@ -657,7 +671,7 @@ public class Clinic {
         return null;
     }
 
-/* Finds the first free start later than the refused time. */
+    /** Finds the first free start later than the refused time. */
     private String suggestNextFreeSlot(HealthProfessional professional, TimeSlot after) {
         for (TimeSlot slot : getFreeSlots(professional)) {
             if (after.isBefore(slot)) {
@@ -667,7 +681,7 @@ public class Clinic {
         return " No later slot is free today.";
     }
 
-    /* Puts a list of appointments into a table under a title. */
+    /** Puts a list of appointments into a table under a title. */
     private static String formatAppointments(String title, ArrayList<Appointment> list) {
         String text = title + " (" + list.size() + "):\n" + Appointment.tableHeader();
         for (Appointment appointment : list) {

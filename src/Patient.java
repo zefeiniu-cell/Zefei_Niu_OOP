@@ -1,4 +1,6 @@
 /**
+ * Arcana Health Centre - Appointment System.
+ *
  * A patient record reused by their appointments.
  * The mobile is stored as digits so spaces and hyphens do not change a match.
  *
@@ -26,7 +28,7 @@ public class Patient {
     /* Mobile number as 10 plain digits, e.g. "0412345678". */
     private final String mobile;
 
-    /* Builds a patient from checked details. Outside code uses create(...). */
+    /** Builds a patient from checked details. Outside code uses create(...). */
     private Patient(String patientNumber, String name, String mobile) {
         this.patientNumber = patientNumber.trim();
         this.name = Validator.tidy(name);
@@ -101,12 +103,20 @@ public class Patient {
         return new Patient(patientNumber, name, mobile);
     }
 
-    /** Turns a typed mobile number into the stored form. */
+    /**
+     * Turns a typed mobile number into the stored form.
+     *
+     * @return the text without whitespace or hyphens; an empty string for null
+     */
     public static String normaliseMobile(String mobile) {
         return Validator.removeSeparators(mobile);
     }
 
-    /** Groups a stored mobile number so it is easy to read: "0412 345 678". */
+    /**
+     * Groups a stored mobile number so it is easy to read: "0412 345 678".
+     *
+     * @return the grouped number, or the original input (including null) when it is not ten characters
+     */
     public static String formatMobile(String mobile) {
         if (mobile == null || mobile.length() != MOBILE_LENGTH) {
             return mobile;

@@ -6,6 +6,8 @@ Zefei Niu (`zniu16`)
 
 This project models appointments for one day at Arcana Health Centre. It has patient input and a scripted demonstration. Both use the same `Clinic` methods. The examples use fourteen staff: four GPs and two of each of the other five types.
 
+The tutor recommended a simple console menu. The unit assessor supported including it on 15 November 2026. The scripted examples are still available.
+
 ## How to run it
 
 Open the project folder in VS Code with Java support and a JDK set up. Open `src/AssignmentOne.java` and run `main`.

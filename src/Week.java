@@ -1,4 +1,6 @@
 /**
+ * Arcana Health Centre - Appointment System.
+ *
  * Weekday names and conversion between full and short names.
  *
  * @author Zefei Niu
@@ -15,7 +17,7 @@ public class Week {
         "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
     };
 
-    /*
+    /**
      * Stops anyone creating a Week object. Everything here is static, so an object would have
      * nothing to do.
      */

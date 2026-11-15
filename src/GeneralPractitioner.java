@@ -1,4 +1,6 @@
 /**
+ * Arcana Health Centre - Appointment System.
+ *
  * A GP with a bulk-billing flag, referral method and prescribing methods.
  *
  * @author Zefei Niu
@@ -7,13 +9,13 @@ public class GeneralPractitioner extends HealthProfessional implements Prescribe
     /* True if the GP bulk bills. */
     private final boolean bulkBilling;
 
-    /* Builds a GP with a given roster. Outside code uses create(...). */
+    /** Builds a GP with a given roster. Outside code uses create(...). */
     private GeneralPractitioner(String id, String name, String[] workingDays, boolean bulkBilling) {
         super(id, name, workingDays);
         this.bulkBilling = bulkBilling;
     }
 
-    /* Builds a full-time GP (Monday to Friday). Outside code uses create(...). */
+    /** Builds a full-time GP (Monday to Friday). Outside code uses create(...). */
     private GeneralPractitioner(String id, String name, boolean bulkBilling) {
         super(id, name);
         this.bulkBilling = bulkBilling;
@@ -42,7 +44,7 @@ public class GeneralPractitioner extends HealthProfessional implements Prescribe
         return new GeneralPractitioner(id, name, workingDays, bulkBilling);
     }
 
-/**
+    /**
      * Creates a GP using the default Monday-to-Friday roster.
      *
      * @return the new GP, or null for invalid details

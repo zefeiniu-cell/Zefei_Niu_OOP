@@ -1,4 +1,6 @@
 /**
+ * Arcana Health Centre - Appointment System.
+ *
  * The prescribing methods shared by GPs, specialists and nurse practitioners.
  *
  * @author Zefei Niu

@@ -2,8 +2,12 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * Runs the separate patient-input reference or the scripted examples.
+ * Arcana Health Centre - Appointment System.
+ *
+ * Runs patient input or the scripted examples.
  * The character names follow the Major Arcana theme explained in README.
+ * Each patient uses their own mobile number in this model.
+ * A mobile cannot be registered to another name in the same clinic session.
  *
  * @author Zefei Niu
  */
@@ -22,7 +26,7 @@ public class AssignmentOne {
     private static final String SINGLE_RULE =
             "------------------------------------------------------------------------------";
 
-    /*
+    /**
      * No instances are needed for these static demonstration methods.
      */
     private AssignmentOne() {
@@ -53,7 +57,7 @@ public class AssignmentOne {
         input.close();
     }
 
-    /* Reads the launch choice without parsing an unchecked number. */
+    /** Reads the launch choice without parsing an unchecked number. */
     private static String readMode(Scanner input) {
         while (true) {
             System.out.println("1 Patient booking");
@@ -71,8 +75,10 @@ public class AssignmentOne {
         }
     }
 
-    /*
+    /**
      * Sets today's weekday for this single-day session.
+     *
+     * @return the full weekday name, or null when 0 is entered or input ends
      */
     private static String readClinicDay(Scanner input) {
         while (true) {
@@ -91,7 +97,7 @@ public class AssignmentOne {
         }
     }
 
-    /*
+    /**
      * Part 3: creates a realistic mix of professionals and shows that they can be stored,
      * printed and used together through their parent type.
      */
@@ -258,7 +264,7 @@ public class AssignmentOne {
         return professionals;
     }
 
-/* Runs booking, filtering, sorting, cancellation and rescheduling examples. */
+    /** Runs booking, filtering, sorting, cancellation and rescheduling examples. */
     private static void runPartSix(ArrayList<HealthProfessional> professionals) {
         printPartTitle("PART 6 - Working with appointments (" + CLINIC_NAME + ", " + DEMO_DAY + ")");
 
@@ -381,7 +387,7 @@ public class AssignmentOne {
         runWeekendClinic(professionals);
     }
 
-    /*
+    /**
      * Shows that the schedule can change without changing any other code: a Saturday clinic
      * with a lunch break runs on exactly the same classes.
      */
@@ -416,7 +422,7 @@ public class AssignmentOne {
         System.out.println(weekend.viewAppointmentsByTime());
     }
 
-    /*
+    /**
      * Adds a professional to a list, but skips a null one. A null means create(...) refused
      * the details, so there is no object to add.
      */
@@ -429,7 +435,7 @@ public class AssignmentOne {
         list.add(professional);
     }
 
-    /*
+    /**
      * Books by staff ID, the way a receptionist would type it. The request is printed before
      * the clinic's answer.
      */
@@ -440,7 +446,7 @@ public class AssignmentOne {
         printResult(clinic.bookAppointment(patientName, mobile, professionalId, time));
     }
 
-    /*
+    /**
      * Books with a professional the patient picked, like on a booking website. The request is
      * printed before the clinic's answer.
      */
@@ -452,7 +458,7 @@ public class AssignmentOne {
         printResult(clinic.bookAppointment(patientName, mobile, professional, time));
     }
 
-    /* Prints what happened to a create(...) call. */
+    /** Prints what happened to a create(...) call. */
     private static void reportCreation(HealthProfessional created, String problems) {
         if (created == null) {
             printResult("[WARNING] Not created. " + problems);
@@ -461,7 +467,7 @@ public class AssignmentOne {
         }
     }
 
-    /* Prints what happened to a roster change. */
+    /** Prints what happened to a roster change. */
     private static void reportRosterChange(HealthProfessional professional, String problem) {
         if (problem.isEmpty()) {
             printResult("[OK] Roster updated: " + professional.getWorkingDaysText() + ".");
@@ -471,7 +477,7 @@ public class AssignmentOne {
         }
     }
 
-    /* Prints the system banner once at the start. */
+    /** Prints the system banner once at the start. */
     private static void printBanner() {
         System.out.println(DOUBLE_RULE);
         System.out.println("  " + CLINIC_NAME.toUpperCase() + "  -  Appointment System");
@@ -479,7 +485,7 @@ public class AssignmentOne {
         System.out.println(DOUBLE_RULE);
     }
 
-    /* Prints a part title between two heavy lines. */
+    /** Prints a part title between two heavy lines. */
     private static void printPartTitle(String title) {
         System.out.println();
         System.out.println(DOUBLE_RULE);
@@ -487,19 +493,19 @@ public class AssignmentOne {
         System.out.println(DOUBLE_RULE);
     }
 
-    /* Prints a section title with a light line under it. */
+    /** Prints a section title with a light line under it. */
     private static void printSection(String title) {
         System.out.println();
         System.out.println(title);
         System.out.println(SINGLE_RULE);
     }
 
-    /* Prints what is about to be tried, before it is tried. */
+    /** Prints what is about to be tried, before it is tried. */
     private static void printAttempt(String description) {
         System.out.println("> " + description);
     }
 
-    /* Prints the system's answer, indented under the attempt. */
+    /** Prints the system's answer, indented under the attempt. */
     private static void printResult(String message) {
         System.out.println("  " + message);
     }
