@@ -15,7 +15,7 @@ public class Specialist extends HealthProfessional implements Prescriber {
     /* True if patients must bring a GP referral. */
     private final boolean referralRequired;
 
-    /** Builds a specialist with every detail. Outside code uses create(...). */
+    /** Builds a specialist with every detail. */
     private Specialist(String id, String name, String[] workingDays, String specialty,
                        boolean referralRequired) {
         super(id, name, workingDays);
@@ -23,7 +23,7 @@ public class Specialist extends HealthProfessional implements Prescriber {
         this.referralRequired = referralRequired;
     }
 
-    /** Builds a specialist who needs referrals, the usual case. Outside code uses create(...). */
+    /** Builds a specialist who needs referrals, the usual case. */
     private Specialist(String id, String name, String[] workingDays, String specialty) {
         this(id, name, workingDays, specialty, DEFAULT_REFERRAL_REQUIRED);
     }

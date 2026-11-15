@@ -8,7 +8,7 @@
  * @author Zefei Niu
  */
 public abstract class HealthProfessional {
-    /** Digits in a staff ID, e.g. "100101". */
+    /* Digits in a staff ID, e.g. "100101". */
     public static final int ID_LENGTH = 6;
 
     /* Three or more working days in a row print as a range, e.g. "Mon-Fri". */
@@ -25,7 +25,7 @@ public abstract class HealthProfessional {
     /* Full name. */
     private final String name;
 
-    /* Working days: picture 7 boxes, Monday first. A ticked box (true) means a working day. */
+    /* Working days from Monday to Sunday; true means on duty. */
     private final boolean[] workingDays = new boolean[Week.DAYS_IN_WEEK];
 
     /* Keeps the registered session's availability from changing behind its bookings. */

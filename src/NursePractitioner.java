@@ -10,7 +10,7 @@ public class NursePractitioner extends Nurse implements Prescriber {
     /* What the NP is endorsed to prescribe for, e.g. "diabetes and blood pressure". */
     private final String endorsedScope;
 
-    /** Builds a nurse practitioner. Outside code uses create(...). */
+    /** Builds a nurse practitioner. */
     private NursePractitioner(String id, String name, String[] workingDays, String clinicalArea,
                               String endorsedScope) {
         super(id, name, workingDays, clinicalArea);

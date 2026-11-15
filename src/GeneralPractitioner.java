@@ -9,13 +9,13 @@ public class GeneralPractitioner extends HealthProfessional implements Prescribe
     /* True if the GP bulk bills. */
     private final boolean bulkBilling;
 
-    /** Builds a GP with a given roster. Outside code uses create(...). */
+    /** Builds a GP with a given roster. */
     private GeneralPractitioner(String id, String name, String[] workingDays, boolean bulkBilling) {
         super(id, name, workingDays);
         this.bulkBilling = bulkBilling;
     }
 
-    /** Builds a full-time GP (Monday to Friday). Outside code uses create(...). */
+    /** Builds a full-time GP (Monday to Friday). */
     private GeneralPractitioner(String id, String name, boolean bulkBilling) {
         super(id, name);
         this.bulkBilling = bulkBilling;

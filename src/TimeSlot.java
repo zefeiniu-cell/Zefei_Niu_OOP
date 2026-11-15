@@ -7,16 +7,16 @@
  * @author Zefei Niu
  */
 public class TimeSlot implements Comparable<TimeSlot> {
-    /** Minutes in an hour. */
+    /* Minutes in an hour. */
     public static final int MINUTES_PER_HOUR = 60;
 
-    /** Minutes in a day. A start time must be less than this. */
+    /* Minutes in a day. A start time must be less than this. */
     public static final int MINUTES_PER_DAY = 24 * MINUTES_PER_HOUR;
 
     /* Minutes since midnight, e.g. 570 for 09:30. */
     private final int startMinute;
 
-    /** Builds a time from minutes since midnight. Outside code uses ofMinutes(...), of(...) or parse(...). */
+    /** Builds a time from minutes since midnight. */
     private TimeSlot(int startMinute) {
         this.startMinute = startMinute;
     }

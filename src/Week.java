@@ -6,10 +6,10 @@
  * @author Zefei Niu
  */
 public class Week {
-    /** Days in a week, also the size of every per-day array. */
+    /* Days in a week, also the size of every per-day array. */
     public static final int DAYS_IN_WEEK = 7;
 
-    /** Length of a short day name, e.g. "Mon". */
+    /* Length of a short day name, e.g. "Mon". */
     public static final int SHORT_NAME_LENGTH = 3;
 
     /* The day names, Monday first. */
@@ -17,10 +17,7 @@ public class Week {
         "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
     };
 
-    /**
-     * Stops anyone creating a Week object. Everything here is static, so an object would have
-     * nothing to do.
-     */
+    /** No instances are needed for these static methods. */
     private Week() {
     }
 

@@ -57,7 +57,12 @@ public class AssignmentOne {
         input.close();
     }
 
-    /** Reads the launch choice without parsing an unchecked number. */
+    /**
+     * Reads the launch choice without parsing an unchecked number.
+     *
+     * @return "1" for patient booking, "2" for the demonstration, or "0" to exit;
+     *         input ending also returns "0"
+     */
     private static String readMode(Scanner input) {
         while (true) {
             System.out.println("1 Patient booking");

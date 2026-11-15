@@ -9,14 +9,14 @@ public class RegisteredNurse extends Nurse {
     /* True if the nurse can vaccinate without a doctor's order. */
     private final boolean authorisedImmuniser;
 
-    /** Builds a registered nurse with a given roster. Outside code uses create(...). */
+    /** Builds a registered nurse with a given roster. */
     private RegisteredNurse(String id, String name, String[] workingDays, String clinicalArea,
                             boolean authorisedImmuniser) {
         super(id, name, workingDays, clinicalArea);
         this.authorisedImmuniser = authorisedImmuniser;
     }
 
-    /** Builds a full-time registered nurse. Outside code uses create(...). */
+    /** Builds a full-time registered nurse. */
     private RegisteredNurse(String id, String name, String clinicalArea, boolean authorisedImmuniser) {
         super(id, name, clinicalArea);
         this.authorisedImmuniser = authorisedImmuniser;

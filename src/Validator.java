@@ -7,16 +7,13 @@
  * @author Zefei Niu
  */
 public class Validator {
-    /** Longest name allowed. */
+    /* Longest name allowed. */
     public static final int MAX_NAME_LENGTH = 40;
 
-    /** Longest free-text detail allowed, e.g. a specialty. */
+    /* Longest free-text detail allowed, e.g. a specialty. */
     public static final int MAX_TEXT_LENGTH = 60;
 
-    /**
-     * Stops anyone creating a Validator object. Everything here is static, so an object would
-     * have nothing to do.
-     */
+    /** No instances are needed for these static methods. */
     private Validator() {
     }
 

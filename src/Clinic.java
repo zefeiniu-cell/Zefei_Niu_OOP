@@ -10,10 +10,10 @@ import java.util.Collections;
  * @author Zefei Niu
  */
 public class Clinic {
-    /** Start of every successful message. */
+    /* Start of every successful message. */
     public static final String OK = "[OK] ";
 
-    /** Start of every refusal. */
+    /* Start of every refusal. */
     public static final String WARNING = "[WARNING] ";
 
     /* Clinic name, e.g. "Arcana Health Centre". */
@@ -37,7 +37,7 @@ public class Clinic {
     /* The number the next new patient gets. */
     private int nextPatientNumber = 1;
 
-    /** Builds a clinic from checked details. Outside code uses create(...). */
+    /** Builds a clinic from checked details. */
     private Clinic(String name, String today, ClinicSchedule schedule) {
         this.name = Validator.tidy(name);
         this.today = Week.normalise(today);
@@ -94,8 +94,7 @@ public class Clinic {
      */
     public String registerProfessional(HealthProfessional professional) {
         if (professional == null) {
-            return WARNING + "Registration refused. No professional was supplied: invalid details never "
-                    + "create an object.";
+            return WARNING + "Registration refused. No professional was supplied.";
         }
         if (staff.contains(professional)) {
             HealthProfessional holder = staff.get(staff.indexOf(professional));

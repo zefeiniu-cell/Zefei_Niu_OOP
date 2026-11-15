@@ -16,7 +16,7 @@ public class Appointment implements Comparable<Appointment> {
     /* When the appointment starts. */
     private final TimeSlot timeSlot;
 
-    /** Builds an appointment from parts that were already checked. Outside code uses create(...). */
+    /** Builds an appointment from parts that were already checked. */
     private Appointment(Patient patient, HealthProfessional professional, TimeSlot timeSlot) {
         this.patient = patient;
         this.professional = professional;

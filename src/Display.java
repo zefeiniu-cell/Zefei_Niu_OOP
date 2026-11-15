@@ -6,28 +6,25 @@
  * @author Zefei Niu
  */
 public class Display {
-    /** Width of the time column, e.g. "09:30". */
+    /* Width of the time column, e.g. "09:30". */
     public static final int TIME_WIDTH = 5;
 
-    /** Width of the ID column (staff IDs and patient numbers). */
+    /* Width of the ID column (staff IDs and patient numbers). */
     public static final int ID_WIDTH = 6;
 
-    /** Width of the name column. */
+    /* Width of the name column. */
     public static final int NAME_WIDTH = 18;
 
-    /** Width of the type column (a patient's mobile goes here too). */
+    /* Width of the type column (a patient's mobile goes here too). */
     public static final int TYPE_WIDTH = 20;
 
-    /** Width of the working days column. */
+    /* Width of the working days column. */
     public static final int DAYS_WIDTH = 15;
 
-    /** Space between two columns. */
+    /* Space between two columns. */
     public static final String GAP = "  ";
 
-    /**
-     * Stops anyone creating a Display object. Everything here is static, so an object would
-     * have nothing to do.
-     */
+    /** No instances are needed for these static methods. */
     private Display() {
     }
 

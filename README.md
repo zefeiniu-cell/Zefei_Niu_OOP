@@ -93,7 +93,7 @@ The project has nineteen Java source files in `src`.
 | Encapsulation | Private fields, `HealthProfessional.getWorkingDays()` and `updateWorkingDays()`, and the list getters in `Clinic` | The getters return copies. Changes go through methods that check the input, and a registered roster stays fixed. |
 | Inheritance | `RegisteredNurse extends Nurse extends HealthProfessional`; `super(...)` and `super.toString()` | Both nurse types reuse the common nursing code. Each level sets up and prints its own fields. |
 | Polymorphism | `ArrayList<HealthProfessional>`, the staff loop in `AssignmentOne`, and `getPreparationAdvice()` in `Clinic.bookAppointment()` | One list holds all six types. The same method call gives the details or advice for the actual object. |
-| Abstraction | Abstract `HealthProfessional` and `Nurse`, plus the `Prescriber` interface | The parent defines the shared questions. `Prescriber` lets doctors and nurse practitioners share an ability while keeping their own parent classes. |
+| Abstraction | Abstract `HealthProfessional` and `Nurse`, plus the `Prescriber` interface | The abstract classes hold shared code and leave profession-specific behaviour to the subclasses. `Prescriber` groups the prescribing methods used by doctors and nurse practitioners. |
 
 `Appointment` holds a patient, a professional and a time slot. `Clinic` keeps the staff, patients and appointment lists. These are the has-a relationships in the model.
 
@@ -105,7 +105,15 @@ A single appointment only knows its own details. To find a time clash, I need to
 
 The six concrete professional types have private constructors. Their `create(...)` methods check the details before making an object. Bad input returns `null`, and `check(...)` gives the reason. `Appointment.create(...)` also refuses missing references. A new subclass must follow the same checking rule: `abstract` alone does not make its input valid.
 
-The cancellation and time-change overloads that take a mobile also check the staff ID and current appointment time. They then call the existing operation. The mobile-only cancellation method gives a warning if there is more than one booking to choose from. Methods with the same name and different parameters show overloading. A subclass giving its own version of an inherited instance method shows overriding.
+The cancellation and time-change overloads that take a mobile also check the staff ID and current appointment time. They then call the existing operation. The mobile-only cancellation method gives a warning if there is more than one booking to choose from.
+
+## Coding conventions
+
+I use K&R braces: the opening brace stays at the end of the line, including `} else {`. Each level is indented by four spaces. I will use the same conventions in A2.
+
+Each class or interface starts with Javadoc giving the system name, its responsibility and the author. Constructors and methods, including private ones, use `/** ... */` and start with a short summary. Fields use ordinary `/* ... */` comments. Member comments line up with their declarations; top-level class comments start at the left margin.
+
+I use `@return` to explain special results such as `null`, an empty string, an exit choice or a warning message. I add `@param` when a parameter needs a format or allowed-value explanation. Short `//` comments explain a reason or a business rule where it helps the reader.
 
 ## Checks
 

@@ -9,16 +9,16 @@ import java.util.ArrayList;
  * @author Zefei Niu
  */
 public class ClinicSchedule {
-    /** Opening time in the brief. */
+    /* Opening time in the brief. */
     public static final String STANDARD_OPENING = "08:00";
 
-    /** Closing time in the brief. */
+    /* Closing time in the brief. */
     public static final String STANDARD_CLOSING = "16:00";
 
-    /** Slot length in the brief, in minutes. */
+    /* Slot length in the brief, in minutes. */
     public static final int STANDARD_SLOT_MINUTES = 30;
 
-    /** Shortest slot length allowed, in minutes. */
+    /* Shortest slot length allowed, in minutes. */
     public static final int MIN_SLOT_MINUTES = 5;
 
     /* When the clinic opens. */
@@ -39,10 +39,7 @@ public class ClinicSchedule {
     /* Every bookable start time, earliest first. */
     private final ArrayList<TimeSlot> slots = new ArrayList<>();
 
-    /**
-     * Builds a schedule from settings that were already checked. Outside code uses create(...)
-     * or standard().
-     */
+    /** Builds a schedule from checked settings. */
     private ClinicSchedule(TimeSlot opening, TimeSlot closing, int slotMinutes,
                            TimeSlot lunchStart, TimeSlot lunchEnd) {
         this.opening = opening;

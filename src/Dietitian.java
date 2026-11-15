@@ -9,7 +9,7 @@ public class Dietitian extends HealthProfessional {
     /* The dietitian's focus, e.g. "Diabetes nutrition". */
     private final String focusArea;
 
-    /** Builds a dietitian. Outside code uses create(...). */
+    /** Builds a dietitian. */
     private Dietitian(String id, String name, String[] workingDays, String focusArea) {
         super(id, name, workingDays);
         this.focusArea = Validator.tidy(focusArea);

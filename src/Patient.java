@@ -7,16 +7,16 @@
  * @author Zefei Niu
  */
 public class Patient {
-    /** Digits in an Australian mobile number. */
+    /* Digits in an Australian mobile number. */
     public static final int MOBILE_LENGTH = 10;
 
-    /** Every Australian mobile number starts with these two digits. */
+    /* Every Australian mobile number starts with these two digits. */
     public static final String MOBILE_PREFIX = "04";
 
-    /** First character of a patient number. */
+    /* First character of a patient number. */
     public static final String NUMBER_PREFIX = "P";
 
-    /** Digits after the "P" in a patient number. */
+    /* Digits after the "P" in a patient number. */
     public static final int NUMBER_DIGITS = 4;
 
     /* Patient number given by the clinic, e.g. "P0001". */
@@ -28,7 +28,7 @@ public class Patient {
     /* Mobile number as 10 plain digits, e.g. "0412345678". */
     private final String mobile;
 
-    /** Builds a patient from checked details. Outside code uses create(...). */
+    /** Builds a patient from checked details. */
     private Patient(String patientNumber, String name, String mobile) {
         this.patientNumber = patientNumber.trim();
         this.name = Validator.tidy(name);

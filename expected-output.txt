@@ -132,7 +132,7 @@ Imogen Empey        Nurse Practitioner    Medicines for contraception and menopa
 > Register "Dr Finn Foley" with staff ID 100101, which Dr Magee already holds
   [WARNING] Registration refused. Staff ID 100101 already belongs to Dr Elias Magee.
 > Register a GP whose ID "10O101" has the letter O instead of a zero
-  [WARNING] Registration refused. No professional was supplied: invalid details never create an object.
+  [WARNING] Registration refused. No professional was supplied.
 
 On duty Wednesday (11 of 14 staff):
 ID      NAME                TYPE                  DAYS             DETAILS

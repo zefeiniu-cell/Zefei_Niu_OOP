@@ -9,7 +9,7 @@ public class Physiotherapist extends HealthProfessional {
     /* The physio's focus, e.g. "Sports injuries". */
     private final String treatmentFocus;
 
-    /** Builds a physiotherapist. Outside code uses create(...). */
+    /** Builds a physiotherapist. */
     private Physiotherapist(String id, String name, String[] workingDays, String treatmentFocus) {
         super(id, name, workingDays);
         this.treatmentFocus = Validator.tidy(treatmentFocus);
